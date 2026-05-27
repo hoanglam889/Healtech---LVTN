@@ -1,0 +1,26 @@
+# Thư mục chứa các thư viện tải về (rất nặng, không push lên GitHub)
+**/node_modules/
+
+# File cấu hình môi trường chứa mật khẩu database (bảo mật, không push lên GitHub)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Các thư mục chứa code đã được biên dịch/build
+**/dist/
+**/build/
+/backend/dist/
+/backend/tsconfig.tsbuildinfo
+
+# File logs hoặc debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Cấu hình IDE cá nhân
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
