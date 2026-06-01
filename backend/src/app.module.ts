@@ -17,7 +17,7 @@ import { AppService } from './app.service';
       port: parseInt(process.env.DB_PORT || '3306', 10),
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_DATABASE,
+      database: process.env.DB_DATABASE, 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
     }),
