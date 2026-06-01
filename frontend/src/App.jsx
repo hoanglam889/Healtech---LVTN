@@ -1,12 +1,12 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import SpecialtySection from './components/SpecialtySection';
-import DoctorSection from './components/DoctorSection';
-import QueueFeatureSection from './components/QueueFeatureSection';
-import ArticleSection from './components/ArticleSection';
-import ContactSection from './components/ContactSection';
-import Footer from './components/Footer';
+import Navbar from './components/shared/Navbar';
+import Footer from './components/shared/Footer';
+import HeroSection from './components/landing/HeroSection';
+import SpecialtySection from './components/landing/SpecialtySection';
+import DoctorSection from './components/landing/DoctorSection';
+import QueueFeatureSection from './components/landing/QueueFeatureSection';
+import ArticleSection from './components/landing/ArticleSection';
+import ContactSection from './components/landing/ContactSection';
 
 function App() {
   return (
