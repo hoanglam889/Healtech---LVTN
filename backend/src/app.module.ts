@@ -3,6 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { SpecialtiesModule } from './specialties/specialties.module';
+import { UploadModule } from './upload/upload.module';
+import { DoctorProfilesModule } from './doctor-profiles/doctor-profiles.module';
+import { PatientsModule } from './patients/patients.module';
+import { AppointmentsModule } from './appointments/appointments.module';
 
 @Module({
   imports: [
@@ -18,9 +23,14 @@ import { AppService } from './app.service';
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE, 
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
+      entities: [__dirname + '/**/*.entity{.ts,.js}', __dirname + '/entities/*{.ts,.js}'],
+      synchronize: false, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
     }),
+    SpecialtiesModule,
+    UploadModule,
+    DoctorProfilesModule,
+    PatientsModule,
+    AppointmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

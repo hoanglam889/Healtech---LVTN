@@ -22,9 +22,11 @@ const HeroSection = () => {
         </div>
         <div className="flex-1 w-full">
           <div className="aspect-square md:aspect-[4/3] bg-blue-50 rounded-3xl overflow-hidden border border-blue-100 relative">
-             <div className="absolute inset-0 flex items-center justify-center text-blue-300 font-medium text-lg">
-                Ảnh minh họa Healtech
-             </div>
+             <img 
+               src="/images/phongkham_1.jpg" 
+               alt="Phòng khám Healtech" 
+               className="w-full h-full object-cover"
+             />
           </div>
         </div>
       </div>

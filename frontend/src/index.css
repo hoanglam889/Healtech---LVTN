@@ -1,1 +1,143 @@
 @import "tailwindcss";
+
+/* ==========================================
+   REACT CALENDAR CUSTOM STYLES (PREMIUM)
+   ========================================== */
+
+/* Outer wrapper */
+.react-calendar {
+  width: 100% !important;
+  max-width: 480px !important;
+  margin: 0 auto !important;
+  background: #ffffff !important;
+  border: 1px solid #f3f4f6 !important; /* border-gray-100 */
+  border-radius: 1.25rem !important; /* rounded-2xl */
+  font-family: inherit !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
+  padding: 1.5rem !important;
+}
+
+/* Navigation bar (Month, Year switcher) */
+.react-calendar__navigation {
+  display: flex !important;
+  height: 3rem !important;
+  margin-bottom: 1.25rem !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.react-calendar__navigation button {
+  min-width: 2.5rem !important;
+  height: 2.5rem !important;
+  background: none !important;
+  border: none !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important; /* gray-800 */
+  border-radius: 0.75rem !important; /* rounded-xl */
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #f3f4f6 !important;
+  color: #2563eb !important;
+}
+
+.react-calendar__navigation__label {
+  font-weight: 800 !important;
+  font-size: 1.125rem !important;
+  color: #1f2937 !important;
+  pointer-events: none !important;
+}
+
+/* Weekday labels (CN, T2...) */
+.react-calendar__month-view__weekdays {
+  text-align: center !important;
+  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  color: #9ca3af !important; /* gray-400 */
+  margin-bottom: 0.75rem !important;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  padding: 0.5rem 0 !important;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none !important;
+}
+
+/* Day tiles */
+.react-calendar__tile {
+  max-width: 100% !important;
+  background: none !important;
+  border: none !important;
+  text-align: center !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: #4b5563 !important; /* gray-600 */
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  aspect-ratio: 1 / 1 !important;
+  position: relative !important;
+  margin: 2px 0 !important;
+}
+
+/* 1. Past dates / Unavailable dates (Grayed out) */
+.react-calendar__tile:disabled,
+.react-calendar__tile--neighboringMonth {
+  background-color: transparent !important;
+  color: #d1d5db !important; /* màu xám nhạt */
+  cursor: not-allowed !important;
+  font-weight: 500 !important;
+  opacity: 0.5 !important;
+}
+
+/* 2. Today (Current date) - Blue outline Circle (Hình vòng tròn) */
+.react-calendar__tile--now {
+  background: transparent !important;
+  border: 2px solid #2563eb !important; /* Viền xanh */
+  border-radius: 9999px !important; /* Hình vòng tròn */
+  color: #2563eb !important; /* Chữ xanh */
+  font-weight: 800 !important;
+}
+
+/* Thêm hiệu ứng hover nhẹ cho ngày hôm nay nếu nó được kích hoạt */
+.react-calendar__tile--now:enabled:hover {
+  background-color: #eff6ff !important;
+}
+
+/* 3. Future selectable dates (when hovered) - Blue Rounded Square (Hình ô vuông bo góc) */
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #eff6ff !important; /* blue-50 */
+  color: #2563eb !important;
+  border-radius: 0.75rem !important; /* Hình ô vuông bo góc */
+  border: none !important;
+}
+
+/* 4. Selected date (Active state) - Solid Blue Square (Hình ô vuông màu xanh) */
+.react-calendar__tile--active {
+  background-color: #2563eb !important; /* Màu xanh đậm */
+  color: #ffffff !important;
+  border-radius: 0.75rem !important; /* Hình ô vuông bo góc */
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35) !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+
+/* Kết hợp nếu hôm nay là ngày được click chọn */
+.react-calendar__tile--now.react-calendar__tile--active {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 0.75rem !important; /* Chuyển thành ô vuông khi được chọn */
+}
+
