@@ -141,3 +141,11 @@
   border-radius: 0.75rem !important; /* Chuyển thành ô vuông khi được chọn */
 }
 
+/* Fix nền trắng cho Hamburger Menu trên Mobile */
+.mobile-drawer-panel {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+}
+
+

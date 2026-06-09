@@ -5,14 +5,14 @@ import BookingStepper from '../../components/booking/BookingStepper';
 import ProfileCard from '../../components/booking/ProfileCard';
 import ProfileForm from '../../components/booking/ProfileForm';
 import ShiftCard from '../../components/booking/ShiftCard';
-import { getPatients, createPatient } from '../../services/patientService';
+import { getPatientsByAccountId, createPatient } from '../../services/patientService';
 import { getSpecialties } from '../../services/specialtyService';
 import { getDoctors, getDoctorById } from '../../services/doctorService';
 import { createAppointment } from '../../services/appointmentService';
 import { BASE_URL } from '../../services/apiClient';
 import * as Icons from 'lucide-react';
 
-const BookingPage = ({ onGoHome }) => {
+const BookingPage = ({ user, onGoHome }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [profiles, setProfiles] = useState([]);
   const [specialties, setSpecialties] = useState([]);
@@ -39,7 +39,7 @@ const BookingPage = ({ onGoHome }) => {
 
   // Load toàn bộ dữ liệu từ các APIs
   useEffect(() => {
-    Promise.all([getPatients(), getSpecialties(), getDoctors()])
+    Promise.all([getPatientsByAccountId(user?.id), getSpecialties(), getDoctors()])
       .then(([patientData, specialtyData, doctorData]) => {
         setProfiles(patientData);
         setSpecialties(specialtyData);
@@ -50,7 +50,7 @@ const BookingPage = ({ onGoHome }) => {
         console.error('Lỗi khi tải dữ liệu đặt lịch:', err);
         setLoading(false);
       });
-  }, []);
+  }, [user?.id]);
 
   // Thêm hồ sơ mới vào danh sách qua API
   const handleAddProfile = (newProfileData) => {

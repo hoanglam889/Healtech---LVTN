@@ -24,12 +24,21 @@ export class AppointmentsService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Tạo mã QR code duy nhất
+      // 1. Tạo mã QR code duy nhất dạng doanh nghiệp bảo mật: HT-APPT-YYYYMMDD-HEX8
       let qrCode = '';
       let isUnique = false;
       while (!isUnique) {
-        const randNum = Math.floor(100000 + Math.random() * 900000);
-        qrCode = `HT-${randNum}`;
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}${mm}${dd}`;
+
+        // Sinh 8 ký tự Hexadecimal ngẫu nhiên (chữ in hoa)
+        const randHex = Math.random().toString(16).substring(2, 10).toUpperCase();
+        
+        qrCode = `HT-APPT-${dateStr}-${randHex}`; // Định dạng: HT-APPT-20260607-4E2F9B8A
+        
         const existing = await queryRunner.manager.findOne(Appointments, { where: { qrCode } });
         if (!existing) {
           isUnique = true;
@@ -79,8 +88,9 @@ export class AppointmentsService {
     }
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
     return this.appointmentsRepo.find({
+      where: userId ? { patient: { patientAccountId: userId } } : {},
       relations: {
         patient: true,
         doctorProfile: true,

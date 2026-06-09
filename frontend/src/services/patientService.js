@@ -1,7 +1,14 @@
 import apiClient from './apiClient';
 
-export const getPatients = async () => {
+export const getAllPatients = async () => {
   const response = await apiClient.get('/patients');
+  return response.data;
+};
+
+export const getPatientsByAccountId = async (accountId) => {
+  const response = await apiClient.get('/patients', {
+    params: accountId ? { patientAccountId: accountId } : {}
+  });
   return response.data;
 };
 

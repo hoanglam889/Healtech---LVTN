@@ -17,8 +17,10 @@ export class PatientsService {
     return await this.patientsRepository.save(newPatient);
   }
 
-  async findAll() {
-    return await this.patientsRepository.find();
+  async findAll(patientAccountId?: number) {
+    return await this.patientsRepository.find({
+      where: patientAccountId ? { patientAccountId } : {}
+    });
   }
 
   async findOne(id: number) {
