@@ -34,4 +34,22 @@ Dùng để test chức năng xem lịch bác sĩ và Đặt lịch khám bệnh
 
 ### 🩺 2. Cổng Nội bộ (Lễ tân & Bác sĩ)
 Hệ thống sẽ tự động nhận diện Role để hiển thị đúng giao diện dựa trên tài khoản đăng nhập.
-* Link truy cập: http://
+* Link truy cập: http://http://localhost:5173/staff
+
+**Tài khoản Lễ tân:**
+Dùng để test tính năng Check-in bệnh nhân (chuyển trạng thái từ Booking sang Waiting) và tính điểm ưu tiên Hàng đợi.
+* Tài khoản: 008
+* Mật khẩu: 1
+
+**Tài khoản Bác sĩ (Khoa Tim Mạch - BS. Cao Mỹ Ái):**
+Dùng để test giao diện theo dõi Hàng đợi tự động và chức năng Tạo bệnh án.
+* Tài khoản: 004
+* Mật khẩu: 1
+
+---
+
+## 💡 GỢI Ý LUỒNG TEST CHUẨN (HAPPY CASE)
+Để thấy hệ thống chạy mượt nhất, anh hãy test theo đúng trình tự này:
+1. Đăng nhập nick **Khách hàng** -> Đặt 1 lịch hẹn ở **Khoa Tim Mạch** (Vì Nick Bác sĩ test đang ở khoa này).
+2. Đăng nhập nick **Lễ tân** -> Bấm Check-in cho lịch hẹn vừa tạo.
+3. Đăng nhập nick **Bác sĩ (004)** -> Xem bệnh nhân vừa check-in đã lọt vào Hàng đợi chưa -> Bấm "Khám" -> Gõ nội dung bệnh án và hoàn tất.
