@@ -4,6 +4,8 @@ import * as Icons from 'lucide-react';
 const Navbar = ({ 
   isLoggedIn, 
   user, 
+  activeTab,
+  setActiveTab,
   onLogout, 
   onLoginClick, 
   onBookClick, 
@@ -17,7 +19,7 @@ const Navbar = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
         
         {/* LOGO */}
-        <div className="flex items-center cursor-pointer" onClick={() => { onHomeClick(); setIsMobileMenuOpen(false); }}>
+        <div className="flex items-center cursor-pointer" onClick={() => { onHomeClick(); setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}>
           <div className="w-28 h-10 md:w-44 md:h-16 overflow-hidden relative flex items-center justify-center">
             <img 
               src="/images/logo.png" 
@@ -31,10 +33,34 @@ const Navbar = ({
         <nav className="hidden md:flex gap-8 font-semibold text-gray-500 text-sm lg:text-base">
           {isLoggedIn ? (
             <>
-              <a href="#dashboard" onClick={(e) => { e.preventDefault(); onHomeClick(); }} className="hover:text-blue-600 transition-colors">Bảng điều khiển</a>
-              <a href="#my-appointments" onClick={(e) => { e.preventDefault(); }} className="hover:text-blue-600 transition-colors opacity-50 cursor-not-allowed">Lịch hẹn của tôi</a>
-              <a href="#profiles" onClick={(e) => { e.preventDefault(); }} className="hover:text-blue-600 transition-colors opacity-50 cursor-not-allowed">Hồ sơ bệnh nhân</a>
-              <a href="#history" onClick={(e) => { e.preventDefault(); }} className="hover:text-blue-600 transition-colors opacity-50 cursor-not-allowed">Sổ sức khỏe</a>
+              <a 
+                href="#dashboard" 
+                onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('dashboard'); }} 
+                className={`hover:text-blue-600 transition-colors ${activeTab === 'dashboard' ? 'text-blue-600 font-extrabold' : ''}`}
+              >
+                Bảng điều khiển
+              </a>
+              <a 
+                href="#my-appointments" 
+                onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('appointments'); }} 
+                className={`hover:text-blue-600 transition-colors ${activeTab === 'appointments' ? 'text-blue-600 font-extrabold' : ''}`}
+              >
+                Lịch hẹn của tôi
+              </a>
+              <a 
+                href="#profiles" 
+                onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('profiles'); }} 
+                className={`hover:text-blue-600 transition-colors ${activeTab === 'profiles' ? 'text-blue-600 font-extrabold' : ''}`}
+              >
+                Hồ sơ bệnh nhân
+              </a>
+              <a 
+                href="#history" 
+                onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('history'); }} 
+                className={`hover:text-blue-600 transition-colors ${activeTab === 'history' ? 'text-blue-600 font-extrabold' : ''}`}
+              >
+                Sổ sức khỏe
+              </a>
             </>
           ) : (
             <>
@@ -165,14 +191,32 @@ const Navbar = ({
                 <nav className="flex flex-col gap-4 text-gray-600 font-bold text-sm">
                   <a 
                     href="#dashboard" 
-                    onClick={(e) => { e.preventDefault(); onHomeClick(); setIsMobileMenuOpen(false); }}
-                    className="hover:text-blue-600 transition-colors py-1"
+                    onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
+                    className={`hover:text-blue-600 transition-colors py-1 ${activeTab === 'dashboard' ? 'text-blue-600 font-extrabold' : ''}`}
                   >
                     Bảng điều khiển
                   </a>
-                  <a href="#my-appointments" onClick={(e) => e.preventDefault()} className="hover:text-blue-600 transition-colors py-1 opacity-50 cursor-not-allowed">Lịch hẹn của tôi</a>
-                  <a href="#profiles" onClick={(e) => e.preventDefault()} className="hover:text-blue-600 transition-colors py-1 opacity-50 cursor-not-allowed">Hồ sơ bệnh nhân</a>
-                  <a href="#history" onClick={(e) => e.preventDefault()} className="hover:text-blue-600 transition-colors py-1 opacity-50 cursor-not-allowed">Sổ sức khỏe</a>
+                  <a 
+                    href="#my-appointments" 
+                    onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('appointments'); setIsMobileMenuOpen(false); }}
+                    className={`hover:text-blue-600 transition-colors py-1 ${activeTab === 'appointments' ? 'text-blue-600 font-extrabold' : ''}`}
+                  >
+                    Lịch hẹn của tôi
+                  </a>
+                  <a 
+                    href="#profiles" 
+                    onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('profiles'); setIsMobileMenuOpen(false); }}
+                    className={`hover:text-blue-600 transition-colors py-1 ${activeTab === 'profiles' ? 'text-blue-600 font-extrabold' : ''}`}
+                  >
+                    Hồ sơ bệnh nhân
+                  </a>
+                  <a 
+                    href="#history" 
+                    onClick={(e) => { e.preventDefault(); onHomeClick(); setActiveTab('history'); setIsMobileMenuOpen(false); }}
+                    className={`hover:text-blue-600 transition-colors py-1 ${activeTab === 'history' ? 'text-blue-600 font-extrabold' : ''}`}
+                  >
+                    Sổ sức khỏe
+                  </a>
                 </nav>
               </div>
             ) : (

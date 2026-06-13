@@ -15,7 +15,14 @@ export class DoctorProfilesService {
   }
 
   findAll() {
-    return this.DoctorProfiles.find({ relations: { specialty: true } });
+    return this.DoctorProfiles.find({
+      relations: {
+        specialty: true,
+        doctorSchedules: {
+          shift: true,
+        },
+      },
+    });
   }
 
   findOne(id: number) {

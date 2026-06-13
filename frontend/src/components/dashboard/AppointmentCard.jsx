@@ -2,8 +2,9 @@ import React from 'react';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
 
-const AppointmentCard = ({ apt, onShowQr, formatDate }) => {
+const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
   const isUpcoming = apt.status === 'BOOKED';
+  const isCancelled = apt.status === 'CANCELLED';
   const isPaid = apt.invoices?.status === 'PAID';
   const imageUrl = apt.doctorProfile?.avatarUrl ? `${BASE_URL}${apt.doctorProfile.avatarUrl}` : null;
 
@@ -40,29 +41,44 @@ const AppointmentCard = ({ apt, onShowQr, formatDate }) => {
         </div>
       </div>
 
-      {/* Trạng thái và Nút xem QR */}
-      <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
+      {/* Trạng thái và Nút xem QR / Hủy khám */}
+      <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
         <div className="flex flex-col gap-1 sm:items-end">
           {/* Trạng thái khám */}
           <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-            isUpcoming ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-green-50 text-green-600 border border-green-100'
+            isUpcoming 
+              ? 'bg-blue-50 text-blue-600 border border-blue-100' 
+              : isCancelled
+                ? 'bg-red-50 text-red-600 border border-red-100'
+                : 'bg-green-50 text-green-600 border border-green-100'
           }`}>
-            {isUpcoming ? 'Đã xác nhận' : 'Đã khám'}
+            {isUpcoming ? 'Đã xác nhận' : isCancelled ? 'Đã hủy' : 'Đã khám'}
           </span>
           {/* Trạng thái hóa đơn */}
           <span className={`text-[10px] font-bold ${isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>
             {isPaid ? '✓ Đã thanh toán' : '• Trả tiền tại quầy'}
           </span>
         </div>
-        {isUpcoming && (
-          <button 
-            onClick={() => onShowQr(apt.qrCode)}
-            className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/50 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-all cursor-pointer flex items-center gap-1"
-          >
-            <Icons.QrCode className="w-3.5 h-3.5" />
-            <span>Mã QR khám</span>
-          </button>
-        )}
+        <div className="flex gap-2">
+          {isUpcoming && onCancel && (
+            <button 
+              onClick={() => onCancel(apt.id)}
+              className="text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50/50 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition-all cursor-pointer flex items-center gap-1"
+            >
+              <Icons.X className="w-3.5 h-3.5" />
+              <span>Hủy lịch</span>
+            </button>
+          )}
+          {isUpcoming && (
+            <button 
+              onClick={() => onShowQr(apt.qrCode)}
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/50 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-all cursor-pointer flex items-center gap-1"
+            >
+              <Icons.QrCode className="w-3.5 h-3.5" />
+              <span>Mã QR</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

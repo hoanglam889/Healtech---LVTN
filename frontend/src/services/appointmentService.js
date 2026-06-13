@@ -16,3 +16,8 @@ export const getAppointmentsByUserId = async (userId) => {
   });
   return response.data;
 };
+
+export const updateAppointment = async (id, appointmentData) => {
+  const response = await apiClient.patch(`/appointments/${id}`, appointmentData);
+  return response.data;
+};

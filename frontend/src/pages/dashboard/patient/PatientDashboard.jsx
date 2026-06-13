@@ -4,8 +4,11 @@ import { getPatientsByAccountId } from '../../../services/patientService';
 import * as Icons from 'lucide-react';
 import AppointmentCard from '../../../components/dashboard/AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
+import PatientProfiles from './PatientProfiles';
+import MyAppointments from './MyAppointments';
+import HealthBook from './HealthBook';
 
-const PatientDashboard = ({ user, onBookClick }) => {
+const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
   const [appointments, setAppointments] = useState([]);
   const [patientCount, setPatientCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -43,6 +46,19 @@ const PatientDashboard = ({ user, onBookClick }) => {
   // Thống kê nhanh
   const upcomingCount = appointments.filter(a => a.status === 'BOOKED').length;
   const unpaidInvoices = appointments.filter(a => a.invoices?.status === 'UNPAID').length;
+
+  // Render các màn hình con tương ứng theo Tab
+  if (activeTab === 'profiles') {
+    return <PatientProfiles user={user} />;
+  }
+
+  if (activeTab === 'appointments') {
+    return <MyAppointments user={user} onBookClick={onBookClick} />;
+  }
+
+  if (activeTab === 'history') {
+    return <HealthBook user={user} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/50 py-10">

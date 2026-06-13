@@ -9,31 +9,59 @@ import ArticleSection from './components/landing/ArticleSection';
 import ContactSection from './components/landing/ContactSection';
 import BookingPage from './pages/booking/BookingPage';
 import PatientDashboard from './pages/dashboard/patient/PatientDashboard';
+import StaffDashboard from './pages/dashboard/staff/StaffDashboard';
+import AuthModal from './components/auth/AuthModal';
+
 
 function App() {
   const [isBooking, setIsBooking] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [user, setUser] = useState({
-    id: 1,
-    fullName: 'Hoàng Lâm',
-    phone: '0901234567'
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('isLoggedIn') === 'true';
   });
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
-  // Giả lập Đăng nhập (Phục vụ báo cáo/Demo đồ án)
-  const handleLogin = () => {
+  React.useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+
+  // Xử lý Đăng nhập thành công
+  const handleLoginSuccess = (userData) => {
     setIsLoggedIn(true);
-    setUser({
-      id: 1,
-      fullName: 'Hoàng Lâm',
-      phone: '0901234567'
-    });
+    setUser(userData);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('user', JSON.stringify(userData));
+    setIsAuthModalOpen(false);
+    setActiveTab('dashboard');
   };
 
   // Đăng xuất
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('user');
+    setIsBooking(false);
+    setActiveTab('dashboard');
   };
+
+  if (currentPath === '/staff') {
+    return <StaffDashboard />;
+  }
 
   return (
     <div className="font-sans text-gray-900 bg-white min-h-screen flex flex-col justify-between">
@@ -41,17 +69,30 @@ function App() {
         <Navbar 
           isLoggedIn={isLoggedIn}
           user={user}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
           onLogout={handleLogout}
-          onLoginClick={handleLogin}
-          onBookClick={() => setIsBooking(true)} 
-          onHomeClick={() => setIsBooking(false)} 
+          onLoginClick={() => setIsAuthModalOpen(true)}
+          onBookClick={() => {
+            if (isLoggedIn) {
+              setIsBooking(true);
+            } else {
+              setIsAuthModalOpen(true);
+            }
+          }} 
+          onHomeClick={() => { setIsBooking(false); setActiveTab('dashboard'); }} 
         />
         
         {isBooking ? (
           <BookingPage user={user} onGoHome={() => setIsBooking(false)} />
         ) : isLoggedIn ? (
           // Đã đăng nhập -> Hiển thị trang quản lý lịch khám cá nhân (Dashboard)
-          <PatientDashboard user={user} onBookClick={() => setIsBooking(true)} />
+          <PatientDashboard 
+            user={user} 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onBookClick={() => setIsBooking(true)} 
+          />
         ) : (
           // Chưa đăng nhập -> Hiển thị trang chủ giới thiệu (Landing Page)
           <main>
@@ -65,6 +106,13 @@ function App() {
         )}
       </div>
       <Footer />
+
+      {/* Patient Auth Modal (Login / Registration) */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        onLoginSuccess={handleLoginSuccess} 
+      />
     </div>
   );
 }

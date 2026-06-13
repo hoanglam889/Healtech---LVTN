@@ -65,34 +65,84 @@ const BookingPage = ({ user, onGoHome }) => {
       });
   };
 
-  // Reset các lựa chọn lịch khám khi đổi chuyên khoa
+  // Reset các lựa chọn lịch khám khi đổi chuyên khoa và lọc toàn bộ lịch trực thuộc khoa
   const handleSelectSpecialty = (id) => {
     setSelectedSpecialtyId(id);
     setSelectedDoctorId(null);
     setSelectedDate(null);
     setSelectedTimeSlot(null);
-    setDoctorSchedules([]);
+    
+    if (id) {
+      const specialtyDoctors = doctors.filter(doc => doc.specialtyId === id);
+      const allSchedules = specialtyDoctors.reduce((acc, doc) => {
+        if (doc.doctorSchedules) {
+          const docSchedulesWithDoc = doc.doctorSchedules.map(schedule => ({
+            ...schedule,
+            doctor: doc
+          }));
+          return [...acc, ...docSchedulesWithDoc];
+        }
+        return acc;
+      }, []);
+      setDoctorSchedules(allSchedules);
+    } else {
+      setDoctorSchedules([]);
+    }
   };
 
-  // Reset các lựa chọn ngày giờ khi đổi bác sĩ và tải lịch từ API
+  // Reset lựa chọn giờ khám khi đổi bác sĩ
   const handleSelectDoctor = (id) => {
     setSelectedDoctorId(id);
-    setSelectedDate(null);
     setSelectedTimeSlot(null);
-    setDoctorSchedules([]);
+  };
 
-    if (id) {
-      setLoadingSchedule(true);
-      getDoctorById(id)
-        .then((data) => {
-          setDoctorSchedules(data.doctorSchedules || []);
-          setLoadingSchedule(false);
-        })
-        .catch((err) => {
-          console.error('Lỗi khi tải lịch trực bác sĩ:', err);
-          setLoadingSchedule(false);
-        });
+  // Kiểm tra trạng thái ca trực so với giờ hiện hành
+  const checkShiftStatus = (dateStr, startTime, endTime) => {
+    if (!dateStr || !startTime || !endTime) {
+      return 'NORMAL';
     }
+    
+    try {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const currentDateStr = `${year}-${month}-${day}`;
+
+      // Nếu không trùng ngày hiện hành, ca khám luôn bình thường
+      if (dateStr !== currentDateStr) {
+        return 'NORMAL';
+      }
+
+      // Đổi giờ hiện hành và giờ ca trực ra phút để dễ so sánh
+      const currentMinutes = today.getHours() * 60 + today.getMinutes();
+      
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+
+      if (currentMinutes >= endMinutes) {
+        return 'EXPIRED'; // Đã quá giờ kết thúc
+      } else if (currentMinutes > startMinutes + 20) {
+        return 'LATE_ALLOWED'; // Sau ca bắt đầu 20 phút nhưng chưa hết ca
+      }
+    } catch (e) {
+      console.error('Lỗi khi tính toán thời gian ca trực:', e);
+    }
+    
+    return 'NORMAL';
+  };
+
+  // Kiểm tra bác sĩ có ca nào nhận khám muộn trong ngày không
+  const hasLateAllowedShift = (doc, dateStr) => {
+    if (!doc.doctorSchedules) return false;
+    return doc.doctorSchedules.some(sched => {
+      if (sched.date !== dateStr) return false;
+      const status = checkShiftStatus(dateStr, sched.shift?.startTime, sched.shift?.endTime);
+      return status === 'LATE_ALLOWED';
+    });
   };
 
   // Hàm định dạng ngày chọn hiển thị tiếng Việt
@@ -110,7 +160,7 @@ const BookingPage = ({ user, onGoHome }) => {
     }
   };
 
-  // Kiểm tra ngày khả dụng (không ở quá khứ và bác sĩ có ca trực)
+  // Kiểm tra ngày khả dụng (không ở quá khứ và có bác sĩ thuộc khoa làm việc)
   const isDateAvailable = (date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -128,9 +178,9 @@ const BookingPage = ({ user, onGoHome }) => {
     return doctorSchedules.some(schedule => schedule.date === dateStr);
   };
 
-  // Lọc các ca khám khả dụng cho ngày được chọn
+  // Lọc các ca khám khả dụng cho ngày và bác sĩ được chọn
   const availableShifts = doctorSchedules.filter(
-    (schedule) => schedule.date === selectedDate
+    (schedule) => schedule.date === selectedDate && schedule.doctorProfileId === selectedDoctorId
   );
 
   // Gửi thông tin đặt lịch hẹn lên Backend API
@@ -267,7 +317,7 @@ const BookingPage = ({ user, onGoHome }) => {
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                Tiếp tục (Chọn bác sĩ) →
+                Tiếp tục (Chọn lịch khám) →
               </button>
             </div>
           </div>
@@ -276,13 +326,20 @@ const BookingPage = ({ user, onGoHome }) => {
         {/* BƯỚC 2: CHỌN CHUYÊN KHOA, BÁC SĨ & LỊCH TRÌNH */}
         {currentStep === 2 && (
           <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
-            <h3 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 flex items-center justify-between">
+            <h3 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 flex flex-wrap items-center justify-between gap-2">
               <span>Khám cho: <span className="text-blue-600 font-bold">{selectedProfile?.fullName || selectedProfile?.name}</span></span>
-              {selectedSpecialty && (
-                <span className="text-xs font-semibold text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-200 uppercase tracking-wider">
-                  Khoa: {selectedSpecialty.name}
-                </span>
-              )}
+              <div className="flex gap-2">
+                {selectedSpecialty && (
+                  <span className="text-xs font-semibold text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-200 uppercase tracking-wider">
+                    Khoa: {selectedSpecialty.name}
+                  </span>
+                )}
+                {selectedDate && (
+                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 uppercase tracking-wider">
+                    Ngày: {formatSelectedDate(selectedDate)}
+                  </span>
+                )}
+              </div>
             </h3>
             
             {/* 2.1: CHƯA CHỌN CHUYÊN KHOA */}
@@ -309,49 +366,87 @@ const BookingPage = ({ user, onGoHome }) => {
               </div>
             )}
 
-            {/* 2.2: ĐÃ CHỌN CHUYÊN KHOA, CẦN CHỌN BÁC SĨ */}
-            {selectedSpecialtyId && !selectedDoctorId && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-gray-800 text-base md:text-lg">2. Chọn bác sĩ khám bệnh:</h4>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {doctors.filter(doc => doc.specialtyId === selectedSpecialtyId).map((doc) => {
-                    const imageUrl = doc.avatarUrl ? `${BASE_URL}${doc.avatarUrl}` : null;
-                    return (
-                      <div 
-                        key={doc.id}
-                        onClick={() => handleSelectDoctor(doc.id)}
-                        className="p-5 bg-white border-2 border-gray-100 rounded-2xl flex items-center gap-4 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 select-none"
-                      >
-                        <div className="w-16 h-16 bg-blue-50 rounded-full overflow-hidden flex items-center justify-center text-3xl shrink-0 font-bold text-blue-500 border border-blue-100 relative">
-                          {imageUrl ? (
-                            <img src={imageUrl} alt={doc.fullName} className="w-full h-full object-cover" />
-                          ) : (
-                            <span>🩺</span>
-                          )}
-                        </div>
-                        <div className="space-y-1">
-                          <h5 className="font-bold text-gray-900 text-base">{doc.fullName}</h5>
-                          <p className="text-xs text-gray-400 font-semibold">Kinh nghiệm: <span className="text-emerald-600 font-bold">{doc.experienceYears || 0} năm</span></p>
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <span className="text-yellow-400">★</span> 
-                            <span className="font-bold text-gray-700">4.9</span> 
-                            (98 đánh giá)
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+            {/* 2.2: ĐÃ CHỌN CHUYÊN KHOA, CẦN CHỌN NGÀY */}
+            {selectedSpecialtyId && !selectedDate && (
+              <div className="space-y-4 flex flex-col items-center">
+                <h4 className="font-bold text-gray-800 text-base md:text-lg self-start">2. Chọn ngày khám:</h4>
+                <Calendar
+                  onChange={(val) => {
+                    const year = val.getFullYear();
+                    const month = String(val.getMonth() + 1).padStart(2, '0');
+                    const day = String(val.getDate()).padStart(2, '0');
+                    const dateStr = `${year}-${month}-${day}`;
+                    setSelectedDate(dateStr);
+                    setSelectedDoctorId(null);
+                    setSelectedTimeSlot(null);
+                  }}
+                  value={selectedDate ? new Date(selectedDate) : null}
+                  tileDisabled={({ date }) => !isDateAvailable(date)}
+                />
               </div>
             )}
 
-            {/* 2.3: ĐÃ CHỌN BÁC SĨ, CHỌN LỊCH KHÁM (NGÀY & GIỜ) */}
-            {selectedSpecialtyId && selectedDoctorId && (
-              <div className="space-y-6">
+            {/* 2.3: ĐÃ CHỌN NGÀY, CẦN CHỌN BÁC SĨ */}
+            {selectedSpecialtyId && selectedDate && !selectedDoctorId && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-bold text-gray-800 text-base md:text-lg">3. Chọn bác sĩ khám bệnh:</h4>
+                </div>
                 
+                {doctors.filter(doc => 
+                  doc.specialtyId === selectedSpecialtyId &&
+                  doc.doctorSchedules &&
+                  doc.doctorSchedules.some(schedule => schedule.date === selectedDate)
+                ).length === 0 ? (
+                  <p className="text-sm text-amber-600 font-medium bg-amber-50 border border-amber-100 rounded-xl p-3">
+                    Không có bác sĩ nào thuộc chuyên khoa này có lịch trực vào ngày đã chọn.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {doctors.filter(doc => 
+                      doc.specialtyId === selectedSpecialtyId &&
+                      doc.doctorSchedules &&
+                      doc.doctorSchedules.some(schedule => schedule.date === selectedDate)
+                    ).map((doc) => {
+                      const imageUrl = doc.avatarUrl ? `${BASE_URL}${doc.avatarUrl}` : null;
+                      return (
+                        <div 
+                          key={doc.id}
+                          onClick={() => handleSelectDoctor(doc.id)}
+                          className="p-5 bg-white border-2 border-gray-100 rounded-2xl flex items-center gap-4 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 select-none"
+                        >
+                          <div className="w-16 h-16 bg-blue-50 rounded-full overflow-hidden flex items-center justify-center text-3xl shrink-0 font-bold text-blue-500 border border-blue-100 relative">
+                            {imageUrl ? (
+                              <img src={imageUrl} alt={doc.fullName} className="w-full h-full object-cover" />
+                            ) : (
+                              <span>🩺</span>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <h5 className="font-bold text-gray-900 text-base">{doc.fullName}</h5>
+                            <p className="text-xs text-gray-400 font-semibold">Kinh nghiệm: <span className="text-emerald-600 font-bold">{doc.experienceYears || 0} năm</span></p>
+                            <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500">
+                              <span className="text-yellow-400">★</span> 
+                              <span className="font-bold text-gray-700">4.9</span> 
+                              (98 đánh giá)
+                              {hasLateAllowedShift(doc, selectedDate) && (
+                                <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 ml-1">
+                                  ⚠️ Nhận khám muộn
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2.4: ĐÃ CHỌN BÁC SĨ, CHỌN CA KHÁM */}
+            {selectedSpecialtyId && selectedDate && selectedDoctorId && (
+              <div className="space-y-6">
                 {/* Tóm tắt bác sĩ đã chọn */}
                 <div className="p-4 bg-blue-50/40 border border-blue-100 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -369,59 +464,45 @@ const BookingPage = ({ user, onGoHome }) => {
                       </p>
                     </div>
                   </div>
+                  <button 
+                    onClick={() => {
+                      setSelectedDoctorId(null);
+                      setSelectedTimeSlot(null);
+                    }}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Đổi bác sĩ
+                  </button>
                 </div>
 
-                {loadingSchedule ? (
-                  <div className="flex flex-col items-center justify-center py-12 gap-3">
-                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-sm text-gray-500 font-semibold animate-pulse">Đang tải lịch trực của bác sĩ...</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* Chọn ngày khám qua Lịch dương */}
-                    <div className="space-y-3 flex flex-col items-center">
-                      <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider self-start">3. Chọn ngày khám:</h4>
-                      <Calendar
-                        onChange={(val) => {
-                          const year = val.getFullYear();
-                          const month = String(val.getMonth() + 1).padStart(2, '0');
-                          const day = String(val.getDate()).padStart(2, '0');
-                          const dateStr = `${year}-${month}-${day}`;
-                          setSelectedDate(dateStr);
-                          setSelectedTimeSlot(null);
-                        }}
-                        value={selectedDate ? new Date(selectedDate) : null}
-                        tileDisabled={({ date }) => !isDateAvailable(date)}
-                      />
+                <div className="space-y-3">
+                  <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider">4. Chọn ca trực:</h4>
+                  {availableShifts.length === 0 ? (
+                    <p className="text-sm text-amber-600 font-medium bg-amber-50 border border-amber-100 rounded-xl p-3">
+                      Bác sĩ không có ca trực nào khả dụng vào ngày đã chọn.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      {availableShifts.map((sched) => {
+                        const timeRange = `${sched.shift?.startTime?.substring(0, 5)} - ${sched.shift?.endTime?.substring(0, 5)}`;
+                        const status = checkShiftStatus(selectedDate, sched.shift?.startTime, sched.shift?.endTime);
+                        return (
+                          <ShiftCard
+                            key={sched.id}
+                            schedule={sched}
+                            status={status}
+                            isSelected={selectedTimeSlot === timeRange}
+                            onSelect={() => {
+                              if (status !== 'EXPIRED') {
+                                setSelectedTimeSlot(timeRange);
+                              }
+                            }}
+                          />
+                        );
+                      })}
                     </div>
-
-                    {/* Chọn ca trực tương ứng */}
-                    {selectedDate && (
-                      <div className="space-y-3 animate-[fadeIn_0.2s_ease-out]">
-                        <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider">4. Chọn ca trực:</h4>
-                        {availableShifts.length === 0 ? (
-                          <p className="text-sm text-amber-600 font-medium bg-amber-50 border border-amber-100 rounded-xl p-3">
-                            Bác sĩ không có ca trực nào khả dụng vào ngày đã chọn.
-                          </p>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-3">
-                            {availableShifts.map((sched) => {
-                              const timeRange = `${sched.shift?.startTime?.substring(0, 5)} - ${sched.shift?.endTime?.substring(0, 5)}`;
-                              return (
-                                <ShiftCard
-                                  key={sched.id}
-                                  schedule={sched}
-                                  isSelected={selectedTimeSlot === timeRange}
-                                  onSelect={() => setSelectedTimeSlot(timeRange)}
-                                />
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
 
