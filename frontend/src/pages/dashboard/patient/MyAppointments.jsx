@@ -3,15 +3,19 @@ import * as Icons from 'lucide-react';
 import { getAppointmentsByUserId, updateAppointment } from '../../../services/appointmentService';
 import AppointmentCard from '../../../components/dashboard/AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
+import { useToast, ConfirmModal } from '../../../components/shared/ToastProvider';
+import { formatDate } from '../../../utils/dateUtils';
 
 const MyAppointments = ({ user, onBookClick }) => {
+  const { showToast } = useToast();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedQr, setSelectedQr] = useState(null); // Lưu mã QR khám hiển thị Modal
+  const [selectedQr, setSelectedQr] = useState(null);
+  const [confirmCancel, setConfirmCancel] = useState(null); // id to cancel
 
   // Bộ lọc tìm kiếm & trạng thái
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'BOOKED' | 'DONE' | 'CANCELLED'
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Load danh sách lịch hẹn
   const loadAppointments = () => {
@@ -32,32 +36,16 @@ const MyAppointments = ({ user, onBookClick }) => {
   }, [user?.id]);
 
   // Hàm xử lý Hủy lịch khám
-  const handleCancel = (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn hủy lịch khám này không? Thao tác này không thể hoàn tác.')) {
-      updateAppointment(id, { status: 'CANCELLED' })
-        .then(() => {
-          alert('Hủy lịch khám thành công.');
-          loadAppointments();
-        })
-        .catch((err) => {
-          console.error('Lỗi khi hủy lịch khám:', err);
-          alert('Không thể hủy lịch khám. Vui lòng thử lại sau.');
-        });
-    }
+  const handleCancel = (id) => setConfirmCancel(id);
+
+  const doCancel = () => {
+    const id = confirmCancel;
+    setConfirmCancel(null);
+    updateAppointment(id, { status: 'CANCELLED' })
+      .then(() => { showToast('Hủy lịch khám thành công.', 'success'); loadAppointments(); })
+      .catch(() => showToast('Không thể hủy lịch khám. Vui lòng thử lại sau.', 'error'));
   };
 
-  // Hàm định dạng ngày hiển thị
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   // Tiến hành lọc dữ liệu
   const filteredAppointments = appointments.filter((apt) => {
@@ -75,6 +63,13 @@ const MyAppointments = ({ user, onBookClick }) => {
   });
 
   return (
+    <>
+    <ConfirmModal
+      isOpen={!!confirmCancel}
+      message="Bạn có chắc chắn muốn hủy lịch khám này không? Thao tác này không thể hoàn tác."
+      onConfirm={doCancel}
+      onCancel={() => setConfirmCancel(null)}
+    />
     <div className="min-h-screen bg-gray-50/50 py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
@@ -202,6 +197,7 @@ const MyAppointments = ({ user, onBookClick }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

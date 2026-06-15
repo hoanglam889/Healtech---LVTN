@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getAppointmentsByUserId } from '../../../services/appointmentService';
 import { getPatientsByAccountId } from '../../../services/patientService';
+import { formatDate } from '../../../utils/dateUtils';
 import * as Icons from 'lucide-react';
 import AppointmentCard from '../../../components/dashboard/AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
 import PatientProfiles from './PatientProfiles';
 import MyAppointments from './MyAppointments';
 import HealthBook from './HealthBook';
+import AccountSettings from './AccountSettings';
 
 const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
   const [appointments, setAppointments] = useState([]);
@@ -30,18 +32,6 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
       });
   }, [user?.id]);
 
-  // Hàm định dạng ngày hiển thị
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   // Thống kê nhanh
   const upcomingCount = appointments.filter(a => a.status === 'BOOKED').length;
@@ -58,6 +48,10 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
 
   if (activeTab === 'history') {
     return <HealthBook user={user} />;
+  }
+
+  if (activeTab === 'settings') {
+    return <AccountSettings user={user} />;
   }
 
   return (

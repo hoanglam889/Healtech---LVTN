@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import StaffLogin from '../../../components/auth/StaffLogin';
 import CheckinPanel from '../../../components/reception/CheckinPanel';
 import ClinicQueue from '../../../components/reception/ClinicQueue';
 import BillingManager from '../../../components/reception/BillingManager';
 import DoctorClinicQueue from '../../../components/doctor/DoctorClinicQueue';
+import ScheduleManager from '../../../components/staff/ScheduleManager';
 
 export default function StaffDashboard() {
+  const navigate = useNavigate();
+
   // Trạng thái nhân viên đang đăng nhập
   const [staffUser, setStaffUser] = useState(() => {
     try {
@@ -35,12 +39,12 @@ export default function StaffDashboard() {
   const handleLogout = () => {
     setStaffUser(null);
     localStorage.removeItem('staffUser');
+    localStorage.removeItem('token');
   };
 
   // Quay lại trang chủ bệnh nhân
   const handleGoHome = () => {
-    window.history.pushState({}, '', '/');
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    navigate('/');
   };
 
   // Nếu chưa đăng nhập, hiển thị form Đăng nhập
@@ -122,6 +126,18 @@ export default function StaffDashboard() {
                   <Icons.Receipt className="w-5 h-5" />
                   <span>Thu ngân & Thanh toán</span>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('schedules')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                    activeTab === 'schedules'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icons.CalendarDays className="w-5 h-5" />
+                  <span>Quản lý lịch trực</span>
+                </button>
               </>
             )}
 
@@ -174,6 +190,7 @@ export default function StaffDashboard() {
               {activeTab === 'queue' && 'Giám sát Hàng đợi Phòng khám'}
               {activeTab === 'billing' && 'Quản lý Thu ngân / Thanh toán'}
               {activeTab === 'doctor-queue' && 'Phòng Khám Nội / Ngoại khoa'}
+              {activeTab === 'schedules' && 'Quản lý Lịch trực Bác sĩ'}
             </h2>
             <p className="text-xs text-gray-400 font-semibold mt-0.5">Hệ thống quản lý thông tin nội bộ Healtech ERP</p>
           </div>
@@ -190,7 +207,8 @@ export default function StaffDashboard() {
           {activeTab === 'checkin' && <CheckinPanel />}
           {activeTab === 'queue' && <ClinicQueue />}
           {activeTab === 'billing' && <BillingManager />}
-          {activeTab === 'doctor-queue' && <DoctorClinicQueue />}
+          {activeTab === 'doctor-queue' && <DoctorClinicQueue staffUser={staffUser} />}
+          {activeTab === 'schedules' && <ScheduleManager />}
         </div>
       </main>
 

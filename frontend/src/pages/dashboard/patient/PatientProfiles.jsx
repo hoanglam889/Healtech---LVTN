@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getPatientsByAccountId, createPatient, updatePatient, deletePatient } from '../../../services/patientService';
+import { useToast, ConfirmModal } from '../../../components/shared/ToastProvider';
+import { formatDate } from '../../../utils/dateUtils';
 
 const PatientProfiles = ({ user }) => {
+  const { showToast } = useToast();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
 
   // Trạng thái hiển thị Modal thêm/sửa
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,7 +72,7 @@ const PatientProfiles = ({ user }) => {
     e.preventDefault();
 
     if (!fullName.trim() || !phone.trim() || !dob) {
-      alert('Vui lòng nhập đầy đủ các trường bắt buộc (*).');
+      showToast('Vui lòng nhập đầy đủ các trường bắt buộc (*).', 'warning');
       return;
     }
 
@@ -90,10 +94,7 @@ const PatientProfiles = ({ user }) => {
           setIsModalOpen(false);
           loadData();
         })
-        .catch((err) => {
-          console.error('Lỗi khi cập nhật hồ sơ:', err);
-          alert('Không thể cập nhật hồ sơ. Vui lòng kiểm tra lại (CCCD/SĐT không được trùng).');
-        });
+        .catch(() => showToast('Không thể cập nhật hồ sơ. Vui lòng kiểm tra lại (CCCD/SĐT không được trùng).', 'error'));
     } else {
       // Gọi API tạo mới hồ sơ
       createPatient(patientData)
@@ -101,41 +102,30 @@ const PatientProfiles = ({ user }) => {
           setIsModalOpen(false);
           loadData();
         })
-        .catch((err) => {
-          console.error('Lỗi khi tạo mới hồ sơ:', err);
-          alert('Không thể tạo hồ sơ mới. Vui lòng kiểm tra lại (CCCD/SĐT không được trùng).');
-        });
+        .catch(() => showToast('Không thể tạo hồ sơ mới. Vui lòng kiểm tra lại (CCCD/SĐT không được trùng).', 'error'));
     }
   };
 
   // Xóa hồ sơ
-  const handleDelete = (id, name) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa hồ sơ của bệnh nhân "${name}" không?`)) {
-      deletePatient(id)
-        .then(() => {
-          loadData();
-        })
-        .catch((err) => {
-          console.error('Lỗi khi xóa hồ sơ:', err);
-          alert('Không thể xóa hồ sơ này vì đã có lịch hẹn liên kết.');
-        });
-    }
+  const handleDelete = (id, name) => setConfirmDelete({ id, name });
+
+  const doDelete = () => {
+    const { id } = confirmDelete;
+    setConfirmDelete(null);
+    deletePatient(id)
+      .then(() => loadData())
+      .catch(() => showToast('Không thể xóa hồ sơ này vì đã có lịch hẹn liên kết.', 'error'));
   };
 
-  // Hàm định dạng ngày dd/mm/yyyy
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   return (
+    <>
+    <ConfirmModal
+      isOpen={!!confirmDelete}
+      message={`Bạn có chắc chắn muốn xóa hồ sơ của bệnh nhân "${confirmDelete?.name}" không?`}
+      onConfirm={doDelete}
+      onCancel={() => setConfirmDelete(null)}
+    />
     <div className="min-h-screen bg-gray-50/50 py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
@@ -390,6 +380,7 @@ const PatientProfiles = ({ user }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

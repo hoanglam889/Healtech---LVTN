@@ -1,0 +1,215 @@
+import React, { useState, useEffect } from 'react';
+import * as Icons from 'lucide-react';
+import { getSchedules, createSchedule, deleteSchedule, getShifts, getDoctors } from '../../services/scheduleService';
+import { useToast, ConfirmModal } from '../shared/ToastProvider';
+import { formatDate } from '../../utils/dateUtils';
+
+export default function ScheduleManager() {
+  const { showToast } = useToast();
+  const [schedules, setSchedules] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // Form state
+  const [form, setForm] = useState({ doctorProfileId: '', shiftId: '', date: '', maxPatients: 5 });
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [s, sh, d] = await Promise.all([getSchedules(), getShifts(), getDoctors()]);
+      setSchedules(s);
+      setShifts(sh);
+      setDoctors(d);
+    } catch {
+      showToast('Không thể tải dữ liệu lịch trực.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!form.doctorProfileId || !form.shiftId || !form.date) {
+      showToast('Vui lòng điền đầy đủ thông tin.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      await createSchedule({ ...form, doctorProfileId: +form.doctorProfileId, shiftId: +form.shiftId, maxPatients: +form.maxPatients });
+      showToast('Đã thêm lịch trực thành công!', 'success');
+      setIsAdding(false);
+      setForm({ doctorProfileId: '', shiftId: '', date: '', maxPatients: 5 });
+      load();
+    } catch {
+      showToast('Không thể thêm lịch trực. Vui lòng thử lại.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const doDelete = async () => {
+    const id = confirmDelete;
+    setConfirmDelete(null);
+    try {
+      await deleteSchedule(id);
+      showToast('Đã xóa lịch trực.', 'success');
+      load();
+    } catch {
+      showToast('Không thể xóa lịch trực này.', 'error');
+    }
+  };
+
+
+  return (
+    <>
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        message="Bạn có chắc chắn muốn xóa lịch trực này không?"
+        onConfirm={doDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
+
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-extrabold text-gray-900">Quản lý lịch trực</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Thêm hoặc xóa lịch trực cho bác sĩ</p>
+          </div>
+          <button
+            onClick={() => setIsAdding(!isAdding)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+          >
+            <Icons.Plus className="w-4 h-4" />
+            Thêm lịch trực
+          </button>
+        </div>
+
+        {/* Add form */}
+        {isAdding && (
+          <form onSubmit={handleAdd} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+            <h3 className="font-extrabold text-gray-800 text-sm">Thêm lịch trực mới</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Bác sĩ</label>
+                <select
+                  value={form.doctorProfileId}
+                  onChange={(e) => setForm({ ...form, doctorProfileId: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                >
+                  <option value="">-- Chọn bác sĩ --</option>
+                  {doctors.map((d) => (
+                    <option key={d.id} value={d.id}>{d.fullName} ({d.specialty?.name})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Ca trực</label>
+                <select
+                  value={form.shiftId}
+                  onChange={(e) => setForm({ ...form, shiftId: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                >
+                  <option value="">-- Chọn ca trực --</option>
+                  {shifts.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} ({s.startTime}–{s.endTime})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Ngày trực</label>
+                <input
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Số BN tối đa</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={form.maxPatients}
+                  onChange={(e) => setForm({ ...form, maxPatients: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                {saving ? <Icons.Loader className="w-4 h-4 animate-spin" /> : <Icons.Save className="w-4 h-4" />}
+                Lưu lịch trực
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Schedule table */}
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+          {loading ? (
+            <div className="py-12 text-center text-gray-400"><Icons.Loader className="w-6 h-6 animate-spin mx-auto" /></div>
+          ) : schedules.length === 0 ? (
+            <div className="py-12 text-center text-gray-400">
+              <Icons.Calendar className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">Chưa có lịch trực nào</p>
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Bác sĩ</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Ca trực</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Ngày</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">BN tối đa</th>
+                  <th className="px-5 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {schedules.map((s) => (
+                  <tr key={s.id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-5 py-3 font-semibold text-gray-800">{s.doctorProfile?.fullName || '—'}</td>
+                    <td className="px-5 py-3 text-gray-600">{s.shift?.name} <span className="text-gray-400 text-xs">({s.shift?.startTime}–{s.shift?.endTime})</span></td>
+                    <td className="px-5 py-3 font-semibold text-gray-800">{formatDate(s.date)}</td>
+                    <td className="px-5 py-3 text-gray-600">{s.maxPatients}</td>
+                    <td className="px-5 py-3 text-right">
+                      <button
+                        onClick={() => setConfirmDelete(s.id)}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                      >
+                        <Icons.Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

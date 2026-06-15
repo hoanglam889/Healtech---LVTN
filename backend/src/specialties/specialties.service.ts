@@ -1,33 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
-import { Repository } from 'typeorm';
-import { Specialties } from 'src/entities/Specialties';
-import {InjectRepository} from '@nestjs/typeorm';
+import { Specialties } from '../entities/Specialties';
 
 @Injectable()
 export class SpecialtiesService {
   constructor(
     @InjectRepository(Specialties)
-    private specialtiesRepository: Repository<Specialties>
+    private specialtiesRepository: Repository<Specialties>,
   ) {}
-  create(createSpecialtyDto: CreateSpecialtyDto) {
-    return 'This action adds a new specialty';
+
+  async create(createSpecialtyDto: CreateSpecialtyDto) {
+    const specialty = this.specialtiesRepository.create(createSpecialtyDto);
+    return this.specialtiesRepository.save(specialty);
   }
 
   findAll() {
     return this.specialtiesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} specialty`;
+  async findOne(id: number) {
+    const specialty = await this.specialtiesRepository.findOne({ where: { id } });
+    if (!specialty) throw new NotFoundException(`Không tìm thấy chuyên khoa có ID #${id}`);
+    return specialty;
   }
 
-  update(id: number, updateSpecialtyDto: UpdateSpecialtyDto) {
-    return `This action updates a #${id} specialty`;
+  async update(id: number, updateSpecialtyDto: UpdateSpecialtyDto) {
+    await this.findOne(id);
+    await this.specialtiesRepository.update(id, updateSpecialtyDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} specialty`;
+  async remove(id: number) {
+    const specialty = await this.findOne(id);
+    await this.specialtiesRepository.remove(specialty);
+    return { success: true, message: `Đã xóa chuyên khoa #${id}` };
   }
 }

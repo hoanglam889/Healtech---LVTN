@@ -1,1 +1,5 @@
-export class CreateSpecialtyDto {}
+export class CreateSpecialtyDto {
+  name: string;
+  icon?: string;
+  description?: string;
+}

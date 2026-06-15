@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
+import { formatVND } from '../../utils/dateUtils';
 
 export default function BillingManager() {
   const [appointments, setAppointments] = useState([]);
@@ -66,10 +67,6 @@ export default function BillingManager() {
 
   const filteredBills = getFilteredBills();
 
-  // Helper format currency
-  const formatVND = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-  };
 
   return (
     <div className="space-y-6">

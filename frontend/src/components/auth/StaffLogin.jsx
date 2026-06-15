@@ -22,6 +22,7 @@ export default function StaffLogin({ onLoginSuccess, onGoHome }) {
     try {
       const data = await staffLogin(phone, password);
       if (data && data.success) {
+        if (data.access_token) localStorage.setItem('token', data.access_token);
         onLoginSuccess(data.user);
       } else {
         setErrorMsg('Thông tin đăng nhập không hợp lệ hoặc tài khoản bị khóa.');
@@ -143,25 +144,25 @@ export default function StaffLogin({ onLoginSuccess, onGoHome }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => handleQuickFill('0900000000', '123')}
+                onClick={() => handleQuickFill('008', '1')}
                 className="p-3 text-left bg-gray-50/80 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-100 rounded-2xl flex items-center gap-2.5 transition-all text-xs font-semibold text-gray-600 cursor-pointer"
               >
                 <Icons.UserCog className="w-4 h-4 text-blue-600" />
                 <div>
-                  <p className="font-extrabold text-gray-900 leading-tight">Mẫu Lễ Tân</p>
-                  <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">0900000000 / MK: 123</span>
+                  <p className="font-extrabold text-gray-900 leading-tight">Lễ tân</p>
+                  <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">008 / MK: 1</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickFill('0000004', 'dummy_password')}
+                onClick={() => handleQuickFill('004', '1')}
                 className="p-3 text-left bg-gray-50/80 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-100 rounded-2xl flex items-center gap-2.5 transition-all text-xs font-semibold text-gray-600 cursor-pointer"
               >
                 <Icons.Stethoscope className="w-4 h-4 text-blue-600" />
                 <div>
-                  <p className="font-extrabold text-gray-900 leading-tight">Mẫu Bác sĩ Mỹ Ái</p>
-                  <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">0000004 / MK: dummy_password</span>
+                  <p className="font-extrabold text-gray-900 leading-tight">BS. Cao Mỹ Ái (Tim Mạch)</p>
+                  <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">004 / MK: 1</span>
                 </div>
               </button>
             </div>

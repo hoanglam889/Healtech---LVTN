@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAppointmentsByUserId } from '../../../services/appointmentService';
 import { BASE_URL } from '../../../services/apiClient';
+import { formatDate } from '../../../utils/dateUtils';
 
 const HealthBook = ({ user }) => {
   const [appointments, setAppointments] = useState([]);
@@ -23,18 +24,6 @@ const HealthBook = ({ user }) => {
       });
   }, [user?.id]);
 
-  // Hàm định dạng ngày hiển thị
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   // Trình in ấn phiếu khám (giả lập hoặc dùng window.print)
   const handlePrint = () => {

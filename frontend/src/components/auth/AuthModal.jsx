@@ -37,6 +37,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     try {
       const data = await patientLogin(loginPhone, loginPassword);
       if (data && data.success) {
+        if (data.access_token) localStorage.setItem('token', data.access_token);
         setSuccessMsg('Đăng nhập thành công!');
         setTimeout(() => {
           onLoginSuccess(data.user);
@@ -76,6 +77,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       
       const data = await patientRegister(payload);
       if (data && data.success) {
+        if (data.access_token) localStorage.setItem('token', data.access_token);
         setSuccessMsg('Đăng ký tài khoản thành công! Đang tự động đăng nhập...');
         setTimeout(() => {
           onLoginSuccess(data.user);
@@ -208,13 +210,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Tài khoản mẫu (Click để điền nhanh)</span>
                 <button
                   type="button"
-                  onClick={() => handleQuickFill('0987654321', '$2b$10$xP4.Wk.9y2...dummyhash987654321')}
+                  onClick={() => handleQuickFill('0797551612', '1')}
                   className="w-full p-3 text-left bg-gray-50/80 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-100 rounded-2xl flex items-center gap-2.5 transition-all text-xs font-semibold text-gray-600 cursor-pointer"
                 >
                   <Icons.UserCheck className="w-4 h-4 text-blue-600" />
                   <div>
-                    <p className="font-extrabold text-gray-900 leading-tight">Bệnh nhân Hoàng Lâm (Seeded)</p>
-                    <span className="text-[9px] text-gray-400 leading-none mt-0.5 block">0987654321 / MK: $2b$10$xP4.Wk.9y2...dummyhash987654321</span>
+                    <p className="font-extrabold text-gray-900 leading-tight">Bệnh nhân (Tài khoản mẫu)</p>
+                    <span className="text-[9px] text-gray-400 leading-none mt-0.5 block">0797551612 / MK: 1</span>
                   </div>
                 </button>
               </div>

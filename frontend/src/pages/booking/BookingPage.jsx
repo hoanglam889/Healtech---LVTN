@@ -5,11 +5,13 @@ import BookingStepper from '../../components/booking/BookingStepper';
 import ProfileCard from '../../components/booking/ProfileCard';
 import ProfileForm from '../../components/booking/ProfileForm';
 import ShiftCard from '../../components/booking/ShiftCard';
+import VNPaySimulation from './VNPaySimulation';
 import { getPatientsByAccountId, createPatient } from '../../services/patientService';
 import { getSpecialties } from '../../services/specialtyService';
 import { getDoctors, getDoctorById } from '../../services/doctorService';
 import { createAppointment } from '../../services/appointmentService';
 import { BASE_URL } from '../../services/apiClient';
+import { useToast } from '../../components/shared/ToastProvider';
 import * as Icons from 'lucide-react';
 
 const BookingPage = ({ user, onGoHome }) => {
@@ -36,6 +38,10 @@ const BookingPage = ({ user, onGoHome }) => {
   // Trạng thái gửi dữ liệu lên server
   const [submitting, setSubmitting] = useState(false);
   const [createdAppointment, setCreatedAppointment] = useState(null);
+  const [showVNPay, setShowVNPay] = useState(false);
+  const [pendingAppointmentData, setPendingAppointmentData] = useState(null);
+
+  const { showToast } = useToast();
 
   // Load toàn bộ dữ liệu từ các APIs
   useEffect(() => {
@@ -183,10 +189,31 @@ const BookingPage = ({ user, onGoHome }) => {
     (schedule) => schedule.date === selectedDate && schedule.doctorProfileId === selectedDoctorId
   );
 
+  // Thực sự gửi lịch hẹn lên server (dùng cho cả CASH và sau khi VNPay xong)
+  const doCreateAppointment = (appointmentData) => {
+    setSubmitting(true);
+    setShowVNPay(false);
+    createAppointment(appointmentData)
+      .then((res) => {
+        setSubmitting(false);
+        if (res.success || res.appointment) {
+          setCreatedAppointment(res.appointment);
+          setCurrentStep(4);
+        } else {
+          showToast('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.', 'error');
+        }
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        console.error('Lỗi đặt lịch khám:', err);
+        showToast('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.', 'error');
+      });
+  };
+
   // Gửi thông tin đặt lịch hẹn lên Backend API
   const handleConfirmBooking = () => {
     if (!selectedTimeSlot) return;
-    const startTime = selectedTimeSlot.split(' - ')[0] + ':00'; // Đưa về định dạng "HH:MM:SS"
+    const startTime = selectedTimeSlot.split(' - ')[0] + ':00';
 
     const appointmentData = {
       patientId: selectedProfileId,
@@ -196,22 +223,12 @@ const BookingPage = ({ user, onGoHome }) => {
       paymentMethod: paymentMethod
     };
 
-    setSubmitting(true);
-    createAppointment(appointmentData)
-      .then((res) => {
-        setSubmitting(false);
-        if (res.success || res.appointment) {
-          setCreatedAppointment(res.appointment);
-          setCurrentStep(4);
-        } else {
-          alert('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
-        }
-      })
-      .catch((err) => {
-        setSubmitting(false);
-        console.error('Lỗi đặt lịch khám:', err);
-        alert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
-      });
+    if (paymentMethod === 'VNPAY') {
+      setPendingAppointmentData(appointmentData);
+      setShowVNPay(true);
+    } else {
+      doCreateAppointment(appointmentData);
+    }
   };
 
   // Lấy thông tin đã chọn để hiển thị
@@ -227,6 +244,18 @@ const BookingPage = ({ user, onGoHome }) => {
           <p className="text-gray-500 font-semibold text-lg animate-pulse">Đang tải dữ liệu đặt lịch...</p>
         </div>
       </div>
+    );
+  }
+
+  if (showVNPay && pendingAppointmentData) {
+    const selectedDoc = doctors.find(d => d.id === selectedDoctorId);
+    return (
+      <VNPaySimulation
+        amount={150000}
+        orderInfo={`Đặt lịch khám - ${selectedDoc?.fullName || 'Healtech'}`}
+        onSuccess={() => doCreateAppointment(pendingAppointmentData)}
+        onCancel={() => { setShowVNPay(false); setPendingAppointmentData(null); }}
+      />
     );
   }
 

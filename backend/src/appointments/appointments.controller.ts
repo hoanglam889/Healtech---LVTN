@@ -1,20 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
-  create(@Body() createAppointmentDto: CreateAppointmentDto) {
+  create(@Body() createAppointmentDto: CreateAppointmentDto, @Request() req) {
     return this.appointmentsService.create(createAppointmentDto);
   }
 
   @Get()
-  findAll(@Query('userId') userId?: string) {
-    return this.appointmentsService.findAll(userId ? +userId : undefined);
+  findAll(@Query('userId') userId?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+    return this.appointmentsService.findAll(
+      userId ? +userId : undefined,
+      page ? +page : undefined,
+      limit ? +limit : undefined,
+    );
   }
 
   @Get(':id')
@@ -23,8 +29,8 @@ export class AppointmentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
-    return this.appointmentsService.update(+id, updateAppointmentDto);
+  update(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto, @Request() req) {
+    return this.appointmentsService.update(+id, updateAppointmentDto, req.user?.userId);
   }
 
   @Delete(':id')

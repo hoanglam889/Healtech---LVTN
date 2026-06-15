@@ -4,6 +4,9 @@ import { Repository, DataSource } from 'typeorm';
 import { Appointments } from '../entities/Appointments';
 import { Invoices } from '../entities/Invoices';
 import { MedicalRecords } from '../entities/MedicalRecords';
+import { AppointmentStatusLogs } from '../entities/AppointmentStatusLogs';
+import { Notifications } from '../entities/Notifications';
+import { Patients } from '../entities/Patients';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -15,8 +18,24 @@ export class AppointmentsService {
     private appointmentsRepo: Repository<Appointments>,
     @InjectRepository(Invoices)
     private invoicesRepo: Repository<Invoices>,
-    private dataSource: DataSource
+    @InjectRepository(AppointmentStatusLogs)
+    private statusLogsRepo: Repository<AppointmentStatusLogs>,
+    @InjectRepository(Notifications)
+    private notificationsRepo: Repository<Notifications>,
+    @InjectRepository(Patients)
+    private patientsRepo: Repository<Patients>,
+    private dataSource: DataSource,
   ) {}
+
+  private async sendNotification(patientId: number, title: string, content: string) {
+    try {
+      const patient = await this.patientsRepo.findOne({ where: { id: patientId } });
+      if (patient?.patientAccountId) {
+        const notif = this.notificationsRepo.create({ patientAccountId: patient.patientAccountId, title, content });
+        await this.notificationsRepo.save(notif);
+      }
+    } catch {}
+  }
 
   async create(createDto: CreateAppointmentDto) {
     const { patientId, doctorProfileId, appointmentDate, appointmentTime, paymentMethod } = createDto;
@@ -26,7 +45,6 @@ export class AppointmentsService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Tạo mã QR code duy nhất dạng doanh nghiệp bảo mật: HT-APPT-YYYYMMDD-HEX8
       let qrCode = '';
       let isUnique = false;
       while (!isUnique) {
@@ -34,20 +52,12 @@ export class AppointmentsService {
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
-        const dateStr = `${yyyy}${mm}${dd}`;
-
-        // Sinh 8 ký tự Hexadecimal ngẫu nhiên (chữ in hoa)
         const randHex = Math.random().toString(16).substring(2, 10).toUpperCase();
-        
-        qrCode = `HT-APPT-${dateStr}-${randHex}`; // Định dạng: HT-APPT-20260607-4E2F9B8A
-        
+        qrCode = `HT-APPT-${yyyy}${mm}${dd}-${randHex}`;
         const existing = await queryRunner.manager.findOne(Appointments, { where: { qrCode } });
-        if (!existing) {
-          isUnique = true;
-        }
+        if (!existing) isUnique = true;
       }
 
-      // 2. Tạo đối tượng Lịch khám
       const appointment = new Appointments();
       appointment.qrCode = qrCode;
       appointment.patientId = patientId;
@@ -59,12 +69,11 @@ export class AppointmentsService {
 
       const savedAppointment = await queryRunner.manager.save(Appointments, appointment);
 
-      // 3. Tạo Hóa đơn đi kèm
       const invoice = new Invoices();
       invoice.appointmentId = savedAppointment.id;
-      invoice.totalAmount = '150000.00'; // Tiền khám mặc định
+      invoice.totalAmount = '150000.00';
       invoice.paymentMethod = paymentMethod;
-      
+
       if (paymentMethod === 'VNPAY') {
         invoice.status = 'PAID';
         invoice.paidAt = new Date();
@@ -75,13 +84,25 @@ export class AppointmentsService {
 
       await queryRunner.manager.save(Invoices, invoice);
 
+      // Log initial status
+      const log = new AppointmentStatusLogs();
+      log.appointmentId = savedAppointment.id;
+      log.oldStatus = null;
+      log.newStatus = 'BOOKED';
+      log.changedBy = null;
+      log.changedAt = new Date();
+      await queryRunner.manager.save(AppointmentStatusLogs, log);
+
       await queryRunner.commitTransaction();
 
-      return {
-        success: true,
-        appointment: savedAppointment,
-        invoice
-      };
+      // Send booking confirmation notification (fire-and-forget)
+      this.sendNotification(
+        patientId,
+        'Đặt lịch thành công!',
+        `Lịch khám ngày ${appointmentDate} đã được xác nhận. Mã QR: ${qrCode}`,
+      );
+
+      return { success: true, appointment: savedAppointment, invoice };
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw new BadRequestException('Lỗi tạo lịch khám: ' + err.message);
@@ -90,18 +111,25 @@ export class AppointmentsService {
     }
   }
 
-  async findAll(userId?: number) {
-    return this.appointmentsRepo.find({
+  async findAll(userId?: number, page?: number, limit?: number) {
+    const take = limit || 50;
+    const skip = page ? (page - 1) * take : 0;
+
+    const [data, total] = await this.appointmentsRepo.findAndCount({
       where: userId ? { patient: { patientAccountId: userId } } : {},
       relations: {
         patient: true,
-        doctorProfile: {
-          specialty: true
-        },
+        doctorProfile: { specialty: true },
         invoices: true,
-        medicalRecords: true
-      }
+        medicalRecords: true,
+      },
+      order: { createdAt: 'DESC' },
+      skip,
+      take,
     });
+
+    if (page) return { data, total, page, limit: take };
+    return data;
   }
 
   async findOne(id: number) {
@@ -109,112 +137,107 @@ export class AppointmentsService {
       where: { id },
       relations: {
         patient: true,
-        doctorProfile: {
-          specialty: true
-        },
+        doctorProfile: { specialty: true },
         invoices: true,
-        medicalRecords: true
-      }
+        medicalRecords: true,
+      },
     });
-    if (!appointment) {
-      throw new NotFoundException(`Không tìm thấy lịch hẹn có ID #${id}`);
-    }
+    if (!appointment) throw new NotFoundException(`Không tìm thấy lịch hẹn có ID #${id}`);
     return appointment;
   }
 
-  async update(id: number, updateDto: any) {
+  async update(id: number, updateDto: any, changedByUserId?: number) {
     const appointment = await this.findOne(id);
-    
+
     const { invoiceStatus, symptoms, diagnosis, notes, ...appointmentFields } = updateDto;
-    
-    // Nếu trạng thái đổi thành WAITING (Lễ tân check-in), tính điểm priority_score cho Smart Queue
+
+    // Smart priority score when checking in
     if (appointmentFields.status === 'WAITING') {
-      let baseScore = 5; // Mặc định người trưởng thành là 5
-      
-      if (appointment.patient && appointment.patient.dob) {
+      let baseScore = 5;
+
+      if (appointment.patient?.dob) {
         const dobDate = new Date(appointment.patient.dob);
         const today = new Date();
         let age = today.getFullYear() - dobDate.getFullYear();
         const m = today.getMonth() - dobDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
-          age--;
-        }
-        
-        // Trẻ em < 6 tuổi hoặc Người già > 60 tuổi
-        if (age < 6 || age > 60) {
-          baseScore = 8;
-        }
+        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
+        if (age < 6 || age > 60) baseScore = 8;
       }
-      
-      const isBookedViaApp = true; // Khách hàng đặt lịch trước
-      const isPaidInAdvance = appointment.invoices && appointment.invoices.status === 'PAID';
-      
+
+      const isPaidInAdvance = appointment.invoices?.status === 'PAID';
       let lateModifier = 0;
+
       if (appointment.appointmentDate && appointment.appointmentTime) {
         try {
-          const scheduledTimeStr = `${appointment.appointmentDate}T${appointment.appointmentTime}`;
-          const scheduledDateTime = new Date(scheduledTimeStr);
-          const today = new Date();
-          
+          const scheduledDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
           if (!isNaN(scheduledDateTime.getTime())) {
-            const diffInMs = today.getTime() - scheduledDateTime.getTime();
-            const diffInMinutes = diffInMs / (1000 * 60);
-            
-            // Đến trễ quá 20 phút
-            if (diffInMinutes > 20) {
-              lateModifier = -2;
-            }
+            const diffMinutes = (Date.now() - scheduledDateTime.getTime()) / 60000;
+            if (diffMinutes > 20) lateModifier = -2;
           }
-        } catch (timeErr) {
-          console.error('Lỗi tính toán thời gian đi trễ:', timeErr);
-        }
+        } catch {}
       }
-      
-      appointmentFields.priorityScore = baseScore + (isBookedViaApp ? 1 : 0) + (isPaidInAdvance ? 1 : 0) + lateModifier;
+
+      appointmentFields.priorityScore = baseScore + 1 + (isPaidInAdvance ? 1 : 0) + lateModifier;
     }
-    
-    // Cập nhật lịch khám
-    if (appointmentFields && Object.keys(appointmentFields).length > 0) {
+
+    // Update appointment
+    if (Object.keys(appointmentFields).length > 0) {
       await this.appointmentsRepo.update(id, appointmentFields);
     }
-    
-    // Cập nhật hóa đơn
+
+    // Write status log and send notification
+    if (appointmentFields.status && appointmentFields.status !== appointment.status) {
+      const log = new AppointmentStatusLogs();
+      log.appointmentId = id;
+      log.oldStatus = appointment.status as any;
+      log.newStatus = appointmentFields.status;
+      log.changedBy = changedByUserId || null;
+      log.changedAt = new Date();
+      await this.statusLogsRepo.save(log);
+
+      if (appointment.patient?.patientAccountId) {
+        const notifMap: Partial<Record<string, { title: string; content: string }>> = {
+          WAITING: { title: 'Check-in thành công!', content: 'Bạn đã được xếp vào hàng đợi. Vui lòng chờ được gọi tên.' },
+          EXAMINING: { title: 'Bắt đầu khám!', content: 'Bác sĩ đang tiến hành khám cho bạn.' },
+          DONE: { title: 'Khám hoàn tất!', content: 'Buổi khám đã hoàn tất. Hãy xem sổ sức khỏe để biết kết quả.' },
+          CANCELLED: { title: 'Lịch hẹn đã hủy', content: 'Lịch hẹn của bạn đã bị hủy.' },
+        };
+        const notif = notifMap[appointmentFields.status];
+        if (notif) {
+          this.sendNotification(appointment.patient.id, notif.title, notif.content);
+        }
+      }
+    }
+
+    // Update invoice
     if (invoiceStatus) {
       const invoice = await this.invoicesRepo.findOne({ where: { appointmentId: id } });
       if (invoice) {
         invoice.status = invoiceStatus;
-        if (invoiceStatus === 'PAID') {
-          invoice.paidAt = new Date();
-        } else if (invoiceStatus === 'UNPAID') {
-          invoice.paidAt = null;
-        }
+        invoice.paidAt = invoiceStatus === 'PAID' ? new Date() : null;
         await this.invoicesRepo.save(invoice);
       }
     }
-    
-    // Cập nhật bệnh án (Medical Record)
+
+    // Create/update medical record
     if (symptoms !== undefined || diagnosis !== undefined || notes !== undefined) {
       const medicalRecordsRepo = this.dataSource.getRepository(MedicalRecords);
       let record = await medicalRecordsRepo.findOne({ where: { appointmentId: id } });
-      
       if (!record) {
         record = new MedicalRecords();
         record.appointmentId = id;
       }
-      
       if (symptoms !== undefined) record.symptoms = symptoms;
       if (diagnosis !== undefined) record.diagnosis = diagnosis;
       if (notes !== undefined) record.notes = notes;
-      
       await medicalRecordsRepo.save(record);
     }
-    
+
     return this.findOne(id);
   }
 
-
   async remove(id: number) {
-    const appointment = await this.findOne(id); // Kiểm tra xem bản ghi có tồn tại không
+    const appointment = await this.findOne(id);
     await this.appointmentsRepo.remove(appointment);
     return { success: true, message: `Đã xóa lịch hẹn #${id} thành công` };
   }
