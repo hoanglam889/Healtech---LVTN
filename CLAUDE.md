@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Workflow Rules
+
+**NEVER work on `main`.** All changes must go on `develop` or a dedicated feature branch (`feature/...`).
+
+**NEVER push to any remote** unless the user explicitly says to push or approves a push. Committing locally is fine; pushing is not.
+
+These rules apply at all times, even when the user says "run it", "test it", or "make it work" — those are not push approvals.
+
 ## Project Overview
 
 Healtech is a full-stack healthcare clinic management ERP (graduation thesis project). It handles patient appointment booking, receptionist check-in with QR codes, doctor queue management, and medical records.
