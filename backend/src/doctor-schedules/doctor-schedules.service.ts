@@ -3,10 +3,24 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DoctorSchedules } from '../entities/DoctorSchedules';
 
+import { IsInt, IsString, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+
 export class CreateDoctorScheduleDto {
+  @IsInt()
+  @Type(() => Number)
   doctorProfileId: number;
+
+  @IsInt()
+  @Type(() => Number)
   shiftId: number;
+
+  @IsString()
   date: string;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
   maxPatients?: number;
 }
 
