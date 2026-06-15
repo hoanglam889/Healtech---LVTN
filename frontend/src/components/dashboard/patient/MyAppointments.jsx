@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAppointmentsByUserId, updateAppointment } from '../../../services/appointmentService';
-import AppointmentCard from '../../../components/dashboard/AppointmentCard';
+import AppointmentCard from '../AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
 
 const MyAppointments = ({ user, onBookClick }) => {
