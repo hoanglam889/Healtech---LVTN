@@ -145,7 +145,7 @@ const Navbar = ({
       {/* ==========================================
          MOBILE MENU DRAWER (SLIDE-OUT OVERLAY)
          ========================================== */}
-      <div className={`fixed inset-0 z-50 transition-all duration-300 md:hidden ${
+      <div className={`fixed inset-0 z-50 transition-all duration-300 md:hidden overflow-hidden ${
         isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}>
         {/* Dark blurred background overlay */}

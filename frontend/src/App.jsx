@@ -10,6 +10,7 @@ import ContactSection from './components/landing/ContactSection';
 import BookingPage from './pages/booking/BookingPage';
 import PatientDashboard from './pages/dashboard/patient/PatientDashboard';
 import StaffDashboard from './pages/dashboard/staff/StaffDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthModal from './components/auth/AuthModal';
 
 
@@ -58,6 +59,10 @@ function App() {
     setIsBooking(false);
     setActiveTab('dashboard');
   };
+
+  if (currentPath === '/admin') {
+    return <AdminDashboard />;
+  }
 
   if (currentPath === '/staff') {
     return <StaffDashboard />;

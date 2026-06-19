@@ -12,6 +12,11 @@ async function bootstrap() {
     prefix: '/public/',
   });
 
+  // Tương thích với đường dẫn mặc định /uploads/... trong CSDL trỏ về thư mục public/images
+  app.useStaticAssets(join(__dirname, '..', 'public/images'), {
+    prefix: '/uploads/',
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

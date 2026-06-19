@@ -19,6 +19,7 @@ export default function StaffDashboard() {
 
   // Quản lý tab hiển thị
   const [activeTab, setActiveTab] = useState('checkin');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Xử lý đăng nhập
   const handleLoginSuccess = (user) => {
@@ -49,11 +50,29 @@ export default function StaffDashboard() {
   }
 
   return (
-    <div className="flex bg-gray-50/50 min-h-screen text-gray-800 font-sans">
+    <div className="flex bg-gray-50/50 min-h-screen text-gray-800 font-sans relative overflow-x-hidden">
       
+      {/* BACKDROP OVERLAY TRÊN MOBILE */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* SIDEBAR BÊN TRÁI */}
-      <aside className="w-72 bg-white border-r border-gray-100 flex flex-col justify-between p-6 shrink-0 sticky top-0 h-screen shadow-sm">
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 lg:z-30 w-72 h-screen bg-white border-r border-gray-100 flex flex-col justify-between p-6 shrink-0 shadow-sm transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
         <div>
+          {/* NÚT CLOSE SIDEBAR TRÊN MOBILE */}
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute right-4 top-4 p-2 text-gray-400 hover:text-gray-600 lg:hidden cursor-pointer"
+          >
+            <Icons.X className="w-5 h-5" />
+          </button>
+
           {/* LOGO */}
           <div className="flex items-center gap-3 pb-8 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-100 text-white">
@@ -88,7 +107,7 @@ export default function StaffDashboard() {
             {staffUser.role === 'STAFF' && (
               <>
                 <button
-                  onClick={() => setActiveTab('checkin')}
+                  onClick={() => { setActiveTab('checkin'); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                     activeTab === 'checkin'
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
@@ -100,7 +119,7 @@ export default function StaffDashboard() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('queue')}
+                  onClick={() => { setActiveTab('queue'); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                     activeTab === 'queue'
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
@@ -112,7 +131,7 @@ export default function StaffDashboard() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('billing')}
+                  onClick={() => { setActiveTab('billing'); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                     activeTab === 'billing'
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
@@ -128,7 +147,7 @@ export default function StaffDashboard() {
             {staffUser.role === 'DOCTOR' && (
               <>
                 <button
-                  onClick={() => setActiveTab('doctor-queue')}
+                  onClick={() => { setActiveTab('doctor-queue'); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                     activeTab === 'doctor-queue'
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
@@ -167,26 +186,35 @@ export default function StaffDashboard() {
       <main className="flex-1 flex flex-col min-h-screen overflow-y-auto">
         
         {/* HEADER TRÊN CÙNG */}
-        <header className="h-20 bg-white border-b border-gray-100 px-8 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-          <div>
-            <h2 className="font-bold text-gray-900 text-lg">
-              {activeTab === 'checkin' && 'Tiếp đón Bệnh nhân mới'}
-              {activeTab === 'queue' && 'Giám sát Hàng đợi Phòng khám'}
-              {activeTab === 'billing' && 'Quản lý Thu ngân / Thanh toán'}
-              {activeTab === 'doctor-queue' && 'Phòng Khám Nội / Ngoại khoa'}
-            </h2>
-            <p className="text-xs text-gray-400 font-semibold mt-0.5">Hệ thống quản lý thông tin nội bộ Healtech ERP</p>
+        <header className="h-20 bg-white border-b border-gray-100 px-6 lg:px-8 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+          <div className="flex items-center gap-3">
+            {/* NÚT HAMBURGER CHỈ HIỆN TRÊN MOBILE */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl lg:hidden cursor-pointer"
+            >
+              <Icons.Menu className="w-6 h-6" />
+            </button>
+            <div>
+              <h2 className="font-bold text-gray-900 text-sm lg:text-lg whitespace-nowrap">
+                {activeTab === 'checkin' && 'Tiếp đón Bệnh nhân mới'}
+                {activeTab === 'queue' && 'Giám sát Hàng đợi Phòng khám'}
+                {activeTab === 'billing' && 'Quản lý Thu ngân / Thanh toán'}
+                {activeTab === 'doctor-queue' && 'Phòng Khám Nội / Ngoại khoa'}
+              </h2>
+              <p className="text-[10px] lg:text-xs text-gray-400 font-semibold mt-0.5">Hệ thống quản lý thông tin nội bộ Healtech ERP</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+            <span className="text-[10px] lg:text-xs font-bold text-gray-400 bg-gray-50 px-2 lg:px-3 py-1.5 rounded-lg border border-gray-100">
               Hôm nay: {new Date().toLocaleDateString('vi-VN')}
             </span>
           </div>
         </header>
 
         {/* BẢNG ĐIỀU KHIỂN CHI TIẾT */}
-        <div className="p-8 flex-1">
+        <div className="p-4 lg:p-8 flex-1">
           {activeTab === 'checkin' && <CheckinPanel />}
           {activeTab === 'queue' && <ClinicQueue />}
           {activeTab === 'billing' && <BillingManager />}

@@ -41,7 +41,7 @@ const Footer = () => {
         <div className="space-y-4">
           <h4 className="text-white font-semibold mb-4 md:mb-6 text-sm md:text-base uppercase tracking-wider">Đăng Ký Bản Tin</h4>
           <p className="text-sm text-gray-400 leading-relaxed">Nhận những cẩm nang sức khỏe hữu ích được gửi trực tiếp đến email của bạn.</p>
-          <div className="flex shadow-sm max-w-md">
+          <div className="flex shadow-sm w-full max-w-md">
             <input 
               type="email" 
               placeholder="Địa chỉ email..." 
