@@ -9,7 +9,7 @@ const BookingStepper = ({ currentStep }) => {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto mb-8 md:mb-12 px-2 md:px-4">
+    <div className="max-w-3xl mx-auto mb-6 md:mb-8 px-2 md:px-4">
       <div className="flex items-start justify-between relative">
         {/* Progress Line */}
         <div className="absolute top-4 md:top-5 left-4 right-4 h-1 bg-gray-200 z-0">

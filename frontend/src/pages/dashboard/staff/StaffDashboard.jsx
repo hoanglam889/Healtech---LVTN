@@ -50,7 +50,7 @@ export default function StaffDashboard() {
   }
 
   return (
-    <div className="flex bg-gray-50/50 min-h-screen text-gray-800 font-sans relative overflow-x-hidden">
+    <div className="flex bg-gray-50/50 h-screen text-gray-800 font-sans relative overflow-hidden">
       
       {/* BACKDROP OVERLAY TRÊN MOBILE */}
       {isSidebarOpen && (
@@ -74,14 +74,13 @@ export default function StaffDashboard() {
           </button>
 
           {/* LOGO */}
-          <div className="flex items-center gap-3 pb-8 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-100 text-white">
-              <Icons.ShieldPlus className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="font-extrabold text-lg text-gray-900 tracking-tight leading-none">Healtech</h1>
-              <span className="text-[10px] text-gray-400 font-bold tracking-wider uppercase mt-1 block">Staff Portal</span>
-            </div>
+          <div className="flex flex-col gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
+            <img 
+              src="/images/logo.png" 
+              alt="Healtech Logo" 
+              className="h-14 w-auto object-contain scale-[1.5] origin-left -ml-2" 
+            />
+            <span className="text-[10px] text-blue-600 font-bold tracking-wider uppercase block mt-2">Staff Portal</span>
           </div>
 
           {/* USER INFO PROFILE CARD */}
@@ -183,10 +182,10 @@ export default function StaffDashboard() {
       </aside>
 
       {/* KHU VỰC NỘI DUNG CHÍNH BÊN PHẢI */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-y-auto">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
         
         {/* HEADER TRÊN CÙNG */}
-        <header className="h-20 bg-white border-b border-gray-100 px-6 lg:px-8 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        <header className="h-20 bg-white border-b border-gray-100 px-6 lg:px-8 flex justify-between items-center z-10 shadow-sm flex-shrink-0">
           <div className="flex items-center gap-3">
             {/* NÚT HAMBURGER CHỈ HIỆN TRÊN MOBILE */}
             <button
@@ -214,11 +213,11 @@ export default function StaffDashboard() {
         </header>
 
         {/* BẢNG ĐIỀU KHIỂN CHI TIẾT */}
-        <div className="p-4 lg:p-8 flex-1">
+        <div className="p-4 lg:p-8 flex-1 overflow-y-auto">
           {activeTab === 'checkin' && <CheckinPanel />}
           {activeTab === 'queue' && <ClinicQueue />}
           {activeTab === 'billing' && <BillingManager />}
-          {activeTab === 'doctor-queue' && <DoctorClinicQueue />}
+          {activeTab === 'doctor-queue' && <DoctorClinicQueue staffUser={staffUser} />}
         </div>
       </main>
 

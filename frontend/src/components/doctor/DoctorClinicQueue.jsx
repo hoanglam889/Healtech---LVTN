@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 
-export default function DoctorClinicQueue() {
+export default function DoctorClinicQueue({ staffUser }) {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   
@@ -23,8 +23,11 @@ export default function DoctorClinicQueue() {
       const data = await getAllAppointments();
       setAppointments(data || []);
       
-      // Tìm ca bệnh đang khám (nếu có sẵn trên server)
-      const currentExam = data.find(appt => appt.status === 'EXAMINING');
+      // Tìm ca bệnh đang khám của bác sĩ này (nếu có sẵn trên server)
+      const currentExam = data.find(appt => 
+        appt.status === 'EXAMINING' && 
+        (!staffUser?.doctorProfileId || appt.doctorProfile?.id === staffUser.doctorProfileId)
+      );
       if (currentExam) {
         setExaminingPatient((prev) => {
           // Chỉ cập nhật các trường nhập liệu của form y án nếu chuyển sang bệnh nhân khác (hoặc chưa chọn ai)
@@ -62,10 +65,15 @@ export default function DoctorClinicQueue() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Get waiting patients (WAITING) sorted by priorityScore descending
+  // Get waiting patients (WAITING) assigned to this doctor, sorted by priorityScore descending
   const getWaitingList = () => {
     return appointments
-      .filter(appt => appt.status === 'WAITING' && appt.priorityScore !== null && appt.priorityScore !== undefined)
+      .filter(appt => 
+        appt.status === 'WAITING' && 
+        appt.priorityScore !== null && 
+        appt.priorityScore !== undefined &&
+        (!staffUser?.doctorProfileId || appt.doctorProfile?.id === staffUser.doctorProfileId)
+      )
       .sort((a, b) => {
         const scoreA = a.priorityScore || 0;
         const scoreB = b.priorityScore || 0;

@@ -61,11 +61,11 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="min-h-screen bg-gray-50/50 py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 lg:space-y-5">
         
         {/* Header chào mừng */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 lg:p-6 rounded-2xl border border-gray-100 shadow-sm">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold text-gray-900 md:text-3xl flex items-center gap-2.5">
               <span>Xin chào, <span className="text-blue-600 font-extrabold">{user?.fullName || 'Hoàng Lâm'}</span>!</span>
@@ -83,72 +83,82 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
         </div>
 
         {/* Khung chỉ số thống kê */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {/* Chỉ số 1 */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-5">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <Icons.CalendarDays className="w-6 h-6" />
+          <div className="bg-white p-4 lg:p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Icons.CalendarDays className="w-5 h-5 md:w-6 md:h-6" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Lịch hẹn sắp tới</p>
-              <h3 className="text-2xl font-extrabold text-gray-900 mt-1">{upcomingCount} ca</h3>
+              <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider">Lịch hẹn sắp tới</p>
+              <h3 className="text-lg md:text-2xl font-extrabold text-gray-900 leading-tight">{upcomingCount} ca</h3>
             </div>
           </div>
 
           {/* Chỉ số 2 */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <Icons.Users className="w-6 h-6" />
+          <div className="bg-white p-4 lg:p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Icons.Users className="w-5 h-5 md:w-6 md:h-6" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Hồ sơ bệnh nhân</p>
-              <h3 className="text-2xl font-extrabold text-gray-900 mt-1">{patientCount} hồ sơ</h3>
+              <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider">Hồ sơ bệnh nhân</p>
+              <h3 className="text-lg md:text-2xl font-extrabold text-gray-900 leading-tight">{patientCount} hồ sơ</h3>
             </div>
           </div>
 
           {/* Chỉ số 3 */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-5">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+          <div className="bg-white p-4 lg:p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 ${
               unpaidInvoices > 0 ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400'
             }`}>
-              <Icons.CreditCard className="w-6 h-6" />
+              <Icons.CreditCard className="w-5 h-5 md:w-6 md:h-6" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Hóa đơn chưa đóng</p>
-              <h3 className="text-2xl font-extrabold text-gray-900 mt-1">{unpaidInvoices} hóa đơn</h3>
+              <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider">Hóa đơn chưa đóng</p>
+              <h3 className="text-lg md:text-2xl font-extrabold text-gray-900 leading-tight">{unpaidInvoices} hóa đơn</h3>
             </div>
           </div>
         </div>
 
         {/* Layout 2 cột chính */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           
           {/* CỘT TRÁI (LỚN - LỊCH SỬ HẸN) */}
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <Icons.Clock className="w-5 h-5 text-gray-400" />
-              <span>Danh sách lịch hẹn đã đặt</span>
-            </h3>
+          <div className="lg:col-span-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <Icons.Clock className="w-5 h-5 text-blue-500" />
+                <span>Lịch hẹn gần đây</span>
+              </h3>
+              {appointments.length > 3 && (
+                <button 
+                  onClick={() => setActiveTab('appointments')}
+                  className="text-blue-600 text-sm font-semibold hover:text-blue-700 hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  Xem tất cả <Icons.ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
 
             {loading ? (
-              <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center shadow-sm">
-                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-400 font-semibold">Đang tải lịch hẹn...</p>
+              <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center shadow-sm">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-gray-400 font-medium text-sm">Đang tải lịch hẹn...</p>
               </div>
             ) : appointments.length === 0 ? (
-              <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center text-gray-400 font-medium shadow-sm space-y-4">
-                <Icons.FolderOpen className="w-12 h-12 mx-auto text-gray-300" />
-                <p>Bạn chưa có lịch hẹn khám nào.</p>
+              <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center text-gray-400 font-medium shadow-sm space-y-3">
+                <Icons.FolderOpen className="w-10 h-10 mx-auto text-gray-300" />
+                <p className="text-sm">Bạn chưa có lịch hẹn khám nào.</p>
                 <button 
                   onClick={onBookClick}
-                  className="px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-bold text-sm transition-all cursor-pointer"
+                  className="px-5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-bold text-sm transition-all cursor-pointer"
                 >
                   Đăng ký đặt lịch ngay
                 </button>
               </div>
             ) : (
               <div className="space-y-4">
-                {appointments.map((apt) => (
+                {appointments.slice(0, 3).map((apt) => (
                   <AppointmentCard 
                     key={apt.id} 
                     apt={apt} 
@@ -156,12 +166,22 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
                     formatDate={formatDate} 
                   />
                 ))}
+                {appointments.length > 3 && (
+                  <div className="text-center pt-2">
+                    <button 
+                      onClick={() => setActiveTab('appointments')}
+                      className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-blue-600 rounded-xl font-bold text-sm transition-all cursor-pointer shadow-sm w-full md:w-auto"
+                    >
+                      Xem toàn bộ lịch sử khám ({appointments.length})
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* CỘT PHẢI (NHỎ - LỐI TẮT & LƯU Ý) */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Lối tắt */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
               <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider border-b border-gray-100 pb-2">Tiện ích nhanh</h4>

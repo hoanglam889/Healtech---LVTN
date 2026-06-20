@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getDoctors } from '../../services/doctorService';
-import { User, Star } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
 
 const DoctorSection = () => {
@@ -21,23 +21,29 @@ const DoctorSection = () => {
 
   if (loading) {
     return (
-      <section id="doctors" className="py-24">
+      <section id="doctors" className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
-            <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900">Bác Sĩ Nổi Bật</h2>
-              <p className="text-gray-500 text-lg max-w-xl">Đội ngũ y bác sĩ, chuyên gia y tế giỏi chuyên môn và tận tâm chăm sóc sức khỏe cho bạn.</p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+            <div className="space-y-3">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Bác Sĩ Nổi Bật</h2>
+              <p className="text-gray-500 text-base md:text-lg max-w-xl">Đội ngũ y bác sĩ, chuyên gia y tế giỏi chuyên môn và tận tâm chăm sóc sức khỏe cho bạn.</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="flex flex-col gap-5 animate-pulse">
-                <div className="aspect-[3/4] bg-gray-200 rounded-3xl"></div>
-                <div className="space-y-3">
-                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 flex flex-col gap-4 animate-pulse">
+                <div className="flex gap-4">
+                  <div className="w-24 h-24 md:w-28 md:h-28 bg-gray-200 rounded-xl shrink-0"></div>
+                  <div className="space-y-3 flex-1 py-2">
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-2">
+                  <div className="h-10 bg-gray-200 rounded-xl flex-1"></div>
+                  <div className="h-10 bg-gray-200 rounded-xl flex-1"></div>
                 </div>
               </div>
             ))}
@@ -48,50 +54,76 @@ const DoctorSection = () => {
   }
 
   return (
-    <section id="doctors" className="py-24">
+    <section id="doctors" className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
-          <div className="space-y-4">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Bác Sĩ Nổi Bật</h2>
-            <p className="text-gray-500 text-lg max-w-xl">Đội ngũ y bác sĩ, chuyên gia y tế giỏi chuyên môn và tận tâm chăm sóc sức khỏe cho bạn.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+          <div className="space-y-3">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Bác Sĩ Nổi Bật</h2>
+            <p className="text-gray-500 text-base md:text-lg max-w-xl">Đội ngũ y bác sĩ, chuyên gia y tế giỏi chuyên môn và tận tâm chăm sóc sức khỏe cho bạn.</p>
           </div>
           <button className="text-blue-600 font-semibold hover:text-blue-700 transition-colors">
             Xem Tất Cả Bác Sĩ &rarr;
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {doctors.map((doc) => {
             const imageUrl = doc.avatarUrl ? `${BASE_URL}${doc.avatarUrl}` : null;
+            
+            // Extract Title and Name
+            const prefixes = ['BS CKII.', 'BS CKI.', 'ThS. BS.', 'PGS. TS. BS.', 'GS. TS. BS.', 'BS.', 'ThS.', 'TS.', 'BS CKII', 'BS CKI'];
+            let title = 'Bác sĩ chuyên khoa';
+            let name = doc.fullName;
+            for (const prefix of prefixes) {
+              if (name.toUpperCase().startsWith(prefix.toUpperCase())) {
+                title = name.substring(0, prefix.length).trim();
+                name = name.substring(prefix.length).trim();
+                break;
+              }
+            }
+
             return (
-              <div key={doc.id} className="group flex flex-col gap-5 cursor-pointer">
-                <div className="aspect-[3/4] bg-blue-50/50 rounded-3xl overflow-hidden relative border border-blue-50/30 transition-transform group-hover:scale-[1.02]">
-                  {imageUrl ? (
-                    <img 
-                      src={imageUrl} 
-                      alt={doc.fullName} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 to-indigo-50 text-blue-400 gap-2">
-                      <User className="w-12 h-12 stroke-[1.5]" />
-                      <span className="text-xs font-medium text-blue-500/80">Chưa cập nhật ảnh</span>
-                    </div>
-                  )}
-                  {doc.experienceYears !== null && (
-                    <span className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
-                      {doc.experienceYears} năm kinh nghiệm
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">{doc.fullName}</h3>
-                  <p className="text-blue-600 font-medium mt-1">{doc.specialty?.name || 'Bác sĩ đa khoa'}</p>
-                  <div className="flex items-center gap-1.5 mt-3 text-sm text-gray-500">
-                    <Star className="w-4 h-4 fill-yellow-400 stroke-yellow-400" />
-                    <span className="font-semibold text-gray-700">4.9</span> 
-                    (98 đánh giá)
+              <div key={doc.id} className="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all group flex flex-col justify-between">
+                <div className="flex gap-4 relative">
+                  {/* Icon top right */}
+                  <div className="absolute top-0 right-0 w-10 h-10 bg-white border border-gray-100 rounded-xl shadow-sm flex items-center justify-center text-blue-500 z-10 group-hover:scale-110 transition-transform">
+                    {(() => {
+                      const IconComponent = doc.specialty?.icon && Icons[doc.specialty.icon] ? Icons[doc.specialty.icon] : Icons.Stethoscope;
+                      return <IconComponent className="w-5 h-5" />;
+                    })()}
                   </div>
+
+                  {/* Avatar */}
+                  <div className="w-24 h-24 md:w-28 md:h-28 shrink-0 rounded-xl overflow-hidden border border-blue-100 bg-blue-50 relative group-hover:shadow-md transition-shadow">
+                    {imageUrl ? (
+                      <img 
+                        src={imageUrl} 
+                        alt={doc.fullName} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-blue-400">
+                        <Icons.User className="w-8 h-8 stroke-[1.5]" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 flex flex-col pr-12 justify-center">
+                    <p className="text-blue-600 font-bold text-sm mb-1">{title}</p>
+                    <h3 className="text-xl font-bold text-gray-900 leading-snug">{name}</h3>
+                    <p className="text-blue-500 text-sm font-medium mt-1.5">{doc.specialty?.name || 'Bác sĩ đa khoa'}</p>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 mt-6">
+                  <button className="flex-1 py-2.5 px-2 border-2 border-blue-600 text-blue-600 rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-50 transition-colors">
+                    Xem hồ sơ <Icons.ChevronRightCircle className="w-4 h-4" />
+                  </button>
+                  <button className="flex-1 py-2.5 px-2 bg-blue-600 text-white rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                    Đặt lịch khám <Icons.CalendarDays className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             );

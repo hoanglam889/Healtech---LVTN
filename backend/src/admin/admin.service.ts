@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Appointments } from '../entities/Appointments';
@@ -57,7 +57,8 @@ export class AdminService {
     });
 
     const recentActivities = recentAppointments.map((act) => {
-      let statusLabel = 'Chờ khám';
+      let statusLabel = 'Đã đặt';
+      if (act.status === 'WAITING' || act.status === 'EXAMINING') statusLabel = 'Đã check-in';
       if (act.status === 'DONE') statusLabel = 'Hoàn thành';
       if (act.status === 'CANCELLED') statusLabel = 'Đã hủy';
 
@@ -100,32 +101,103 @@ export class AdminService {
     return list.map((item) => ({
       id: item.id,
       doctor: item.doctorProfile?.fullName ? `BS. ${item.doctorProfile.fullName}` : 'N/A',
+      doctorProfileId: item.doctorProfileId,
       specialty: item.doctorProfile?.specialty?.name || 'Chuyên khoa',
+      specialtyId: item.doctorProfile?.specialty?.id || null,
       day: this.getWeekdayLabel(item.date),
+      date: item.date,
       shift: item.shift ? `${item.shift.name} (${item.shift.startTime.substring(0, 5)} - ${item.shift.endTime.substring(0, 5)})` : 'Chưa xếp ca',
+      shiftId: item.shiftId,
+      shiftName: item.shift?.name || '',
+      shiftTime: item.shift ? `${item.shift.startTime.substring(0, 5)} - ${item.shift.endTime.substring(0, 5)}` : '',
       clinicRoom: `Phòng ${item.doctorProfile?.id ? 100 + item.doctorProfile.id : 101}`, // Mock phòng khám theo ID bác sĩ
     }));
   }
 
   // 3. Phân ca trực mới cho bác sĩ
-  async createSchedule(dto: { doctorProfileId: number; shiftId: number; date: string; maxPatients?: number }) {
-    const schedule = new DoctorSchedules();
-    schedule.doctorProfileId = dto.doctorProfileId;
-    schedule.shiftId = dto.shiftId;
-    schedule.date = dto.date;
-    schedule.maxPatients = dto.maxPatients || 5;
+  async createSchedule(dto: { doctorProfileId: number; shiftId: any; date: string; maxPatients?: number }) {
+    // Không xếp lịch cho ngày trong quá khứ
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const scheduleDate = new Date(dto.date);
+    scheduleDate.setHours(0, 0, 0, 0);
+    if (scheduleDate < today) {
+      throw new BadRequestException('Không thể xếp lịch cho những ngày đã qua!');
+    }
 
-    return this.doctorSchedulesRepo.save(schedule);
+    const shiftVal = dto.shiftId;
+    if (typeof shiftVal === 'string' || isNaN(+shiftVal)) {
+      const sessionName = shiftVal; // "Sáng", "Chiều" hoặc "Tối"
+      const allShifts = await this.shiftsRepo.find();
+      const targetShifts = allShifts.filter((s) => s.name?.includes(sessionName));
+      
+      const savedSchedules: DoctorSchedules[] = [];
+      for (const shift of targetShifts) {
+        // Tránh tạo trùng lặp lịch trực nếu đã tồn tại
+        const existing = await this.doctorSchedulesRepo.findOne({
+          where: {
+            doctorProfileId: dto.doctorProfileId,
+            shiftId: shift.id,
+            date: dto.date,
+          },
+        });
+        if (!existing) {
+          const schedule = new DoctorSchedules();
+          schedule.doctorProfileId = dto.doctorProfileId;
+          schedule.shiftId = shift.id;
+          schedule.date = dto.date;
+          schedule.maxPatients = dto.maxPatients || 5;
+          savedSchedules.push(schedule);
+        }
+      }
+      if (savedSchedules.length > 0) {
+        await this.doctorSchedulesRepo.save(savedSchedules);
+      }
+      return { success: true };
+    } else {
+      const schedule = new DoctorSchedules();
+      schedule.doctorProfileId = dto.doctorProfileId;
+      schedule.shiftId = +shiftVal;
+      schedule.date = dto.date;
+      schedule.maxPatients = dto.maxPatients || 5;
+
+      return this.doctorSchedulesRepo.save(schedule);
+    }
   }
 
-  // 4. Xóa ca trực bác sĩ
+  // 4. Xóa ca trực bác sĩ (xóa cả buổi trực để đồng bộ)
   async deleteSchedule(id: number) {
-    const schedule = await this.doctorSchedulesRepo.findOne({ where: { id } });
+    const schedule = await this.doctorSchedulesRepo.findOne({
+      where: { id },
+      relations: { shift: true },
+    });
     if (!schedule) {
       throw new NotFoundException(`Không tìm thấy ca trực với ID #${id}`);
     }
-    await this.doctorSchedulesRepo.remove(schedule);
-    return { success: true, message: `Đã xóa thành công ca trực #${id}` };
+
+    let prefix = '';
+    if (schedule.shift?.name) {
+      if (schedule.shift.name.includes('Sáng')) prefix = 'Sáng';
+      else if (schedule.shift.name.includes('Chiều')) prefix = 'Chiều';
+      else if (schedule.shift.name.includes('Tối')) prefix = 'Tối';
+    }
+
+    if (prefix) {
+      const schedulesToDelete = await this.doctorSchedulesRepo.find({
+        where: {
+          doctorProfileId: schedule.doctorProfileId,
+          date: schedule.date,
+        },
+        relations: { shift: true },
+      });
+
+      const targets = schedulesToDelete.filter((item) => item.shift?.name?.includes(prefix));
+      await this.doctorSchedulesRepo.remove(targets);
+    } else {
+      await this.doctorSchedulesRepo.remove(schedule);
+    }
+
+    return { success: true, message: `Đã xóa thành công ca trực` };
   }
 
   // 5. Lấy danh sách các ca trực mẫu (Shifts)

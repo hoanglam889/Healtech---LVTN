@@ -103,9 +103,11 @@ export default function AdminOverview() {
                       <span className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                         act.status === 'Hoàn thành' 
                           ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                          : act.status === 'Chờ khám' 
-                            ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-                            : 'bg-red-50 text-red-600 border border-red-100'
+                          : act.status === 'Đã check-in' 
+                            ? 'bg-amber-50 text-amber-600 border border-amber-100' 
+                            : act.status === 'Đã hủy'
+                              ? 'bg-red-50 text-red-600 border border-red-100'
+                              : 'bg-blue-50 text-blue-600 border border-blue-100'
                       }`}>
                         {act.status}
                       </span>

@@ -13,7 +13,19 @@ export class PatientsService {
   ) {}
 
   async create(createPatientDto: CreatePatientDto) {
-    const newPatient = this.patientsRepository.create(createPatientDto);
+    const isCompleted = !!(
+      createPatientDto.fullName &&
+      createPatientDto.dob &&
+      createPatientDto.cccd &&
+      createPatientDto.address &&
+      createPatientDto.gender &&
+      createPatientDto.phone
+    );
+
+    const newPatient = this.patientsRepository.create({
+      ...createPatientDto,
+      isCompleted,
+    });
     return await this.patientsRepository.save(newPatient);
   }
 
@@ -32,7 +44,22 @@ export class PatientsService {
   }
 
   async update(id: number, updatePatientDto: UpdatePatientDto) {
-    await this.patientsRepository.update(id, updatePatientDto);
+    const patient = await this.findOne(id);
+    
+    const mergedData = { ...patient, ...updatePatientDto };
+    const isCompleted = !!(
+      mergedData.fullName &&
+      mergedData.dob &&
+      mergedData.cccd &&
+      mergedData.address &&
+      mergedData.gender &&
+      mergedData.phone
+    );
+
+    await this.patientsRepository.update(id, {
+      ...updatePatientDto,
+      isCompleted,
+    });
     return this.findOne(id);
   }
 

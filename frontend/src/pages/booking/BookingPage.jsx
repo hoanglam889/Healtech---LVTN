@@ -3,12 +3,12 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import BookingStepper from '../../components/booking/BookingStepper';
 import ProfileCard from '../../components/booking/ProfileCard';
-import ProfileForm from '../../components/booking/ProfileForm';
+import PatientProfileModal from '../../components/dashboard/patient/PatientProfileModal';
 import ShiftCard from '../../components/booking/ShiftCard';
 import { getPatientsByAccountId, createPatient } from '../../services/patientService';
 import { getSpecialties } from '../../services/specialtyService';
 import { getDoctors, getDoctorById } from '../../services/doctorService';
-import { createAppointment } from '../../services/appointmentService';
+import { createAppointment, getAllAppointments } from '../../services/appointmentService';
 import { BASE_URL } from '../../services/apiClient';
 import * as Icons from 'lucide-react';
 
@@ -19,6 +19,7 @@ const BookingPage = ({ user, onGoHome }) => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // States phục vụ chọn lịch trình ở Bước 2
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState(null);
@@ -36,14 +37,16 @@ const BookingPage = ({ user, onGoHome }) => {
   // Trạng thái gửi dữ liệu lên server
   const [submitting, setSubmitting] = useState(false);
   const [createdAppointment, setCreatedAppointment] = useState(null);
+  const [allAppointments, setAllAppointments] = useState([]);
 
   // Load toàn bộ dữ liệu từ các APIs
   useEffect(() => {
-    Promise.all([getPatientsByAccountId(user?.id), getSpecialties(), getDoctors()])
-      .then(([patientData, specialtyData, doctorData]) => {
+    Promise.all([getPatientsByAccountId(user?.id), getSpecialties(), getDoctors(), getAllAppointments()])
+      .then(([patientData, specialtyData, doctorData, apptsData]) => {
         setProfiles(patientData);
         setSpecialties(specialtyData);
         setDoctors(doctorData);
+        setAllAppointments(apptsData || []);
         setLoading(false);
       })
       .catch((err) => {
@@ -52,17 +55,10 @@ const BookingPage = ({ user, onGoHome }) => {
       });
   }, [user?.id]);
 
-  // Thêm hồ sơ mới vào danh sách qua API
-  const handleAddProfile = (newProfileData) => {
-    createPatient(newProfileData)
-      .then((savedProfile) => {
-        setProfiles((prev) => [...prev, savedProfile]);
-        setSelectedProfileId(savedProfile.id); // Tự động chọn hồ sơ vừa tạo
-      })
-      .catch((err) => {
-        console.error('Lỗi khi lưu hồ sơ bệnh nhân:', err);
-        alert('Có lỗi xảy ra khi lưu hồ sơ. Vui lòng thử lại.');
-      });
+  // Cập nhật danh sách khi tạo hồ sơ mới thành công từ Modal
+  const handleAddProfileSuccess = (savedProfile) => {
+    setProfiles((prev) => [...prev, savedProfile]);
+    setSelectedProfileId(savedProfile.id); // Tự động chọn hồ sơ vừa tạo
   };
 
   // Reset các lựa chọn lịch khám khi đổi chuyên khoa và lọc toàn bộ lịch trực thuộc khoa
@@ -181,7 +177,17 @@ const BookingPage = ({ user, onGoHome }) => {
   // Lọc các ca khám khả dụng cho ngày và bác sĩ được chọn
   const availableShifts = doctorSchedules.filter(
     (schedule) => schedule.date === selectedDate && schedule.doctorProfileId === selectedDoctorId
-  );
+  ).map(schedule => {
+    // Tính toán số ca đã đặt để so sánh với max_patients
+    const bookedCount = allAppointments.filter(a => 
+      a.doctorProfileId === selectedDoctorId &&
+      a.appointmentDate === selectedDate &&
+      a.appointmentTime >= schedule.shift?.startTime &&
+      a.appointmentTime <= schedule.shift?.endTime &&
+      a.status !== 'CANCELLED'
+    ).length;
+    return { ...schedule, bookedCount, isFull: bookedCount >= (schedule.maxPatients || 5) };
+  });
 
   // Gửi thông tin đặt lịch hẹn lên Backend API
   const handleConfirmBooking = () => {
@@ -254,12 +260,12 @@ const BookingPage = ({ user, onGoHome }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 md:py-20">
+    <div className="min-h-screen bg-gray-50/50 py-4 md:py-6">
       <div className="max-w-4xl mx-auto px-4">
         
         {/* Header Trang */}
-        <div className="text-center mb-10 space-y-3">
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-4xl">
+        <div className="text-center mb-4 space-y-1">
+          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 md:text-3xl">
             Đặt Lịch Khám Bệnh Online
           </h1>
           <p className="text-gray-500 max-w-lg mx-auto text-sm md:text-base">
@@ -274,9 +280,20 @@ const BookingPage = ({ user, onGoHome }) => {
         
         {/* BƯỚC 1: CHỌN HỒ SƠ BỆNH NHÂN */}
         {currentStep === 1 && (
-          <div className="space-y-8">
-            {/* Form thêm hồ sơ mới */}
-            <ProfileForm onAddProfile={handleAddProfile} />
+          <div className="space-y-4">
+            {/* Header & Nút thêm hồ sơ mới */}
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Hồ sơ bệnh nhân</h2>
+                <p className="text-sm text-gray-400 mt-1">Chọn hồ sơ có sẵn hoặc tạo mới để đặt lịch khám.</p>
+              </div>
+              <button 
+                onClick={() => setIsProfileModalOpen(true)}
+                className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all cursor-pointer bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow flex items-center justify-center gap-2 shrink-0"
+              >
+                <Icons.Plus className="w-4 h-4" /> Tạo hồ sơ mới
+              </button>
+            </div>
 
             {/* Danh sách hồ sơ hiện tại */}
             <div className="space-y-4">
@@ -287,7 +304,7 @@ const BookingPage = ({ user, onGoHome }) => {
                   Chưa có hồ sơ nào. Vui lòng bấm "Tạo hồ sơ mới" ở trên.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {profiles.map((profile) => (
                     <ProfileCard 
                       key={profile.id}
@@ -301,7 +318,7 @@ const BookingPage = ({ user, onGoHome }) => {
             </div>
 
             {/* Các nút chuyển hướng */}
-            <div className="flex justify-between items-center pt-6 border-t border-gray-100">
+            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
               <button 
                 onClick={handleGoBack}
                 className="px-6 py-3 bg-white text-gray-600 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 transition-all cursor-pointer"
@@ -325,8 +342,8 @@ const BookingPage = ({ user, onGoHome }) => {
 
         {/* BƯỚC 2: CHỌN CHUYÊN KHOA, BÁC SĨ & LỊCH TRÌNH */}
         {currentStep === 2 && (
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
-            <h3 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 flex flex-wrap items-center justify-between gap-2">
               <span>Khám cho: <span className="text-blue-600 font-bold">{selectedProfile?.fullName || selectedProfile?.name}</span></span>
               <div className="flex gap-2">
                 {selectedSpecialty && (
@@ -345,20 +362,20 @@ const BookingPage = ({ user, onGoHome }) => {
             {/* 2.1: CHƯA CHỌN CHUYÊN KHOA */}
             {!selectedSpecialtyId && (
               <div className="space-y-4">
-                <h4 className="font-bold text-gray-800 text-base md:text-lg">1. Vui lòng chọn chuyên khoa cần khám:</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <h4 className="font-bold text-gray-800 text-sm md:text-base">1. Vui lòng chọn chuyên khoa cần khám:</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {specialties.map((spec) => {
                     const IconComponent = Icons[spec.icon] || Icons.Activity;
                     return (
                       <div 
                         key={spec.id}
                         onClick={() => handleSelectSpecialty(spec.id)}
-                        className="p-5 bg-white border-2 border-gray-100 rounded-2xl flex flex-col items-center gap-3 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 select-none"
+                        className="p-3 bg-white border-2 border-gray-100 rounded-xl flex flex-col items-center gap-2 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 select-none"
                       >
-                        <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                          <IconComponent className="w-7 h-7" />
+                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                          <IconComponent className="w-5 h-5" />
                         </div>
-                        <span className="font-bold text-gray-800 text-sm md:text-base">{spec.name}</span>
+                        <span className="font-bold text-gray-800 text-xs md:text-sm text-center">{spec.name}</span>
                       </div>
                     );
                   })}
@@ -368,8 +385,8 @@ const BookingPage = ({ user, onGoHome }) => {
 
             {/* 2.2: ĐÃ CHỌN CHUYÊN KHOA, CẦN CHỌN NGÀY */}
             {selectedSpecialtyId && !selectedDate && (
-              <div className="space-y-4 flex flex-col items-center">
-                <h4 className="font-bold text-gray-800 text-base md:text-lg self-start">2. Chọn ngày khám:</h4>
+              <div className="space-y-3 flex flex-col items-center">
+                <h4 className="font-bold text-gray-800 text-sm md:text-base self-start">2. Chọn ngày khám:</h4>
                 <Calendar
                   onChange={(val) => {
                     const year = val.getFullYear();
@@ -388,9 +405,9 @@ const BookingPage = ({ user, onGoHome }) => {
 
             {/* 2.3: ĐÃ CHỌN NGÀY, CẦN CHỌN BÁC SĨ */}
             {selectedSpecialtyId && selectedDate && !selectedDoctorId && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-gray-800 text-base md:text-lg">3. Chọn bác sĩ khám bệnh:</h4>
+                  <h4 className="font-bold text-gray-800 text-sm md:text-base">3. Chọn bác sĩ khám bệnh:</h4>
                 </div>
                 
                 {doctors.filter(doc => 
@@ -402,7 +419,7 @@ const BookingPage = ({ user, onGoHome }) => {
                     Không có bác sĩ nào thuộc chuyên khoa này có lịch trực vào ngày đã chọn.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {doctors.filter(doc => 
                       doc.specialtyId === selectedSpecialtyId &&
                       doc.doctorSchedules &&
@@ -413,17 +430,17 @@ const BookingPage = ({ user, onGoHome }) => {
                         <div 
                           key={doc.id}
                           onClick={() => handleSelectDoctor(doc.id)}
-                          className="p-5 bg-white border-2 border-gray-100 rounded-2xl flex items-center gap-4 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 select-none"
+                          className="p-3 bg-white border-2 border-gray-100 rounded-xl flex items-center gap-3 hover:border-blue-500 hover:shadow-sm cursor-pointer transition-all hover:-translate-y-0.5 select-none"
                         >
-                          <div className="w-16 h-16 bg-blue-50 rounded-full overflow-hidden flex items-center justify-center text-3xl shrink-0 font-bold text-blue-500 border border-blue-100 relative">
+                          <div className="w-12 h-12 bg-blue-50 rounded-full overflow-hidden flex items-center justify-center text-xl shrink-0 font-bold text-blue-500 border border-blue-100 relative">
                             {imageUrl ? (
                               <img src={imageUrl} alt={doc.fullName} className="w-full h-full object-cover" />
                             ) : (
                               <span>🩺</span>
                             )}
                           </div>
-                          <div className="space-y-1">
-                            <h5 className="font-bold text-gray-900 text-base">{doc.fullName}</h5>
+                          <div className="space-y-0.5">
+                            <h5 className="font-bold text-gray-900 text-sm">{doc.fullName}</h5>
                             <p className="text-xs text-gray-400 font-semibold">Kinh nghiệm: <span className="text-emerald-600 font-bold">{doc.experienceYears || 0} năm</span></p>
                             <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500">
                               <span className="text-yellow-400">★</span> 
@@ -446,11 +463,11 @@ const BookingPage = ({ user, onGoHome }) => {
 
             {/* 2.4: ĐÃ CHỌN BÁC SĨ, CHỌN CA KHÁM */}
             {selectedSpecialtyId && selectedDate && selectedDoctorId && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Tóm tắt bác sĩ đã chọn */}
-                <div className="p-4 bg-blue-50/40 border border-blue-100 rounded-2xl flex items-center justify-between">
+                <div className="p-3 bg-blue-50/40 border border-blue-100 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-600 text-white rounded-full overflow-hidden flex items-center justify-center text-xl font-bold shrink-0 relative">
+                    <div className="w-10 h-10 bg-blue-600 text-white rounded-full overflow-hidden flex items-center justify-center text-lg font-bold shrink-0 relative">
                       {selectedDoctor?.avatarUrl ? (
                         <img src={`${BASE_URL}${selectedDoctor.avatarUrl}`} alt={selectedDoctor.fullName} className="w-full h-full object-cover" />
                       ) : (
@@ -458,8 +475,8 @@ const BookingPage = ({ user, onGoHome }) => {
                       )}
                     </div>
                     <div>
-                      <h5 className="font-bold text-gray-900">{selectedDoctor?.fullName}</h5>
-                      <p className="text-xs text-gray-400 font-semibold mt-0.5">
+                      <h5 className="font-bold text-gray-900 text-sm">{selectedDoctor?.fullName}</h5>
+                      <p className="text-[11px] text-gray-500 font-semibold mt-0.5">
                         Khoa: {selectedSpecialty?.name} • Kinh nghiệm: <span className="text-emerald-600 font-bold">{selectedDoctor?.experienceYears || 0} năm</span>
                       </p>
                     </div>
@@ -493,7 +510,7 @@ const BookingPage = ({ user, onGoHome }) => {
                             status={status}
                             isSelected={selectedTimeSlot === timeRange}
                             onSelect={() => {
-                              if (status !== 'EXPIRED') {
+                              if (status !== 'EXPIRED' && !sched.isFull) {
                                 setSelectedTimeSlot(timeRange);
                               }
                             }}
@@ -507,7 +524,7 @@ const BookingPage = ({ user, onGoHome }) => {
             )}
 
             {/* Các nút điều hướng */}
-            <div className="flex justify-between items-center pt-6 border-t border-gray-100">
+            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
               <button 
                 onClick={handleGoBack}
                 className="px-6 py-3 bg-white text-gray-600 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 transition-all cursor-pointer"
@@ -531,16 +548,16 @@ const BookingPage = ({ user, onGoHome }) => {
 
         {/* BƯỚC 3: XÁC NHẬN THÔNG TIN & PHƯƠNG THỨC THANH TOÁN */}
         {currentStep === 3 && (
-          <div className="space-y-6">
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
-              <h3 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 flex items-center gap-2">
+          <div className="space-y-4">
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 shadow-sm space-y-4">
+              <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 flex items-center gap-2">
                 <Icons.CheckCircle className="text-blue-600 w-5 h-5" />
                 <span>Xác nhận thông tin đăng ký khám</span>
               </h3>
 
               {/* Tóm tắt thông tin */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                <div className="space-y-3">
                   <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider flex items-center gap-2 border-b border-gray-200/60 pb-1.5">
                     <Icons.User className="w-4 h-4 text-gray-400" /> Thông tin bệnh nhân
                   </h4>
@@ -564,32 +581,32 @@ const BookingPage = ({ user, onGoHome }) => {
               </div>
 
               {/* Phí khám */}
-              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl flex justify-between items-center text-sm md:text-base">
+              <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex justify-between items-center text-sm md:text-base">
                 <span className="font-bold text-gray-700">Giá dịch vụ khám:</span>
-                <span className="font-extrabold text-emerald-600 text-lg">150.000 đ</span>
+                <span className="font-extrabold text-emerald-600 text-base">150.000 đ</span>
               </div>
 
               {/* Chọn phương thức thanh toán */}
-              <div className="space-y-3">
-                <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider">Chọn phương thức thanh toán dự kiến:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <h4 className="font-bold text-gray-800 text-xs uppercase tracking-wider">Chọn phương thức thanh toán dự kiến:</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Trực tiếp tại quầy */}
                   <div
                     onClick={() => setPaymentMethod('CASH')}
-                    className={`p-5 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-4 select-none ${
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 select-none ${
                       paymentMethod === 'CASH'
                         ? 'border-blue-600 bg-blue-50/10'
                         : 'border-gray-100 bg-white hover:border-gray-200'
                     }`}
                   >
-                    <div className={`p-3 rounded-xl flex items-center justify-center shrink-0 ${
+                    <div className={`p-2.5 rounded-lg flex items-center justify-center shrink-0 ${
                       paymentMethod === 'CASH' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
                     }`}>
-                      <Icons.Banknote className="w-6 h-6" />
+                      <Icons.Banknote className="w-5 h-5" />
                     </div>
-                    <div className="space-y-1 text-left">
-                      <h5 className="font-bold text-gray-800 text-sm md:text-base">Thanh toán tại quầy</h5>
-                      <p className="text-xs text-gray-400 font-semibold leading-relaxed">
+                    <div className="space-y-0.5 text-left">
+                      <h5 className="font-bold text-gray-800 text-sm">Thanh toán tại quầy</h5>
+                      <p className="text-[11px] text-gray-500 font-semibold leading-relaxed">
                         Đóng tiền mặt hoặc quẹt thẻ trực tiếp khi đến quầy lễ tân bệnh viện để nhận phiếu khám.
                       </p>
                     </div>
@@ -598,20 +615,20 @@ const BookingPage = ({ user, onGoHome }) => {
                   {/* VNPay Online */}
                   <div
                     onClick={() => setPaymentMethod('VNPAY')}
-                    className={`p-5 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-4 select-none ${
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 select-none ${
                       paymentMethod === 'VNPAY'
                         ? 'border-blue-600 bg-blue-50/10'
                         : 'border-gray-100 bg-white hover:border-gray-200'
                     }`}
                   >
-                    <div className={`p-3 rounded-xl flex items-center justify-center shrink-0 ${
+                    <div className={`p-2.5 rounded-lg flex items-center justify-center shrink-0 ${
                       paymentMethod === 'VNPAY' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
                     }`}>
-                      <Icons.CreditCard className="w-6 h-6" />
+                      <Icons.CreditCard className="w-5 h-5" />
                     </div>
-                    <div className="space-y-1 text-left">
-                      <h5 className="font-bold text-gray-800 text-sm md:text-base">Thanh toán trực tuyến (VNPay)</h5>
-                      <p className="text-xs text-gray-400 font-semibold leading-relaxed">
+                    <div className="space-y-0.5 text-left">
+                      <h5 className="font-bold text-gray-800 text-sm">Thanh toán trực tuyến (VNPay)</h5>
+                      <p className="text-[11px] text-gray-500 font-semibold leading-relaxed">
                         Thanh toán ngay bằng ví điện tử VNPay hoặc QR ngân hàng để xác thực nhanh và giảm thời gian chờ đợi.
                       </p>
                     </div>
@@ -642,8 +659,8 @@ const BookingPage = ({ user, onGoHome }) => {
 
         {/* BƯỚC 4: ĐẶT LỊCH THÀNH CÔNG */}
         {currentStep === 4 && (
-          <div className="bg-white border border-gray-100 rounded-2xl p-8 md:p-12 shadow-sm text-center space-y-6">
-            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl font-bold mx-auto animate-bounce">
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-8 shadow-sm text-center space-y-4">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto animate-bounce">
               ✓
             </div>
             
@@ -695,6 +712,14 @@ const BookingPage = ({ user, onGoHome }) => {
         )}
 
       </div>
+
+      {/* MODAL TẠO HỒ SƠ */}
+      <PatientProfileModal 
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        user={user}
+        onSuccess={handleAddProfileSuccess}
+      />
     </div>
   );
 };

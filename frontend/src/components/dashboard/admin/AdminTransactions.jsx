@@ -59,8 +59,8 @@ export default function AdminTransactions() {
   // Tiến hành lọc dữ liệu
   const filteredData = appointments.filter((item) => {
     // 1. Lọc theo trạng thái hóa đơn hoặc trạng thái ca hẹn
-    if (filter === 'PAID' && item.invoices?.status !== 'PAID') return false;
-    if (filter === 'UNPAID' && item.invoices?.status !== 'UNPAID') return false;
+    if (filter === 'PAID' && (item.invoices?.status !== 'PAID' || item.status === 'CANCELLED')) return false;
+    if (filter === 'UNPAID' && (item.invoices?.status !== 'UNPAID' || item.status === 'CANCELLED')) return false;
     if (filter === 'CANCELLED' && item.status !== 'CANCELLED') return false;
 
     // 2. Tìm kiếm theo tên bệnh nhân, tên bác sĩ, mã qrCode hoặc mã ID
@@ -141,8 +141,9 @@ export default function AdminTransactions() {
               <tbody className="divide-y divide-gray-100 text-sm font-medium text-gray-700">
                 {filteredData.map((item) => {
                   const isUpcoming = item.status === 'BOOKED';
-                  const isCancelled = item.status === 'CANCELLED';
+                  const isCheckedIn = item.status === 'WAITING' || item.status === 'EXAMINING';
                   const isDone = item.status === 'DONE';
+                  const isCancelled = item.status === 'CANCELLED';
 
                   return (
                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
@@ -170,20 +171,24 @@ export default function AdminTransactions() {
                             ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                             : isCancelled
                               ? 'bg-red-50 text-red-600 border border-red-100'
-                              : 'bg-blue-50 text-blue-600 border border-blue-100'
+                              : isCheckedIn
+                                ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                : 'bg-blue-50 text-blue-600 border border-blue-100' // BOOKED
                         }`}>
-                          {isDone ? 'Đã khám' : isCancelled ? 'Đã hủy' : 'Chờ khám'}
+                          {isDone ? 'Hoàn thành' : isCancelled ? 'Đã hủy' : isCheckedIn ? 'Đã check-in' : 'Đã đặt'}
                         </span>
                       </td>
 
                       {/* Trạng thái hóa đơn */}
                       <td className="py-4 px-6">
                         <span className={`inline-block text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                          item.invoices?.status === 'PAID'
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                            : 'bg-amber-50 text-amber-600 border border-amber-100'
+                          isCancelled
+                            ? 'bg-red-50 text-red-600 border border-red-100'
+                            : item.invoices?.status === 'PAID'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                              : 'bg-amber-50 text-amber-600 border border-amber-100'
                         }`}>
-                          {item.invoices?.status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                          {isCancelled ? 'Đã hủy hóa đơn' : item.invoices?.status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                         </span>
                       </td>
 

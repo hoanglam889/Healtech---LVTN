@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
+import PatientProfileModal from '../dashboard/patient/PatientProfileModal';
 
 export default function CheckinPanel() {
   const [searchCode, setSearchCode] = useState('');
@@ -11,6 +12,7 @@ export default function CheckinPanel() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
   const [notification, setNotification] = useState(null);
+  const [isEditingPatient, setIsEditingPatient] = useState(false);
 
   // Load appointments from API
   const loadAppointments = async () => {
@@ -124,7 +126,8 @@ export default function CheckinPanel() {
       loadAppointments();
     } catch (err) {
       console.error('Lỗi check-in:', err);
-      showToast('Đã xảy ra lỗi khi xác nhận Check-in!', 'error');
+      const errMsg = err.response?.data?.message || 'Đã xảy ra lỗi khi xác nhận Check-in!';
+      showToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -258,10 +261,18 @@ export default function CheckinPanel() {
             
             {/* THÔNG TIN BỆNH NHÂN */}
             <div className="space-y-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100/50">
-              <h5 className="font-extrabold text-sm text-gray-800 uppercase tracking-wider flex items-center gap-2 border-b border-gray-100 pb-2">
-                <Icons.User className="w-4.5 h-4.5 text-blue-600" />
-                <span>Thông tin Bệnh nhân</span>
-              </h5>
+              <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <h5 className="font-extrabold text-sm text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                  <Icons.User className="w-4.5 h-4.5 text-blue-600" />
+                  <span>Thông tin Bệnh nhân</span>
+                </h5>
+                <button
+                  onClick={() => setIsEditingPatient(true)}
+                  className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  Cập nhật hồ sơ
+                </button>
+              </div>
               
               <div className="space-y-2.5 text-sm">
                 <div className="flex justify-between">
@@ -337,10 +348,15 @@ export default function CheckinPanel() {
                 <Icons.Activity className="w-5 h-5 animate-pulse" />
                 <span>Bệnh nhân đang khám cùng Bác sĩ</span>
               </div>
+            ) : matchedAppt.status === 'CANCELLED' ? (
+              <div className="flex items-center gap-2 text-rose-600 font-bold bg-rose-50 border border-rose-100 px-5 py-3 rounded-2xl text-sm">
+                <Icons.XCircle className="w-5 h-5" />
+                <span>Lịch khám này đã bị Hủy</span>
+              </div>
             ) : (
               <div className="flex items-center gap-2 text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-5 py-3 rounded-2xl text-sm">
                 <Icons.CheckCircle className="w-5 h-5" />
-                <span>Lịch khám đã hoàn tất chẩn đoán bệnh án</span>
+                <span>Lịch khám đã hoàn tất chẩn đoán</span>
               </div>
             )}
           </div>
@@ -357,6 +373,19 @@ export default function CheckinPanel() {
         }
       `}</style>
 
+      {/* MODAL CẬP NHẬT HỒ SƠ BỆNH NHÂN */}
+      <PatientProfileModal 
+        isOpen={isEditingPatient}
+        onClose={() => setIsEditingPatient(false)}
+        editingProfile={matchedAppt?.patient}
+        user={null}
+        onSuccess={() => {
+          if (matchedAppt?.qrCode) {
+            handleSearch(matchedAppt.qrCode);
+          }
+          showToast('Cập nhật hồ sơ bệnh nhân thành công!', 'success');
+        }}
+      />
     </div>
   );
 }

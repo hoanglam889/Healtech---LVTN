@@ -31,12 +31,14 @@ export class AuthService {
     const normalizedRole = user.role ? user.role.toString().toUpperCase() : '';
 
     let fullName = 'Nhân viên lễ tân';
+    let doctorProfileId: number | null = null;
     if (normalizedRole === 'DOCTOR') {
       const docProfile = await this.doctorProfilesRepo.findOne({
         where: { userId: user.id },
       });
       if (docProfile) {
         fullName = docProfile.fullName;
+        doctorProfileId = docProfile.id;
       } else {
         fullName = 'Bác sĩ trực ban';
       }
@@ -49,6 +51,7 @@ export class AuthService {
         phone: user.phone,
         role: normalizedRole,
         fullName,
+        doctorProfileId,
       },
     };
   }

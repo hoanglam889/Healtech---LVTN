@@ -5,6 +5,7 @@ import { BASE_URL } from '../../services/apiClient';
 const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
   const isUpcoming = apt.status === 'BOOKED';
   const isCancelled = apt.status === 'CANCELLED';
+  const isCheckedIn = apt.status === 'WAITING' || apt.status === 'EXAMINING';
   const isPaid = apt.invoices?.status === 'PAID';
   const imageUrl = apt.doctorProfile?.avatarUrl ? `${BASE_URL}${apt.doctorProfile.avatarUrl}` : null;
 
@@ -48,11 +49,13 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
           <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
             isUpcoming 
               ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-              : isCancelled
-                ? 'bg-red-50 text-red-600 border border-red-100'
-                : 'bg-green-50 text-green-600 border border-green-100'
+              : isCheckedIn
+                ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                : isCancelled
+                  ? 'bg-red-50 text-red-600 border border-red-100'
+                  : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
           }`}>
-            {isUpcoming ? 'Đã xác nhận' : isCancelled ? 'Đã hủy' : 'Đã khám'}
+            {isUpcoming ? 'Đã đặt' : isCheckedIn ? 'Đã check-in' : isCancelled ? 'Đã hủy' : 'Hoàn thành'}
           </span>
           {/* Trạng thái hóa đơn */}
           <span className={`text-[10px] font-bold ${isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>

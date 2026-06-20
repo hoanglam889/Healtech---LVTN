@@ -15,18 +15,17 @@ const Navbar = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <>
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
         
         {/* LOGO */}
-        <div className="flex items-center cursor-pointer" onClick={() => { onHomeClick(); setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}>
-          <div className="w-28 h-10 md:w-44 md:h-16 overflow-hidden relative flex items-center justify-center">
-            <img 
-              src="/images/logo.png" 
-              alt="Healtech Logo" 
-              className="absolute w-44 h-44 md:w-72 md:h-72 max-w-none object-contain" 
-            />
-          </div>
+        <div className="flex items-center cursor-pointer -ml-2 md:ml-0" onClick={() => { onHomeClick(); setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}>
+          <img 
+            src="/images/logo.png" 
+            alt="Healtech Logo" 
+            className="h-12 md:h-16 w-auto object-contain scale-[1.5] origin-left" 
+          />
         </div>
         
         {/* DESKTOP NAVIGATION */}
@@ -141,12 +140,13 @@ const Navbar = ({
           </button>
         </div>
       </div>
+      </header>
 
       {/* ==========================================
          MOBILE MENU DRAWER (SLIDE-OUT OVERLAY)
          ========================================== */}
       <div className={`fixed inset-0 z-50 transition-all duration-300 md:hidden overflow-hidden ${
-        isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        isMobileMenuOpen ? 'opacity-100 pointer-events-auto visible' : 'opacity-0 pointer-events-none invisible'
       }`}>
         {/* Dark blurred background overlay */}
         <div 
@@ -156,16 +156,14 @@ const Navbar = ({
         
         <div 
           style={{ backgroundColor: '#ffffff', height: '100vh' }}
-          className={`absolute right-0 top-0 w-64 bg-white p-6 shadow-2xl flex flex-col justify-between transition-transform duration-300 z-10 ${
+          className={`absolute right-0 top-0 w-64 bg-white p-6 shadow-2xl flex flex-col justify-between transition-transform duration-300 z-10 mobile-drawer-panel ${
             isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           <div>
             {/* Header / Close button */}
             <div className="flex justify-between items-center mb-6">
-              <div className="w-20 h-6 overflow-hidden relative flex items-center justify-center">
-                <img src="/images/logo.png" alt="Healtech Logo" className="absolute w-28 h-28 max-w-none object-contain" />
-              </div>
+              <span className="font-bold text-gray-800 text-sm uppercase tracking-wider">Danh mục</span>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)} 
                 className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -260,7 +258,7 @@ const Navbar = ({
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 };
 

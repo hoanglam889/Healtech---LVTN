@@ -46,6 +46,9 @@ export class Patients {
   @Column("varchar", { name: "address", nullable: true, length: 255 })
   address: string | null;
 
+  @Column("boolean", { name: "is_completed", default: false })
+  isCompleted: boolean;
+
   @Column("timestamp", {
     name: "created_at",
     default: () => "CURRENT_TIMESTAMP",

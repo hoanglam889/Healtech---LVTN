@@ -26,6 +26,32 @@ export class AppointmentsService {
     await queryRunner.startTransaction();
 
     try {
+      // 0. Kiểm tra số lượng bệnh nhân tối đa (max_patients)
+      // Tìm lịch làm việc của bác sĩ trong ngày và khung giờ đó
+      const schedule = await queryRunner.manager.createQueryBuilder('doctor_schedules', 'ds')
+        .innerJoinAndSelect('ds.shift', 's')
+        .where('ds.doctorProfileId = :doctorId', { doctorId: doctorProfileId })
+        .andWhere('ds.date = :date', { date: appointmentDate })
+        .andWhere('s.startTime <= :time', { time: appointmentTime })
+        .andWhere('s.endTime >= :time', { time: appointmentTime })
+        .getOne();
+
+      if (!schedule) {
+        throw new BadRequestException('Bác sĩ không có lịch làm việc vào khung giờ này. Vui lòng chọn lại.');
+      }
+
+      // Đếm số ca khám đã đặt (không tính các ca đã hủy) trong ca làm việc này
+      const currentBookedCount = await queryRunner.manager.createQueryBuilder('appointments', 'a')
+        .where('a.doctorProfileId = :doctorId', { doctorId: doctorProfileId })
+        .andWhere('a.appointmentDate = :date', { date: appointmentDate })
+        .andWhere('a.appointmentTime >= :startTime', { startTime: schedule.shift.startTime })
+        .andWhere('a.appointmentTime <= :endTime', { endTime: schedule.shift.endTime })
+        .andWhere('a.status != :status', { status: 'CANCELLED' })
+        .getCount();
+
+      if (currentBookedCount >= schedule.maxPatients) {
+        throw new BadRequestException('Ca khám này đã đạt tối đa số lượng bệnh nhân cho phép. Vui lòng chọn ca khác.');
+      }
       // 1. Tạo mã QR code duy nhất dạng doanh nghiệp bảo mật: HT-APPT-YYYYMMDD-HEX8
       let qrCode = '';
       let isUnique = false;
@@ -125,10 +151,32 @@ export class AppointmentsService {
   async update(id: number, updateDto: any) {
     const appointment = await this.findOne(id);
     
-    const { invoiceStatus, symptoms, diagnosis, notes, ...appointmentFields } = updateDto;
+    const { invoiceStatus, paymentMethod, symptoms, diagnosis, notes, ...appointmentFields } = updateDto;
     
+    // Thiết lập State Machine (Cỗ máy trạng thái)
+    if (appointmentFields.status && appointment.status) {
+      const currentStatus = appointment.status as string;
+      const newStatus = appointmentFields.status as string;
+      
+      const validTransitions: Record<string, string[]> = {
+        'BOOKED': ['WAITING', 'CANCELLED'],
+        'WAITING': ['EXAMINING', 'CANCELLED'],
+        'EXAMINING': ['DONE', 'CANCELLED'],
+        'DONE': [], // Không được phép thay đổi
+        'CANCELLED': [] // Không được phép thay đổi
+      };
+
+      if (validTransitions[currentStatus] && !validTransitions[currentStatus].includes(newStatus)) {
+        throw new BadRequestException(`Lỗi luồng xử lý: Không thể chuyển trạng thái từ ${currentStatus} sang ${newStatus}.`);
+      }
+    }
+
     // Nếu trạng thái đổi thành WAITING (Lễ tân check-in), tính điểm priority_score cho Smart Queue
     if (appointmentFields.status === 'WAITING') {
+      if (!appointment.patient?.isCompleted) {
+        throw new BadRequestException('Vui lòng cập nhật đầy đủ thông tin bệnh nhân (CCCD, Địa chỉ,...) trước khi check-in.');
+      }
+
       let baseScore = 5; // Mặc định người trưởng thành là 5
       
       if (appointment.patient && appointment.patient.dob) {
@@ -179,14 +227,21 @@ export class AppointmentsService {
     }
     
     // Cập nhật hóa đơn
-    if (invoiceStatus) {
+    if (invoiceStatus || paymentMethod || appointmentFields.status === 'CANCELLED') {
       const invoice = await this.invoicesRepo.findOne({ where: { appointmentId: id } });
       if (invoice) {
-        invoice.status = invoiceStatus;
-        if (invoiceStatus === 'PAID') {
-          invoice.paidAt = new Date();
-        } else if (invoiceStatus === 'UNPAID') {
-          invoice.paidAt = null;
+        if (appointmentFields.status === 'CANCELLED') {
+          invoice.status = 'CANCELLED';
+        } else if (invoiceStatus) {
+          invoice.status = invoiceStatus;
+          if (invoiceStatus === 'PAID') {
+            invoice.paidAt = new Date();
+          } else if (invoiceStatus === 'UNPAID') {
+            invoice.paidAt = null;
+          }
+        }
+        if (paymentMethod) {
+          invoice.paymentMethod = paymentMethod;
         }
         await this.invoicesRepo.save(invoice);
       }

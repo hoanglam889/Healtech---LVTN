@@ -4,6 +4,16 @@ const ShiftCard = ({ schedule, isSelected, onSelect, status }) => {
   const timeRange = `${schedule.shift?.startTime?.substring(0, 5)} - ${schedule.shift?.endTime?.substring(0, 5)}`;
   const isExpired = status === 'EXPIRED';
   const isLate = status === 'LATE_ALLOWED';
+  const isFull = schedule.isFull;
+
+  if (isFull) {
+    return (
+      <div className="py-3.5 px-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-500 text-center font-bold text-sm md:text-base flex flex-col items-center justify-center cursor-not-allowed select-none opacity-80">
+        <span className="line-through">{timeRange}</span>
+        <span className="text-[10px] text-rose-600 font-bold mt-0.5">(Đã hết chỗ)</span>
+      </div>
+    );
+  }
 
   if (isExpired) {
     return (
