@@ -90,8 +90,12 @@ export class AuthService {
       fullName = mainPatient.fullName;
     }
 
+    const payload = { id: account.id, role: 'PATIENT' };
+    const access_token = this.jwtService.sign(payload);
+
     return {
       success: true,
+      access_token,
       user: {
         id: account.id,
         email: account.email,
@@ -125,8 +129,12 @@ export class AuthService {
 
     await this.patientsRepo.save(newPatient);
 
+    const payload = { id: savedAccount.id, role: 'PATIENT' };
+    const access_token = this.jwtService.sign(payload);
+
     return {
       success: true,
+      access_token,
       user: {
         id: savedAccount.id,
         email: savedAccount.email,
