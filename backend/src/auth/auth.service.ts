@@ -5,7 +5,8 @@ import { Users } from '../entities/Users';
 import { PatientAccounts } from '../entities/PatientAccounts';
 import { DoctorProfiles } from '../entities/DoctorProfiles';
 import { Patients } from '../entities/Patients';
-
+import { JwtService } from '@nestjs/jwt';
+import { access } from 'fs';
 @Injectable()
 export class AuthService {
   constructor(
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly doctorProfilesRepo: Repository<DoctorProfiles>,
     @InjectRepository(Patients)
     private readonly patientsRepo: Repository<Patients>,
+    private readonly jwtService: JwtService,
   ) {}
 
   // Đăng nhập dành cho nhân viên (STAFF) và bác sĩ (DOCTOR)
@@ -43,9 +45,11 @@ export class AuthService {
         fullName = 'Bác sĩ trực ban';
       }
     }
-
+    const payload = { id: user.id, role: normalizedRole };
+    const access_token = this.jwtService.sign(payload);
     return {
       success: true,
+      access_token,
       user: {
         id: user.id,
         phone: user.phone,

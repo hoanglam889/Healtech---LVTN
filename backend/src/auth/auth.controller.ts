@@ -1,17 +1,26 @@
-import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-
+import type {Response} from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('staff-login')
-  async staffLogin(@Body() body: any) {
+  async staffLogin(@Body() body: any, @Res({passthrough: true }) res: Response) {
     const { phone, password } = body;
     if (!phone || !password) {
       throw new BadRequestException('Vui lòng điền số điện thoại và mật khẩu!');
     }
-    return this.authService.staffLogin(phone, password);
+    const loginData = await this.authService.staffLogin(phone, password);
+
+    //gắn token
+    res.cookie('acces_token', loginData.access_token, {
+      httpOnly: true,
+      secure: false,
+      maxAge: 5 * 60 * 60 * 1000, // 5 tiếng
+    });
+    const { access_token, ...userData} = loginData;
+    return userData;
   }
 
   @Post('patient-login')
