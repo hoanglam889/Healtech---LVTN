@@ -22,17 +22,24 @@ export class AuthService {
   ) {}
 
   // Đăng nhập dành cho nhân viên (STAFF) và bác sĩ (DOCTOR)
-  async staffLogin(phone: string, pass: string) {
+  async staffLogin(email: string, pass: string) {
     const user = await this.usersRepo.findOne({
-      where: { phone, passwordHash: pass },
+      where: { email, passwordHash: pass },
     });
     if (!user) {
-      throw new UnauthorizedException('Số điện thoại hoặc mật khẩu không chính xác!');
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt!');
     }
 
     const normalizedRole = user.role ? user.role.toString().toUpperCase() : '';
 
     let fullName = 'Nhân viên lễ tân';
+    if(normalizedRole === "ADMIN") {
+      fullName = "Quản trị viên";
+    }
     let doctorProfileId: number | null = null;
     if (normalizedRole === 'DOCTOR') {
       const docProfile = await this.doctorProfilesRepo.findOne({
@@ -52,7 +59,7 @@ export class AuthService {
       access_token,
       user: {
         id: user.id,
-        phone: user.phone,
+        email: user.email,
         role: normalizedRole,
         fullName,
         doctorProfileId,
@@ -61,13 +68,17 @@ export class AuthService {
   }
 
   // Đăng nhập dành cho bệnh nhân (khách hàng)
-  async patientLogin(phone: string, pass: string) {
+  async patientLogin(email: string, pass: string) {
     const account = await this.patientAccountsRepo.findOne({
-      where: { phone, passwordHash: pass },
+      where: { email, passwordHash: pass },
       relations: { patients: true },
     });
     if (!account) {
-      throw new UnauthorizedException('Số điện thoại hoặc mật khẩu không chính xác!');
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
+    }
+
+    if (account.isActive == false) {
+      throw new UnauthorizedException('Tài khoản chưa được kích hoạt! Vui lòng xác thực mã để tiếp tục.');
     }
 
     // Lấy tên bệnh nhân chính của tài khoản (quan hệ Bản thân hoặc bệnh nhân đầu tiên)
@@ -83,7 +94,7 @@ export class AuthService {
       success: true,
       user: {
         id: account.id,
-        phone: account.phone,
+        email: account.email,
         role: 'PATIENT',
         fullName,
       },
@@ -91,15 +102,15 @@ export class AuthService {
   }
 
   // Đăng ký tài khoản cho bệnh nhân mới
-  async patientRegister(phone: string, pass: string, name: string, dob?: string, gender?: 'MALE' | 'FEMALE') {
-    const existing = await this.patientAccountsRepo.findOne({ where: { phone } });
+  async patientRegister(email: string, pass: string, name: string, dob?: string, gender?: 'MALE' | 'FEMALE') {
+    const existing = await this.patientAccountsRepo.findOne({ where: { email } });
     if (existing) {
-      return { success: false, message: 'Số điện thoại này đã được đăng ký tài khoản!' };
+      return { success: false, message: 'Email này đã được đăng ký tài khoản!' };
     }
 
     // 1. Tạo tài khoản bệnh nhân mới
     const newAccount = new PatientAccounts();
-    newAccount.phone = phone;
+    newAccount.email = email;
     newAccount.passwordHash = pass;
     newAccount.isActive = true;
     const savedAccount = await this.patientAccountsRepo.save(newAccount);
@@ -110,7 +121,6 @@ export class AuthService {
     newPatient.fullName = name;
     newPatient.dob = dob || '1995-01-01'; // Default ngày sinh
     newPatient.gender = gender || 'MALE';
-    newPatient.phone = phone;
     newPatient.relationship = 'Bản thân';
 
     await this.patientsRepo.save(newPatient);
@@ -119,7 +129,7 @@ export class AuthService {
       success: true,
       user: {
         id: savedAccount.id,
-        phone: savedAccount.phone,
+        email: savedAccount.email,
         role: 'PATIENT',
         fullName: name,
       },

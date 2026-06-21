@@ -25,6 +25,8 @@ export default function AdminDashboard() {
   // Quản lý tab đang active
   const [activeTab, setActiveTab] = useState('overview');
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Xử lý đăng nhập thành công
   const handleLoginSuccess = (user) => {
     if (user.role !== 'ADMIN') {
@@ -60,8 +62,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="flex bg-gray-50/50 h-screen text-gray-800 font-sans relative overflow-hidden">

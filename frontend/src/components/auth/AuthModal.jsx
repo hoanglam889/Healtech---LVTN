@@ -6,12 +6,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   
   // Login Form States
-  const [loginPhone, setLoginPhone] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   
   // Register Form States
   const [regName, setRegName] = useState('');
-  const [regPhone, setRegPhone] = useState('');
+  const [regEmail, setRegEmail] = useState('');
   const [regDob, setRegDob] = useState('1995-01-01');
   const [regGender, setRegGender] = useState('MALE'); // 'MALE' | 'FEMALE'
   const [regPassword, setRegPassword] = useState('');
@@ -25,8 +25,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   // Handle patient login
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    if (!loginPhone.trim() || !loginPassword.trim()) {
-      setErrorMsg('Vui lòng điền đầy đủ số điện thoại và mật khẩu!');
+    if (!loginEmail.trim() || !loginPassword.trim()) {
+      setErrorMsg('Vui lòng điền đầy đủ Email và mật khẩu!');
       return;
     }
 
@@ -35,7 +35,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     setSuccessMsg('');
 
     try {
-      const data = await patientLogin(loginPhone, loginPassword);
+      const data = await patientLogin(loginEmail, loginPassword);
       if (data && data.success) {
         setSuccessMsg('Đăng nhập thành công!');
         setTimeout(() => {
@@ -56,8 +56,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   // Handle patient registration
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    if (!regName.trim() || !regPhone.trim() || !regPassword.trim()) {
-      setErrorMsg('Vui lòng điền đầy đủ họ tên, số điện thoại và mật khẩu!');
+    if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {
+      setErrorMsg('Vui lòng điền đầy đủ họ tên, email và mật khẩu!');
       return;
     }
 
@@ -68,7 +68,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     try {
       const payload = {
         fullName: regName,
-        phone: regPhone,
+        email: regEmail,
         dob: regDob,
         gender: regGender,
         password: regPassword
@@ -93,8 +93,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   };
 
   // Quick fill helper for evaluation
-  const handleQuickFill = (phone, pass) => {
-    setLoginPhone(phone);
+  const handleQuickFill = (email, pass) => {
+    setLoginEmail(email);
     setLoginPassword(pass);
     setErrorMsg('');
     setSuccessMsg('');
@@ -165,15 +165,15 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                ========================================== */
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Số điện thoại</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Email</label>
                 <div className="relative">
-                  <Icons.Phone className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                  <Icons.Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                   <input
-                    type="tel"
+                    type="email"
                     required
-                    placeholder="Nhập số điện thoại đăng nhập..."
-                    value={loginPhone}
-                    onChange={(e) => setLoginPhone(e.target.value)}
+                    placeholder="Nhập email đăng nhập..."
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-100 outline-none pl-12 pr-4 py-3 rounded-xl font-semibold text-gray-800 text-sm focus:ring-2 focus:ring-blue-500/20 placeholder-gray-400 focus:bg-white focus:border-blue-600/40 transition-all"
                   />
                 </div>
@@ -240,15 +240,15 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Số điện thoại</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Email</label>
                 <div className="relative">
-                  <Icons.Phone className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                  <Icons.Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                   <input
-                    type="tel"
+                    type="email"
                     required
-                    placeholder="VD: 0987654321..."
-                    value={regPhone}
-                    onChange={(e) => setRegPhone(e.target.value)}
+                    placeholder="VD: nguyenvan@gmail.com..."
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-100 outline-none pl-12 pr-4 py-3 rounded-xl font-semibold text-gray-800 text-sm focus:ring-2 focus:ring-blue-500/20 placeholder-gray-400 focus:bg-white focus:border-blue-600/40 transition-all"
                   />
                 </div>

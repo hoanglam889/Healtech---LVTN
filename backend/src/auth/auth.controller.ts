@@ -7,11 +7,11 @@ export class AuthController {
 
   @Post('staff-login')
   async staffLogin(@Body() body: any, @Res({passthrough: true }) res: Response) {
-    const { phone, password } = body;
-    if (!phone || !password) {
-      throw new BadRequestException('Vui lòng điền số điện thoại và mật khẩu!');
+    const { email, password } = body;
+    if (!email || !password) {
+      throw new BadRequestException('Vui lòng điền email và mật khẩu!');
     }
-    const loginData = await this.authService.staffLogin(phone, password);
+    const loginData = await this.authService.staffLogin(email, password);
 
     //gắn token
     res.cookie('acces_token', loginData.access_token, {
@@ -25,19 +25,19 @@ export class AuthController {
 
   @Post('patient-login')
   async patientLogin(@Body() body: any) {
-    const { phone, password } = body;
-    if (!phone || !password) {
-      throw new BadRequestException('Vui lòng điền số điện thoại và mật khẩu!');
+    const { email, password } = body;
+    if (!email || !password) {
+      throw new BadRequestException('Vui lòng điền email và mật khẩu!');
     }
-    return this.authService.patientLogin(phone, password);
+    return this.authService.patientLogin(email, password);
   }
 
   @Post('patient-register')
   async patientRegister(@Body() body: any) {
-    const { phone, password, fullName, dob, gender } = body;
-    if (!phone || !password || !fullName) {
-      throw new BadRequestException('Họ tên, số điện thoại và mật khẩu là bắt buộc!');
+    const { email, password, fullName, dob, gender } = body;
+    if (!email || !password || !fullName) {
+      throw new BadRequestException('Họ tên, email và mật khẩu là bắt buộc!');
     }
-    return this.authService.patientRegister(phone, password, fullName, dob, gender);
+    return this.authService.patientRegister(email, password, fullName, dob, gender);
   }
 }

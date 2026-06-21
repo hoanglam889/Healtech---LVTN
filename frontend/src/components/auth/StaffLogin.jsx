@@ -3,26 +3,31 @@ import * as Icons from 'lucide-react';
 import { staffLogin } from '../../services/authService';
 
 export default function StaffLogin({ onLoginSuccess, onGoHome }) {
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   // Handle submit credentials
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!phone.trim() || !password.trim()) {
-      setErrorMsg('Vui lòng điền đầy đủ số điện thoại và mật khẩu!');
+    if (!email.trim() || !password.trim()) {
+      setErrorMsg('Vui lòng điền đầy đủ Email và mật khẩu!');
       return;
     }
 
     setLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
 
     try {
-      const data = await staffLogin(phone, password);
+      const data = await staffLogin(email, password);
       if (data && data.success) {
-        onLoginSuccess(data.user);
+        setSuccessMsg('Đăng nhập thành công!');
+        setTimeout(() => {
+          onLoginSuccess(data.user);
+        }, 800);
       } else {
         setErrorMsg('Thông tin đăng nhập không hợp lệ hoặc tài khoản bị khóa.');
       }
@@ -97,16 +102,23 @@ export default function StaffLogin({ onLoginSuccess, onGoHome }) {
               </div>
             )}
 
+            {successMsg && (
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 text-xs font-bold animate-[fadeIn_0.15s_ease-out]">
+                <Icons.CheckCircle className="w-5 h-5 shrink-0" />
+                <span>{successMsg}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Số điện thoại</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Email</label>
                 <div className="relative">
-                  <Icons.Phone className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                  <Icons.Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Nhập số điện thoại nhân viên..."
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Nhập Email nhân viên..."
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-100 outline-none pl-12 pr-4 py-3 rounded-xl font-semibold text-gray-800 text-sm focus:ring-2 focus:ring-blue-500/20 placeholder-gray-400 focus:bg-white focus:border-blue-600/40 transition-all"
                   />
                 </div>
