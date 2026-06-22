@@ -16,11 +16,7 @@ export class AppointmentsController {
 
   @Get()
   findAll(@Query('userId') userId?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
-    return this.appointmentsService.findAll(
-      userId ? +userId : undefined,
-      page ? +page : undefined,
-      limit ? +limit : undefined,
-    );
+    return this.appointmentsService.findAll(userId ? +userId : undefined);
   }
 
   @Get(':id')
@@ -30,7 +26,7 @@ export class AppointmentsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto, @Request() req) {
-    return this.appointmentsService.update(+id, updateAppointmentDto, req.user?.userId);
+    return this.appointmentsService.update(+id, updateAppointmentDto);
   }
 
   @Delete(':id')
