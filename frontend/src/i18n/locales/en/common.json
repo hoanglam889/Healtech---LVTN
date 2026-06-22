@@ -53,5 +53,13 @@
     "spouse": "Spouse",
     "child": "Child",
     "other": "Other"
+  },
+  "specialties": {
+    "Tim mạch": "Cardiology",
+    "Thần kinh": "Neurology",
+    "Nhi khoa": "Pediatrics",
+    "Cơ xương khớp": "Orthopedics",
+    "Nha khoa": "Dentistry",
+    "Da liễu": "Dermatology"
   }
 }

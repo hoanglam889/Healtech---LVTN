@@ -53,5 +53,13 @@
     "spouse": "Vợ/Chồng",
     "child": "Con cái",
     "other": "Khác"
+  },
+  "specialties": {
+    "Tim mạch": "Tim mạch",
+    "Thần kinh": "Thần kinh",
+    "Nhi khoa": "Nhi khoa",
+    "Cơ xương khớp": "Cơ xương khớp",
+    "Nha khoa": "Nha khoa",
+    "Da liễu": "Da liễu"
   }
 }

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getSpecialties } from '../../services/specialtyService';
 import * as Icons from 'lucide-react';
 
 const SpecialtySection = () => {
+  const { t } = useTranslation(['landing', 'common']);
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +23,7 @@ const SpecialtySection = () => {
   if (loading) {
     return (
       <div className="text-center py-20 text-gray-500">
-        Đang tải danh sách chuyên khoa...
+        {t('common:loading')}
       </div>
     );
   }
@@ -30,8 +32,8 @@ const SpecialtySection = () => {
     <section id="specialties" className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Các Chuyên Khoa Y Tế</h2>
-          <p className="text-gray-500 text-base md:text-lg">Dịch vụ khám chữa bệnh toàn diện đa chuyên khoa, đáp ứng chính xác nhu cầu sức khỏe của bạn.</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{t('landing:specialties_title')}</h2>
+          <p className="text-gray-500 text-base md:text-lg">{t('landing:specialties_subtitle')}</p>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -43,7 +45,7 @@ const SpecialtySection = () => {
                 <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
                   <IconComponent className="w-7 h-7" />
                 </div>
-                <span className="font-semibold text-gray-800">{spec.name}</span>
+                <span className="font-semibold text-gray-800">{t(`common:specialties.${spec.name}`, { defaultValue: spec.name })}</span>
               </div>
             );
           })}
