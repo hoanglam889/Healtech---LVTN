@@ -27,11 +27,11 @@ const SpecialtySection = () => {
   }
 
   return (
-    <section id="specialties" className="py-24 bg-gray-50">
+    <section id="specialties" className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Các Chuyên Khoa Y Tế</h2>
-          <p className="text-gray-500 text-lg">Dịch vụ khám chữa bệnh toàn diện đa chuyên khoa, đáp ứng chính xác nhu cầu sức khỏe của bạn.</p>
+        <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Các Chuyên Khoa Y Tế</h2>
+          <p className="text-gray-500 text-base md:text-lg">Dịch vụ khám chữa bệnh toàn diện đa chuyên khoa, đáp ứng chính xác nhu cầu sức khỏe của bạn.</p>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">

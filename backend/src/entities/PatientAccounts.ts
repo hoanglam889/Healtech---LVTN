@@ -17,6 +17,9 @@ export class PatientAccounts {
   @Column("varchar", { name: "phone", unique: true, length: 20 })
   phone: string;
 
+  @Column("varchar", { name: "email", unique: true, length: 255, nullable: true })
+  email: string | null;
+
   @Column("varchar", { name: "password_hash", length: 255 })
   passwordHash: string;
 

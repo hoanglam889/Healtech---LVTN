@@ -1,13 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
-import { formatVND } from '../../utils/dateUtils';
+import PaymentModal from './PaymentModal';
+import InvoiceTemplate from './InvoiceTemplate';
+import { useReactToPrint } from 'react-to-print';
 
 export default function BillingManager() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('UNPAID'); // 'UNPAID' | 'PAID'
   const [notification, setNotification] = useState(null);
+  const [selectedApptToPay, setSelectedApptToPay] = useState(null);
+  
+  const [apptToPrint, setApptToPrint] = useState(null);
+  const contentRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
+
+  const handlePrintTrigger = (appt) => {
+    setApptToPrint(appt);
+    setTimeout(() => {
+      reactToPrintFn();
+    }, 100);
+  };
 
   // Load appointments
   const loadAppointments = async () => {
@@ -22,6 +36,7 @@ export default function BillingManager() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     loadAppointments();
   }, []);
@@ -34,32 +49,25 @@ export default function BillingManager() {
   // Filter bills
   const getFilteredBills = () => {
     return appointments.filter((appt) => {
-      // Chỉ lấy hóa đơn thu tiền mặt tại quầy (CASH)
-      if (!appt.invoices || appt.invoices.paymentMethod !== 'CASH') return false;
+      // Chỉ hiển thị hóa đơn chưa bị hủy
+      if (!appt.invoices) return false;
+      if (appt.status === 'CANCELLED') return false;
+      if (appt.status === 'CANCELLED') return false;
       return appt.invoices.status === filterStatus;
     });
   };
 
-  // Action: Confirm cash payment (UNPAID -> PAID)
-  const handleConfirmPayment = async (apptId) => {
+  // Action: Confirm payment via Modal
+  const handleConfirmPayment = async (apptId, paymentMethod) => {
     setLoading(true);
+    setSelectedApptToPay(null);
     try {
-      // Gửi tham số invoiceStatus để Backend xử lý cập nhật Invoice
-      await updateAppointment(apptId, { invoiceStatus: 'PAID' });
-      showToast('Xác nhận đã thu tiền và in biên lai thành công!', 'success');
+      await updateAppointment(apptId, { invoiceStatus: 'PAID', paymentMethod });
+      showToast('Xác nhận đã thu tiền thành công!', 'success');
       loadAppointments();
     } catch (err) {
       console.error(err);
-      // Fallback cho chế độ demo nếu ID không tồn tại
-      showToast('Đã thanh toán giả lập thành công (Chế độ Demo)!', 'success');
-      
-      // Cập nhật state cục bộ cho demo
-      setAppointments(prev => 
-        prev.map(appt => appt.id === apptId 
-          ? { ...appt, invoices: { ...appt.invoices, status: 'PAID' } } 
-          : appt
-        )
-      );
+      showToast('Đã xảy ra lỗi!', 'error');
     } finally {
       setLoading(false);
     }
@@ -67,6 +75,10 @@ export default function BillingManager() {
 
   const filteredBills = getFilteredBills();
 
+  // Helper format currency
+  const formatVND = (value) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
 
   return (
     <div className="space-y-6">
@@ -92,7 +104,7 @@ export default function BillingManager() {
                 : 'text-gray-400 hover:text-gray-800'
             }`}
           >
-            Chưa Thanh Toán ({appointments.filter(a => a.invoices?.paymentMethod === 'CASH' && a.invoices?.status === 'UNPAID').length})
+            Chưa Thanh Toán ({appointments.filter(a => a.invoices?.status === 'UNPAID' && a.status !== 'CANCELLED').length})
           </button>
           
           <button
@@ -103,7 +115,7 @@ export default function BillingManager() {
                 : 'text-gray-400 hover:text-gray-800'
             }`}
           >
-            Đã Thu Tiền ({appointments.filter(a => a.invoices?.paymentMethod === 'CASH' && a.invoices?.status === 'PAID').length})
+            Đã Thu Tiền ({appointments.filter(a => a.invoices?.status === 'PAID' && a.status !== 'CANCELLED').length})
           </button>
         </div>
 
@@ -112,7 +124,7 @@ export default function BillingManager() {
           <span className="font-extrabold text-xl text-rose-600 mt-1 block">
             {formatVND(
               appointments
-                .filter(a => a.invoices?.paymentMethod === 'CASH' && a.invoices?.status === 'UNPAID')
+                .filter(a => a.invoices?.status === 'UNPAID' && a.status !== 'CANCELLED')
                 .reduce((sum, current) => sum + parseFloat(current.invoices?.totalAmount || 0), 0)
             )}
           </span>
@@ -197,17 +209,35 @@ export default function BillingManager() {
                   {/* CỘT ACTION */}
                   <td className="px-6 py-4 text-right">
                     {appt.invoices?.status === 'UNPAID' ? (
-                      <button
-                        onClick={() => handleConfirmPayment(appt.id)}
-                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 font-bold px-4.5 py-2.5 rounded-xl transition-all cursor-pointer text-xs flex items-center gap-1.5 ml-auto"
-                      >
-                        <Icons.Check className="w-4 h-4" />
-                        <span>Thu tiền mặt</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handlePrintTrigger(appt)}
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer text-xs flex items-center gap-1.5"
+                        >
+                          <Icons.Printer className="w-4 h-4" />
+                          <span>In hóa đơn</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedApptToPay(appt)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 font-bold px-4.5 py-2.5 rounded-xl transition-all cursor-pointer text-xs flex items-center gap-1.5"
+                        >
+                          <Icons.CreditCard className="w-4 h-4" />
+                          <span>Thanh toán</span>
+                        </button>
+                      </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 text-emerald-600 font-bold justify-end text-xs">
-                        <Icons.CheckCircle className="w-4 h-4" />
-                        <span>Đã thu tiền</span>
+                      <div className="flex items-center justify-end gap-4">
+                        <button
+                          onClick={() => handlePrintTrigger(appt)}
+                          className="text-gray-500 hover:text-blue-600 font-bold transition-colors cursor-pointer text-xs flex items-center gap-1.5"
+                        >
+                          <Icons.Printer className="w-4 h-4" />
+                          <span>In lại</span>
+                        </button>
+                        <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                          <Icons.CheckCircle className="w-4 h-4" />
+                          <span>Đã thu tiền</span>
+                        </div>
                       </div>
                     )}
                   </td>
@@ -219,6 +249,18 @@ export default function BillingManager() {
         </div>
       )}
 
+      {/* MODAL THANH TOÁN */}
+      <PaymentModal 
+        isOpen={!!selectedApptToPay}
+        onClose={() => setSelectedApptToPay(null)}
+        appointment={selectedApptToPay}
+        onConfirm={handleConfirmPayment}
+      />
+
+      {/* ẨN COMPONENT IN HÓA ĐƠN */}
+      <div style={{ display: 'none' }}>
+        <InvoiceTemplate ref={contentRef} appointment={apptToPrint} />
+      </div>
     </div>
   );
 }

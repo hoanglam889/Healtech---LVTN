@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
-import { Specialties } from '../entities/Specialties';
+import { Repository } from 'typeorm';
+import { Specialties } from 'src/entities/Specialties';
+import {InjectRepository} from '@nestjs/typeorm';
 
 @Injectable()
 export class SpecialtiesService {
   constructor(
     @InjectRepository(Specialties)
-    private specialtiesRepository: Repository<Specialties>,
+    private specialtiesRepository: Repository<Specialties>
   ) {}
-
+  
   async create(createSpecialtyDto: CreateSpecialtyDto) {
     const specialty = this.specialtiesRepository.create(createSpecialtyDto);
     return this.specialtiesRepository.save(specialty);
@@ -23,14 +23,16 @@ export class SpecialtiesService {
 
   async findOne(id: number) {
     const specialty = await this.specialtiesRepository.findOne({ where: { id } });
-    if (!specialty) throw new NotFoundException(`Không tìm thấy chuyên khoa có ID #${id}`);
+    if (!specialty) {
+      throw new NotFoundException(`Không tìm thấy chuyên khoa #${id}`);
+    }
     return specialty;
   }
 
   async update(id: number, updateSpecialtyDto: UpdateSpecialtyDto) {
-    await this.findOne(id);
-    await this.specialtiesRepository.update(id, updateSpecialtyDto);
-    return this.findOne(id);
+    const specialty = await this.findOne(id);
+    this.specialtiesRepository.merge(specialty, updateSpecialtyDto);
+    return this.specialtiesRepository.save(specialty);
   }
 
   async remove(id: number) {
