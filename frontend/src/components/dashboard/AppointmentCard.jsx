@@ -1,11 +1,12 @@
 import React from 'react';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
+import { useTranslation } from 'react-i18next';
 
 const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
+  const { t } = useTranslation(['patient', 'common']);
   const isUpcoming = apt.status === 'BOOKED';
   const isCancelled = apt.status === 'CANCELLED';
-  const isCheckedIn = apt.status === 'WAITING' || apt.status === 'EXAMINING';
   const isPaid = apt.invoices?.status === 'PAID';
   const imageUrl = apt.doctorProfile?.avatarUrl ? `${BASE_URL}${apt.doctorProfile.avatarUrl}` : null;
 
@@ -21,10 +22,10 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
         </div>
         <div className="space-y-1">
           <h4 className="font-bold text-gray-800 text-base">
-            BS. {apt.doctorProfile?.fullName || 'Chuyên khoa'}
+            {t('common:doctor_title')} {apt.doctorProfile?.fullName || t('patient:specialty_label')}
           </h4>
           <p className="text-xs text-gray-400 font-semibold">
-            Chuyên khoa: <span className="text-gray-700">{apt.doctorProfile?.specialty?.name || 'Khám tổng quát'}</span>
+            {t('patient:specialty_label')}: <span className="text-gray-700">{apt.doctorProfile?.specialty?.name}</span>
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 pt-1">
             <span className="flex items-center gap-1">
@@ -36,49 +37,44 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
               <span>{apt.appointmentTime?.substring(0, 5)}</span>
             </span>
             <span className="font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px] font-bold">
-              Mã: {apt.qrCode}
+              {t('patient:code_label')}: {apt.qrCode}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Trạng thái và Nút xem QR / Hủy khám */}
       <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
         <div className="flex flex-col gap-1 sm:items-end">
-          {/* Trạng thái khám */}
           <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-            isUpcoming 
-              ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-              : isCheckedIn
-                ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                : isCancelled
-                  ? 'bg-red-50 text-red-600 border border-red-100'
-                  : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+            isUpcoming
+              ? 'bg-blue-50 text-blue-600 border border-blue-100'
+              : isCancelled
+                ? 'bg-red-50 text-red-600 border border-red-100'
+                : 'bg-green-50 text-green-600 border border-green-100'
           }`}>
-            {isUpcoming ? 'Đã đặt' : isCheckedIn ? 'Đã check-in' : isCancelled ? 'Đã hủy' : 'Hoàn thành'}
+            {isUpcoming ? t('patient:appt_confirmed') : isCancelled ? t('patient:appt_cancelled') : t('patient:appt_done')}
           </span>
-          {/* Trạng thái hóa đơn */}
           <span className={`text-[10px] font-bold ${isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>
-            {isPaid ? '✓ Đã thanh toán' : '• Trả tiền tại quầy'}
+            {isPaid ? t('patient:appt_paid') : t('patient:appt_pay_counter')}
           </span>
         </div>
         <div className="flex gap-2">
           {isUpcoming && onCancel && (
-            <button 
+            <button
               onClick={() => onCancel(apt.id)}
               className="text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50/50 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition-all cursor-pointer flex items-center gap-1"
             >
               <Icons.X className="w-3.5 h-3.5" />
-              <span>Hủy lịch</span>
+              <span>{t('patient:cancel_btn')}</span>
             </button>
           )}
           {isUpcoming && (
-            <button 
+            <button
               onClick={() => onShowQr(apt.qrCode)}
               className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/50 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-all cursor-pointer flex items-center gap-1"
             >
               <Icons.QrCode className="w-3.5 h-3.5" />
-              <span>Mã QR</span>
+              <span>{t('patient:view_qr_btn')}</span>
             </button>
           )}
         </div>
