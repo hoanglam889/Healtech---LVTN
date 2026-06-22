@@ -11,11 +11,11 @@ export class AuthController {
 
   @Post('staff-login')
   async staffLogin(@Body() body: any, @Res({passthrough: true }) res: Response) {
-    const { email, password } = body;
-    if (!email || !password) {
+    const { phone, password } = body;
+    if (!phone || !password) {
       throw new BadRequestException('Vui lòng điền email và mật khẩu!');
     }
-    const loginData = await this.authService.staffLogin(email, password);
+    const loginData = await this.authService.staffLogin(phone, password);
 
     //gắn token
     res.cookie('acces_token', loginData.access_token, {

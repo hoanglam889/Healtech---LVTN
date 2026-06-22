@@ -10,8 +10,8 @@ export const patientRegister = async (data) => {
   return response.data;
 };
 
-export const staffLogin = async (email, password) => {
-  const response = await apiClient.post('/auth/staff-login', { email, password });
+export const staffLogin = async (phone, password) => {
+  const response = await apiClient.post('/auth/staff-login', { phone, password });
   return response.data;
 };
 

@@ -22,8 +22,8 @@ export class AuthService {
   ) {}
 
   // Đăng nhập dành cho nhân viên (STAFF) và bác sĩ (DOCTOR)
-  async staffLogin(email: string, pass: string) {
-    const user = await this.usersRepo.findOne({ where: { email } });
+  async staffLogin(phone: string, pass: string) {
+    const user = await this.usersRepo.findOne({ where: { phone } });
     if (!user || !(await bcrypt.compare(pass, user.passwordHash))) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
     }
