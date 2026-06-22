@@ -1,6 +1,7 @@
-import { Controller, Post, Body, BadRequestException, Res } from '@nestjs/common';
+import { Controller, Post, Patch, Body, BadRequestException, UseGuards, Request, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type {Response} from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import type { Response } from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -56,5 +57,18 @@ export class AuthController {
       return userData;
     }
     return regData;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('change-password')
+  async changePassword(
+    @Request() req,
+    @Body() body: { oldPassword: string; newPassword: string },
+  ) {
+    const { oldPassword, newPassword } = body;
+    if (!oldPassword || !newPassword) {
+      throw new BadRequestException('Vui lòng điền đầy đủ mật khẩu!');
+    }
+    return this.authService.changePassword(req.user.id, req.user.role, oldPassword, newPassword);
   }
 }

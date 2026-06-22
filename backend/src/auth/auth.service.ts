@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -140,5 +140,26 @@ export class AuthService {
         fullName: name,
       },
     };
+  }
+
+  async changePassword(userId: number, role: string, oldPassword: string, newPassword: string) {
+    if (role === 'PATIENT') {
+      const account = await this.patientAccountsRepo.findOne({ where: { id: userId } });
+      if (!account) throw new NotFoundException('Tài khoản không tồn tại!');
+      if (!(await bcrypt.compare(oldPassword, account.passwordHash))) {
+        throw new UnauthorizedException('Mật khẩu cũ không đúng!');
+      }
+      account.passwordHash = await bcrypt.hash(newPassword, 10);
+      await this.patientAccountsRepo.save(account);
+    } else {
+      const user = await this.usersRepo.findOne({ where: { id: userId } });
+      if (!user) throw new NotFoundException('Tài khoản không tồn tại!');
+      if (!(await bcrypt.compare(oldPassword, user.passwordHash))) {
+        throw new UnauthorizedException('Mật khẩu cũ không đúng!');
+      }
+      user.passwordHash = await bcrypt.hash(newPassword, 10);
+      await this.usersRepo.save(user);
+    }
+    return { success: true, message: 'Đổi mật khẩu thành công!' };
   }
 }
