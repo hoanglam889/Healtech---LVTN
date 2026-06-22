@@ -10,6 +10,9 @@ import { PatientsModule } from './patients/patients.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
+import { ShiftsModule } from './shifts/shifts.module';
+import { DoctorSchedulesModule } from './doctor-schedules/doctor-schedules.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -24,7 +27,7 @@ import { AdminModule } from './admin/admin.module';
       port: parseInt(process.env.DB_PORT || '3306', 10),
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_DATABASE, 
+      database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}', __dirname + '/entities/*{.ts,.js}'],
       synchronize: false, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
     }),
@@ -35,6 +38,9 @@ import { AdminModule } from './admin/admin.module';
     AppointmentsModule,
     AuthModule,
     AdminModule,
+    ShiftsModule,
+    DoctorSchedulesModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
