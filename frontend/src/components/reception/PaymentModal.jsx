@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }) {
+  const { t } = useTranslation(['billing', 'common']);
   const [paymentMethod, setPaymentMethod] = useState('CASH'); // 'CASH' | 'VNPAY'
   const [customerPaidStr, setCustomerPaidStr] = useState('');
   
@@ -48,7 +50,7 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50">
           <h3 className="font-extrabold text-lg text-gray-900 flex items-center gap-2">
             <Icons.Receipt className="w-5 h-5 text-blue-600" />
-            <span>Thanh toán Thu ngân</span>
+            <span>{t('billing:modal_title')}</span>
           </h3>
           <button 
             onClick={onClose} 
@@ -63,7 +65,7 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
           
           {/* Left Column (4/12) - Payment Methods */}
           <div className="w-full md:w-1/3 border-r border-gray-100 bg-gray-50/30 p-6 flex flex-col gap-3">
-            <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hình thức thanh toán</h4>
+            <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t('billing:payment_method')}</h4>
             
             {/* Tab Tiền mặt */}
             <button
@@ -79,8 +81,8 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
                   <Icons.Banknote className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className={`font-bold text-sm ${paymentMethod === 'CASH' ? 'text-blue-900' : 'text-gray-700'}`}>Tiền mặt</p>
-                  <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Thanh toán trực tiếp</p>
+                  <p className={`font-bold text-sm ${paymentMethod === 'CASH' ? 'text-blue-900' : 'text-gray-700'}`}>{t('common:payment.cash')}</p>
+                  <p className="text-[10px] text-gray-400 font-semibold mt-0.5">{t('billing:cash_desc')}</p>
                 </div>
               </div>
             </button>
@@ -99,8 +101,8 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
                   <Icons.QrCode className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className={`font-bold text-sm ${paymentMethod === 'VNPAY' ? 'text-blue-900' : 'text-gray-700'}`}>Chuyển khoản</p>
-                  <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Quét mã QR / VNPAY</p>
+                  <p className={`font-bold text-sm ${paymentMethod === 'VNPAY' ? 'text-blue-900' : 'text-gray-700'}`}>{t('billing:transfer')}</p>
+                  <p className="text-[10px] text-gray-400 font-semibold mt-0.5">{t('billing:transfer_desc')}</p>
                 </div>
               </div>
             </button>
@@ -112,15 +114,15 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
               {/* Thông tin chung */}
               <div className="bg-gray-50 rounded-2xl p-5 mb-6 border border-gray-100">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm font-bold text-gray-500">Khách hàng:</span>
+                  <span className="text-sm font-bold text-gray-500">{t('billing:customer')}</span>
                   <span className="text-sm font-extrabold text-gray-900">{appointment.patient?.fullName}</span>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-gray-200 border-dashed">
-                  <span className="text-sm font-bold text-gray-500">Dịch vụ khám:</span>
+                  <span className="text-sm font-bold text-gray-500">{t('billing:service_label')}</span>
                   <span className="text-sm font-bold text-gray-700">{appointment.doctorProfile?.specialty?.name}</span>
                 </div>
                 <div className="flex justify-between items-center pt-4">
-                  <span className="text-sm font-bold text-gray-500">Tổng tiền cần thu:</span>
+                  <span className="text-sm font-bold text-gray-500">{t('billing:total_label')}</span>
                   <span className="text-2xl font-black text-rose-600">{formatVND(totalAmount)}</span>
                 </div>
               </div>
@@ -129,13 +131,13 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
               {paymentMethod === 'CASH' ? (
                 <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tiền khách đưa (VNĐ)</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('billing:customer_paid_label')}</label>
                     <div className="relative">
                       <input 
                         type="text" 
                         value={customerPaidStr}
                         onChange={handleCustomerPaidChange}
-                        placeholder="Nhập số tiền..." 
+                        placeholder={t('billing:amount_placeholder')}
                         className="w-full bg-white border-2 border-gray-200 px-5 py-3.5 rounded-2xl outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 font-bold text-lg text-gray-800 transition-all"
                       />
                       <span className="absolute right-5 top-3.5 font-bold text-gray-400">₫</span>
@@ -145,7 +147,7 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
                   <div className={`p-4 rounded-2xl border-2 flex justify-between items-center transition-colors ${
                     changeAmount < 0 ? 'bg-rose-50 border-rose-100 text-rose-700' : 'bg-emerald-50 border-emerald-100 text-emerald-700'
                   }`}>
-                    <span className="font-bold text-sm">{changeAmount < 0 ? 'Còn thiếu:' : 'Tiền thối lại:'}</span>
+                    <span className="font-bold text-sm">{changeAmount < 0 ? t('billing:change_due') : t('billing:change_return')}</span>
                     <span className="font-black text-xl">{formatVND(Math.abs(changeAmount))}</span>
                   </div>
                 </div>
@@ -154,9 +156,9 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
                   <div className="w-24 h-24 bg-blue-50 rounded-3xl border-2 border-blue-100 border-dashed flex items-center justify-center mb-4">
                     <Icons.QrCode className="w-10 h-10 text-blue-400" />
                   </div>
-                  <h4 className="font-bold text-gray-800 mb-1">Mã QR Thanh toán VNPAY</h4>
+                  <h4 className="font-bold text-gray-800 mb-1">{t('billing:qr_title')}</h4>
                   <p className="text-xs text-gray-500 font-medium max-w-[250px]">
-                    (Khu vực hiển thị mã QR động API Sandbox sẽ được nhúng vào đây ở các bản cập nhật sau)
+                    {t('billing:qr_desc')}
                   </p>
                 </div>
               )}
@@ -168,7 +170,7 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
                 onClick={onClose}
                 className="px-6 py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
               >
-                Hủy bỏ
+                {t('common:cancel')}
               </button>
               <button 
                 onClick={handleConfirm}
@@ -176,7 +178,7 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
                 className="px-8 py-3 rounded-xl font-black text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Icons.CheckCircle className="w-5 h-5" />
-                <span>Xác nhận đã thanh toán</span>
+                <span>{t('billing:confirm_paid')}</span>
               </button>
             </div>
           </div>

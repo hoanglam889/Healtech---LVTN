@@ -4,8 +4,10 @@ import { getAllAppointments, updateAppointment } from '../../services/appointmen
 import PaymentModal from './PaymentModal';
 import InvoiceTemplate from './InvoiceTemplate';
 import { useReactToPrint } from 'react-to-print';
+import { useTranslation } from 'react-i18next';
 
 export default function BillingManager() {
+  const { t, i18n } = useTranslation(['billing', 'common']);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('UNPAID'); // 'UNPAID' | 'PAID'
@@ -63,11 +65,11 @@ export default function BillingManager() {
     setSelectedApptToPay(null);
     try {
       await updateAppointment(apptId, { invoiceStatus: 'PAID', paymentMethod });
-      showToast('Xác nhận đã thu tiền thành công!', 'success');
+      showToast(t('billing:payment_confirmed'), 'success');
       loadAppointments();
     } catch (err) {
       console.error(err);
-      showToast('Đã xảy ra lỗi!', 'error');
+      showToast(t('billing:error_occurred'), 'error');
     } finally {
       setLoading(false);
     }
@@ -75,9 +77,8 @@ export default function BillingManager() {
 
   const filteredBills = getFilteredBills();
 
-  // Helper format currency
   const formatVND = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: 'VND' }).format(value);
   };
 
   return (
@@ -104,9 +105,9 @@ export default function BillingManager() {
                 : 'text-gray-400 hover:text-gray-800'
             }`}
           >
-            Chưa Thanh Toán ({appointments.filter(a => a.invoices?.status === 'UNPAID' && a.status !== 'CANCELLED').length})
+            {t('billing:tab_unpaid', { count: appointments.filter(a => a.invoices?.status === 'UNPAID' && a.status !== 'CANCELLED').length })}
           </button>
-          
+
           <button
             onClick={() => setFilterStatus('PAID')}
             className={`px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
@@ -115,12 +116,12 @@ export default function BillingManager() {
                 : 'text-gray-400 hover:text-gray-800'
             }`}
           >
-            Đã Thu Tiền ({appointments.filter(a => a.invoices?.status === 'PAID' && a.status !== 'CANCELLED').length})
+            {t('billing:tab_paid', { count: appointments.filter(a => a.invoices?.status === 'PAID' && a.status !== 'CANCELLED').length })}
           </button>
         </div>
 
         <div className="text-right sm:text-left">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Tổng tiền mặt cần thu hiện tại</span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{t('billing:total_cash_label')}</span>
           <span className="font-extrabold text-xl text-rose-600 mt-1 block">
             {formatVND(
               appointments
@@ -135,7 +136,7 @@ export default function BillingManager() {
       {loading && filteredBills.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 bg-white rounded-3xl border border-gray-100">
           <Icons.Loader className="w-8 h-8 text-blue-600 animate-spin mb-3" />
-          <p className="text-sm font-semibold text-gray-400">Đang đồng bộ dữ liệu thu chi...</p>
+          <p className="text-sm font-semibold text-gray-400">{t('billing:loading')}</p>
         </div>
       ) : filteredBills.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-3xl border border-gray-100 text-center">
@@ -143,13 +144,10 @@ export default function BillingManager() {
             <Icons.Receipt className="w-8 h-8" />
           </div>
           <h4 className="font-extrabold text-gray-800 text-base">
-            {filterStatus === 'UNPAID' ? 'Không có hóa đơn chưa thanh toán!' : 'Chưa có hóa đơn đã thanh toán!'}
+            {filterStatus === 'UNPAID' ? t('billing:empty_unpaid_title') : t('billing:empty_paid_title')}
           </h4>
           <p className="text-sm text-gray-400 max-w-sm mt-1.5 font-semibold">
-            {filterStatus === 'UNPAID' 
-              ? 'Tất cả các bệnh nhân chọn thanh toán tiền mặt đều đã được thu tiền hoàn chỉnh.' 
-              : 'Hãy thực hiện thu ngân tiền mặt cho các bệnh nhân chờ khám.'
-            }
+            {filterStatus === 'UNPAID' ? t('billing:empty_unpaid_desc') : t('billing:empty_paid_desc')}
           </p>
         </div>
       ) : (
@@ -157,11 +155,11 @@ export default function BillingManager() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                <th className="px-6 py-4.5">Mã QR / Bệnh nhân</th>
-                <th className="px-6 py-4.5">Dịch vụ khám</th>
-                <th className="px-6 py-4.5">Bác sĩ phụ trách</th>
-                <th className="px-6 py-4.5 text-right">Tổng chi phí</th>
-                <th className="px-6 py-4.5 text-right">Hành động</th>
+                <th className="px-6 py-4.5">{t('billing:col_patient')}</th>
+                <th className="px-6 py-4.5">{t('billing:col_service')}</th>
+                <th className="px-6 py-4.5">{t('billing:col_doctor')}</th>
+                <th className="px-6 py-4.5 text-right">{t('billing:col_total')}</th>
+                <th className="px-6 py-4.5 text-right">{t('billing:col_action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
@@ -176,7 +174,7 @@ export default function BillingManager() {
                       </div>
                       <div>
                         <p className="font-extrabold text-gray-900">{appt.patient?.fullName}</p>
-                        <span className="text-xs font-semibold text-gray-400 block mt-0.5">SĐT: {appt.patient?.phone}</span>
+                        <span className="text-xs font-semibold text-gray-400 block mt-0.5">{t('billing:phone_prefix')} {appt.patient?.phone}</span>
                       </div>
                     </div>
                   </td>
@@ -184,9 +182,9 @@ export default function BillingManager() {
                   {/* CỘT DỊCH VỤ / NGÀY GIỜ */}
                   <td className="px-6 py-4">
                     <div>
-                      <p className="font-bold text-gray-800">Khám Chuyên Khoa</p>
+                      <p className="font-bold text-gray-800">{t('billing:service_name')}</p>
                       <span className="text-xs text-gray-400 font-semibold block mt-0.5">
-                        Ngày: {new Date(appt.appointmentDate).toLocaleDateString('vi-VN')} ({appt.appointmentTime?.substring(0, 5)})
+                        {t('billing:date_prefix')} {new Date(appt.appointmentDate).toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US')} ({appt.appointmentTime?.substring(0, 5)})
                       </span>
                     </div>
                   </td>
@@ -215,14 +213,14 @@ export default function BillingManager() {
                           className="bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer text-xs flex items-center gap-1.5"
                         >
                           <Icons.Printer className="w-4 h-4" />
-                          <span>In hóa đơn</span>
+                          <span>{t('billing:print_btn')}</span>
                         </button>
                         <button
                           onClick={() => setSelectedApptToPay(appt)}
                           className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 font-bold px-4.5 py-2.5 rounded-xl transition-all cursor-pointer text-xs flex items-center gap-1.5"
                         >
                           <Icons.CreditCard className="w-4 h-4" />
-                          <span>Thanh toán</span>
+                          <span>{t('billing:pay_btn')}</span>
                         </button>
                       </div>
                     ) : (
@@ -232,11 +230,11 @@ export default function BillingManager() {
                           className="text-gray-500 hover:text-blue-600 font-bold transition-colors cursor-pointer text-xs flex items-center gap-1.5"
                         >
                           <Icons.Printer className="w-4 h-4" />
-                          <span>In lại</span>
+                          <span>{t('billing:reprint_btn')}</span>
                         </button>
                         <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
                           <Icons.CheckCircle className="w-4 h-4" />
-                          <span>Đã thu tiền</span>
+                          <span>{t('billing:paid_badge')}</span>
                         </div>
                       </div>
                     )}
