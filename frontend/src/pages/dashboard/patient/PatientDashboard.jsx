@@ -5,9 +5,9 @@ import { formatDate } from '../../../utils/dateUtils';
 import * as Icons from 'lucide-react';
 import AppointmentCard from '../../../components/dashboard/AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
-import PatientProfiles from './PatientProfiles';
-import MyAppointments from './MyAppointments';
-import HealthBook from './HealthBook';
+import PatientProfiles from '../../../components/dashboard/patient/PatientProfiles';
+import MyAppointments from '../../../components/dashboard/patient/MyAppointments';
+import HealthBook from '../../../components/dashboard/patient/HealthBook';
 import AccountSettings from './AccountSettings';
 import { useTranslation } from 'react-i18next';
 
