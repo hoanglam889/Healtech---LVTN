@@ -63,7 +63,7 @@ export function ToastProvider({ children }) {
 }
 
 /** Simple inline confirmation modal to replace window.confirm() */
-export function ConfirmModal({ isOpen, message, onConfirm, onCancel }) {
+export function ConfirmModal({ isOpen, message, onConfirm, onCancel, cancelLabel, confirmLabel }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
@@ -75,13 +75,13 @@ export function ConfirmModal({ isOpen, message, onConfirm, onCancel }) {
             onClick={onCancel}
             className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors cursor-pointer"
           >
-            Hủy
+            {cancelLabel || 'Cancel'}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 rounded-xl bg-rose-500 text-white font-bold text-sm hover:bg-rose-600 transition-colors cursor-pointer"
           >
-            Xác nhận
+            {confirmLabel || 'Confirm'}
           </button>
         </div>
       </div>

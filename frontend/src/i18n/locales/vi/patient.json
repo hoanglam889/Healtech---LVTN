@@ -74,7 +74,8 @@
     "relation_form_label": "Quan hệ với chủ tài khoản",
     "cancel_btn": "Hủy bỏ",
     "save_btn": "Lưu hồ sơ",
-    "update_btn": "Cập nhật"
+    "update_btn": "Cập nhật",
+    "saving": "Đang lưu..."
   },
   "health": {
     "title": "Sổ sức khỏe cá nhân",
