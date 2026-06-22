@@ -3,7 +3,10 @@ import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('appointments')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('appointments')
 export class AppointmentsController {

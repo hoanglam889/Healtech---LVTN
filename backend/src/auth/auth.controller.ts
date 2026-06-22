@@ -2,6 +2,9 @@ import { Controller, Post, Patch, Body, BadRequestException, UseGuards, Request,
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { Response } from 'express';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -60,6 +63,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch('change-password')
   async changePassword(
     @Request() req,

@@ -4,6 +4,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
@@ -26,6 +28,16 @@ async function bootstrap() {
   //thêm cookie parser
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Healtech API')
+    .setDescription('Healtech clinic management system API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

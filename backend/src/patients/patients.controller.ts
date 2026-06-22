@@ -3,7 +3,10 @@ import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('patients')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('patients')
 export class PatientsController {

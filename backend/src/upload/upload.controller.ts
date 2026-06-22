@@ -8,10 +8,14 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 
+@ApiTags('upload')
 @Controller('upload')
 export class UploadController {
   @Post('image')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
