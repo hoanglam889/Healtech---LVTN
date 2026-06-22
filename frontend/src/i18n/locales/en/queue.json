@@ -1,0 +1,21 @@
+{
+  "title": "Clinic Queue Monitor",
+  "sync_btn": "Sync Queue",
+  "stat_waiting": "Waiting",
+  "stat_examining": "In Examination",
+  "stat_done": "Completed",
+  "stat_unit": "",
+  "loading": "Syncing clinic queue data...",
+  "empty_title": "Queue is empty!",
+  "empty_desc": "Check in patients from the \"Reception\" tab to add them to the waiting queue.",
+  "waiting_count": "Waiting",
+  "currently_examining": "In Examination",
+  "no_patient_examining": "No patient in examination room",
+  "waiting_queue": "Waiting Queue",
+  "no_waiting": "No patients waiting",
+  "code_prefix": "Code:",
+  "diagnosing": "In Diagnosis",
+  "appointment_time": "Appt:",
+  "done_count": "Completed today:",
+  "done_unit": ""
+}

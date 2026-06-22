@@ -1,0 +1,21 @@
+{
+  "title": "Giám sát hàng đợi phòng khám",
+  "sync_btn": "Đồng bộ hàng đợi",
+  "stat_waiting": "Đang đợi khám",
+  "stat_examining": "Đang chẩn đoán",
+  "stat_done": "Đã khám xong",
+  "stat_unit": "người",
+  "loading": "Đang đồng bộ dữ liệu hàng đợi phòng khám...",
+  "empty_title": "Hàng đợi hiện đang trống!",
+  "empty_desc": "Hãy thực hiện check-in cho bệnh nhân ở tab \"Tiếp đón\" để đưa họ vào danh sách xếp hàng chờ khám.",
+  "waiting_count": "Chờ khám",
+  "currently_examining": "Đang khám bệnh",
+  "no_patient_examining": "Không có bệnh nhân trong phòng khám",
+  "waiting_queue": "Hàng đợi chờ khám",
+  "no_waiting": "Không có bệnh nhân chờ khám",
+  "code_prefix": "Mã số:",
+  "diagnosing": "Đang chẩn đoán",
+  "appointment_time": "Hẹn:",
+  "done_count": "Số ca đã khám xong trong ngày:",
+  "done_unit": "ca"
+}

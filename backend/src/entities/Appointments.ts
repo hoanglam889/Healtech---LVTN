@@ -45,6 +45,13 @@ export class Appointments {
   })
   status: "BOOKED" | "WAITING" | "EXAMINING" | "DONE" | "CANCELLED" | null;
 
+  @Column("enum", {
+    name: "booking_type",
+    enum: ["ONLINE", "OFFLINE"],
+    default: () => "'ONLINE'",
+  })
+  bookingType: "ONLINE" | "OFFLINE";
+
   @Column("int", {
     name: "priority_score",
     nullable: true,

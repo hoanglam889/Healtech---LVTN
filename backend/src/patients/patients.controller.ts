@@ -19,6 +19,11 @@ export class PatientsController {
     return this.patientsService.findAll(patientAccountId ? +patientAccountId : undefined);
   }
 
+  @Get('search')
+  search(@Query('q') q: string) {
+    return this.patientsService.search(q || '');
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.patientsService.findOne(+id);

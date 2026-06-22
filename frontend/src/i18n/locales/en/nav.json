@@ -1,0 +1,16 @@
+{
+  "home": "Home",
+  "specialties": "Specialties",
+  "doctors": "Doctors",
+  "news": "News",
+  "dashboard": "Dashboard",
+  "my_appointments": "My Appointments",
+  "patient_profiles": "Patient Profiles",
+  "health_book": "Health Book",
+  "account": "My Account",
+  "login": "Login",
+  "logout": "Log Out",
+  "book_appointment": "Book Appointment",
+  "patient_member": "Member patient",
+  "patient_default": "Patient"
+}

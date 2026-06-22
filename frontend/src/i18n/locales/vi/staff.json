@@ -1,0 +1,17 @@
+{
+  "portal": "Staff Portal",
+  "main_functions": "Chức năng chính",
+  "checkin_menu": "Tiếp đón & Check-in",
+  "queue_menu": "Hàng đợi phòng khám",
+  "billing_menu": "Thu ngân & Thanh toán",
+  "schedules_menu": "Quản lý lịch trực",
+  "doctor_queue_menu": "Danh sách chờ khám",
+  "patient_portal": "Trang bệnh nhân",
+  "logout": "Đăng xuất",
+  "header_checkin": "Tiếp đón Bệnh nhân mới",
+  "header_queue": "Giám sát Hàng đợi Phòng khám",
+  "header_billing": "Quản lý Thu ngân / Thanh toán",
+  "header_doctor_queue": "Phòng Khám Nội / Ngoại khoa",
+  "header_schedules": "Quản lý Lịch trực Bác sĩ",
+  "system_subtitle": "Hệ thống quản lý thông tin nội bộ Healtech ERP"
+}

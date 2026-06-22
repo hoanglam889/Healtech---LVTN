@@ -1,0 +1,57 @@
+{
+  "appName": "Healtech",
+  "loading": "Đang tải...",
+  "save": "Lưu",
+  "cancel": "Hủy",
+  "close": "Đóng",
+  "back": "Quay lại",
+  "next": "Tiếp theo",
+  "confirm": "Xác nhận",
+  "search": "Tìm kiếm",
+  "all": "Tất cả",
+  "today": "Hôm nay",
+  "date": "Ngày",
+  "time": "Giờ",
+  "status": {
+    "booked": "Chưa check-in",
+    "waiting": "Đang đợi khám",
+    "examining": "Đang khám bệnh",
+    "done": "Đã hoàn tất",
+    "cancelled": "Đã huỷ"
+  },
+  "payment": {
+    "paid": "Đã Thanh toán",
+    "unpaid": "Chưa Thanh toán",
+    "cash": "Tiền mặt",
+    "vnpay": "VNPay"
+  },
+  "gender": {
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác"
+  },
+  "booking_type": {
+    "online": "Online",
+    "walkin": "Walk-in"
+  },
+  "role": {
+    "staff": "Lễ tân",
+    "doctor": "Bác sĩ",
+    "manager": "Quản lý"
+  },
+  "fee": "150.000 đ",
+  "point": "Điểm",
+  "points_unit": "đ",
+  "priority_score": "Điểm ưu tiên",
+  "doctor_title": "BS.",
+  "experience_years": "năm kinh nghiệm",
+  "max_patients": "Tối đa {{count}} BN",
+  "date_format": "vi-VN",
+  "relation": {
+    "self": "Bản thân",
+    "parent": "Bố/Mẹ",
+    "spouse": "Vợ/Chồng",
+    "child": "Con cái",
+    "other": "Khác"
+  }
+}

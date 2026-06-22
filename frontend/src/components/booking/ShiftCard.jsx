@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ShiftCard = ({ schedule, isSelected, onSelect, status }) => {
+  const { t } = useTranslation('booking');
   const timeRange = `${schedule.shift?.startTime?.substring(0, 5)} - ${schedule.shift?.endTime?.substring(0, 5)}`;
   const isExpired = status === 'EXPIRED';
   const isLate = status === 'LATE_ALLOWED';
@@ -9,7 +11,7 @@ const ShiftCard = ({ schedule, isSelected, onSelect, status }) => {
     return (
       <div className="py-3.5 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 text-center font-bold text-sm md:text-base flex flex-col items-center justify-center cursor-not-allowed select-none opacity-60">
         <span>{timeRange}</span>
-        <span className="text-[10px] text-gray-400 font-semibold mt-0.5">(Hết ca hẹn)</span>
+        <span className="text-[10px] text-gray-400 font-semibold mt-0.5">{t('expired_shift')}</span>
       </div>
     );
   }
@@ -26,7 +28,7 @@ const ShiftCard = ({ schedule, isSelected, onSelect, status }) => {
       >
         <span>{timeRange}</span>
         <span className={`text-[9px] font-bold mt-0.5 ${isSelected ? 'text-white/95' : 'text-amber-600'}`}>
-          ⚠️ Quá giờ hẹn - Vẫn nhận
+          {t('late_allowed')}
         </span>
       </div>
     );

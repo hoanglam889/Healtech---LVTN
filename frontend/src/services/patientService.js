@@ -26,3 +26,8 @@ export const deletePatient = async (id) => {
   const response = await apiClient.delete(`/patients/${id}`);
   return response.data;
 };
+
+export const searchPatients = async (query) => {
+  const response = await apiClient.get('/patients/search', { params: { q: query } });
+  return response.data;
+};

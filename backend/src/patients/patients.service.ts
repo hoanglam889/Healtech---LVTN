@@ -23,6 +23,15 @@ export class PatientsService {
     });
   }
 
+  async search(query: string) {
+    return await this.patientsRepository
+      .createQueryBuilder('p')
+      .where('p.fullName LIKE :q OR p.phone LIKE :q OR p.cccd LIKE :q', { q: `%${query}%` })
+      .orderBy('p.createdAt', 'DESC')
+      .take(20)
+      .getMany();
+  }
+
   async findOne(id: number) {
     const patient = await this.patientsRepository.findOneBy({ id });
     if (!patient) {

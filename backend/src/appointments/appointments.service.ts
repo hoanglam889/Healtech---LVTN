@@ -37,8 +37,38 @@ export class AppointmentsService {
     } catch {}
   }
 
+  private computePriorityScore(patient: Patients | null, invoiceStatus: string | null | undefined, appointmentDate: string, appointmentTime: string | null): number {
+    let baseScore = 5;
+
+    if (patient?.dob) {
+      const dobDate = new Date(patient.dob);
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
+      if (age < 6 || age > 60) baseScore = 8;
+    }
+
+    const isPaidInAdvance = (invoiceStatus ?? '') === 'PAID';
+    let lateModifier = 0;
+
+    if (appointmentDate && appointmentTime) {
+      try {
+        const scheduledDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+        if (!isNaN(scheduledDateTime.getTime())) {
+          const diffMinutes = (Date.now() - scheduledDateTime.getTime()) / 60000;
+          if (diffMinutes > 20) lateModifier = -2;
+        }
+      } catch { /* ignore invalid date formats */ }
+    }
+
+    return baseScore + 1 + (isPaidInAdvance ? 1 : 0) + lateModifier;
+  }
+
   async create(createDto: CreateAppointmentDto) {
     const { patientId, doctorProfileId, appointmentDate, appointmentTime, paymentMethod } = createDto;
+    const bookingType = createDto.bookingType ?? 'ONLINE';
+    const isWalkIn = bookingType === 'OFFLINE';
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -58,13 +88,16 @@ export class AppointmentsService {
         if (!existing) isUnique = true;
       }
 
+      const initialStatus = isWalkIn ? 'WAITING' : 'BOOKED';
+
       const appointment = new Appointments();
       appointment.qrCode = qrCode;
       appointment.patientId = patientId;
       appointment.doctorProfileId = doctorProfileId;
       appointment.appointmentDate = appointmentDate;
       appointment.appointmentTime = appointmentTime;
-      appointment.status = 'BOOKED';
+      appointment.status = initialStatus;
+      appointment.bookingType = bookingType;
       appointment.priorityScore = 1;
 
       const savedAppointment = await queryRunner.manager.save(Appointments, appointment);
@@ -73,34 +106,43 @@ export class AppointmentsService {
       invoice.appointmentId = savedAppointment.id;
       invoice.totalAmount = '150000.00';
       invoice.paymentMethod = paymentMethod;
+      invoice.status = 'UNPAID';
+      invoice.paidAt = null;
 
       if (paymentMethod === 'VNPAY') {
         invoice.status = 'PAID';
         invoice.paidAt = new Date();
-      } else {
-        invoice.status = 'UNPAID';
-        invoice.paidAt = null;
       }
 
       await queryRunner.manager.save(Invoices, invoice);
+
+      // For walk-ins that go straight to WAITING, compute priority score immediately
+      if (isWalkIn) {
+        const patient = await queryRunner.manager.findOne(Patients, { where: { id: patientId } });
+        const score = this.computePriorityScore(patient, invoice.status, appointmentDate, appointmentTime);
+        await queryRunner.manager.update(Appointments, savedAppointment.id, { priorityScore: score });
+        savedAppointment.priorityScore = score;
+      }
 
       // Log initial status
       const log = new AppointmentStatusLogs();
       log.appointmentId = savedAppointment.id;
       log.oldStatus = null;
-      log.newStatus = 'BOOKED';
+      log.newStatus = initialStatus;
       log.changedBy = null;
       log.changedAt = new Date();
       await queryRunner.manager.save(AppointmentStatusLogs, log);
 
       await queryRunner.commitTransaction();
 
-      // Send booking confirmation notification (fire-and-forget)
-      this.sendNotification(
-        patientId,
-        'Đặt lịch thành công!',
-        `Lịch khám ngày ${appointmentDate} đã được xác nhận. Mã QR: ${qrCode}`,
-      );
+      // Send booking confirmation notification for online bookings only
+      if (!isWalkIn) {
+        this.sendNotification(
+          patientId,
+          'Đặt lịch thành công!',
+          `Lịch khám ngày ${appointmentDate} đã được xác nhận. Mã QR: ${qrCode}`,
+        );
+      }
 
       return { success: true, appointment: savedAppointment, invoice };
     } catch (err) {
@@ -153,31 +195,12 @@ export class AppointmentsService {
 
     // Smart priority score when checking in
     if (appointmentFields.status === 'WAITING') {
-      let baseScore = 5;
-
-      if (appointment.patient?.dob) {
-        const dobDate = new Date(appointment.patient.dob);
-        const today = new Date();
-        let age = today.getFullYear() - dobDate.getFullYear();
-        const m = today.getMonth() - dobDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
-        if (age < 6 || age > 60) baseScore = 8;
-      }
-
-      const isPaidInAdvance = appointment.invoices?.status === 'PAID';
-      let lateModifier = 0;
-
-      if (appointment.appointmentDate && appointment.appointmentTime) {
-        try {
-          const scheduledDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
-          if (!isNaN(scheduledDateTime.getTime())) {
-            const diffMinutes = (Date.now() - scheduledDateTime.getTime()) / 60000;
-            if (diffMinutes > 20) lateModifier = -2;
-          }
-        } catch {}
-      }
-
-      appointmentFields.priorityScore = baseScore + 1 + (isPaidInAdvance ? 1 : 0) + lateModifier;
+      appointmentFields.priorityScore = this.computePriorityScore(
+        appointment.patient,
+        appointment.invoices?.status,
+        appointment.appointmentDate,
+        appointment.appointmentTime,
+      );
     }
 
     // Update appointment

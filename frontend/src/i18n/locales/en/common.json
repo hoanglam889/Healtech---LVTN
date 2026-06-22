@@ -1,0 +1,57 @@
+{
+  "appName": "Healtech",
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "confirm": "Confirm",
+  "search": "Search",
+  "all": "All",
+  "today": "Today",
+  "date": "Date",
+  "time": "Time",
+  "status": {
+    "booked": "Not checked in",
+    "waiting": "Waiting",
+    "examining": "In examination",
+    "done": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "payment": {
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "cash": "Cash",
+    "vnpay": "VNPay"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "booking_type": {
+    "online": "Online",
+    "walkin": "Walk-in"
+  },
+  "role": {
+    "staff": "Receptionist",
+    "doctor": "Doctor",
+    "manager": "Manager"
+  },
+  "fee": "150,000 VND",
+  "point": "Point",
+  "points_unit": "pts",
+  "priority_score": "Priority score",
+  "doctor_title": "Dr.",
+  "experience_years": "years experience",
+  "max_patients": "Max {{count}} patients",
+  "date_format": "en-US",
+  "relation": {
+    "self": "Self",
+    "parent": "Parent",
+    "spouse": "Spouse",
+    "child": "Child",
+    "other": "Other"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "portal": "Staff Portal",
+  "main_functions": "Main Functions",
+  "checkin_menu": "Reception & Check-in",
+  "queue_menu": "Clinic Queue",
+  "billing_menu": "Billing & Payment",
+  "schedules_menu": "Schedule Management",
+  "doctor_queue_menu": "Patient Waiting List",
+  "patient_portal": "Patient Portal",
+  "logout": "Log Out",
+  "header_checkin": "New Patient Reception",
+  "header_queue": "Clinic Queue Monitor",
+  "header_billing": "Billing / Payment Management",
+  "header_doctor_queue": "Examination Room",
+  "header_schedules": "Doctor Schedule Management",
+  "system_subtitle": "Healtech ERP Internal Management System"
+}
