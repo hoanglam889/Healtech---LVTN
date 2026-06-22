@@ -163,7 +163,7 @@ export default function StaffLogin({ onLoginSuccess, onGoHome }) {
               >
                 <Icons.Stethoscope className="w-4 h-4 text-blue-600" />
                 <div>
-                  <p className="font-extrabold text-gray-900 leading-tight">BS. Cao Mỹ Ái (Tim Mạch)</p>
+                  <p className="font-extrabold text-gray-900 leading-tight">{t('doctor_demo')}</p>
                   <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">004 / MK: 1</span>
                 </div>
               </button>

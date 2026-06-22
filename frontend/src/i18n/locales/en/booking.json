@@ -63,5 +63,13 @@
   "form_relation_label": "Relation to account holder",
   "form_patient_info": "Enter patient information",
   "form_cancel_btn": "Cancel",
-  "form_save_btn": "Save Profile"
+  "form_save_btn": "Save Profile",
+  "back_btn": "← Back",
+  "new_profile_btn": "Create new profile",
+  "full_shift": "(Sold out)",
+  "alert_booking_error": "An error occurred while booking. Please try again.",
+  "alert_server_error": "Unable to connect to the server. Please try again later.",
+  "payment_method_label": "Payment method:",
+  "date_on": "on",
+  "reviews_fake": "(98 reviews)"
 }

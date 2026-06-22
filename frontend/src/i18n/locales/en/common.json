@@ -54,6 +54,7 @@
     "child": "Child",
     "other": "Other"
   },
+  "years_unit": "yrs",
   "specialties": {
     "Tim mạch": "Cardiology",
     "Thần kinh": "Neurology",

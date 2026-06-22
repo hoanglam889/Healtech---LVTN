@@ -12,7 +12,7 @@ const ShiftCard = ({ schedule, isSelected, onSelect, status }) => {
     return (
       <div className="py-3.5 px-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-500 text-center font-bold text-sm md:text-base flex flex-col items-center justify-center cursor-not-allowed select-none opacity-80">
         <span className="line-through">{timeRange}</span>
-        <span className="text-[10px] text-rose-600 font-bold mt-0.5">(Đã hết chỗ)</span>
+        <span className="text-[10px] text-rose-600 font-bold mt-0.5">{t('full_shift')}</span>
       </div>
     );
   }
