@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from './components/shared/Navbar';
 import Footer from './components/shared/Footer';
 import HeroSection from './components/landing/HeroSection';
@@ -29,15 +30,7 @@ function App() {
     }
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
-
-  React.useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  const { pathname } = useLocation();
 
 
   // Xử lý Đăng nhập thành công
@@ -60,11 +53,11 @@ function App() {
     setActiveTab('dashboard');
   };
 
-  if (currentPath === '/admin') {
+  if (pathname === '/admin') {
     return <AdminDashboard />;
   }
 
-  if (currentPath === '/staff') {
+  if (pathname === '/staff') {
     return <StaffDashboard />;
   }
 
