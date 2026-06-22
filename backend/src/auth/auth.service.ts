@@ -1,12 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Users } from '../entities/Users';
 import { PatientAccounts } from '../entities/PatientAccounts';
 import { DoctorProfiles } from '../entities/DoctorProfiles';
 import { Patients } from '../entities/Patients';
 import { JwtService } from '@nestjs/jwt';
-import { access } from 'fs';
 @Injectable()
 export class AuthService {
   constructor(
@@ -23,10 +23,8 @@ export class AuthService {
 
   // Đăng nhập dành cho nhân viên (STAFF) và bác sĩ (DOCTOR)
   async staffLogin(email: string, pass: string) {
-    const user = await this.usersRepo.findOne({
-      where: { email, passwordHash: pass },
-    });
-    if (!user) {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    if (!user || !(await bcrypt.compare(pass, user.passwordHash))) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
     }
 
@@ -70,10 +68,10 @@ export class AuthService {
   // Đăng nhập dành cho bệnh nhân (khách hàng)
   async patientLogin(email: string, pass: string) {
     const account = await this.patientAccountsRepo.findOne({
-      where: { email, passwordHash: pass },
+      where: { email },
       relations: { patients: true },
     });
-    if (!account) {
+    if (!account || !(await bcrypt.compare(pass, account.passwordHash))) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
     }
 
@@ -115,7 +113,7 @@ export class AuthService {
     // 1. Tạo tài khoản bệnh nhân mới
     const newAccount = new PatientAccounts();
     newAccount.email = email;
-    newAccount.passwordHash = pass;
+    newAccount.passwordHash = await bcrypt.hash(pass, 10);
     newAccount.isActive = true;
     const savedAccount = await this.patientAccountsRepo.save(newAccount);
 
