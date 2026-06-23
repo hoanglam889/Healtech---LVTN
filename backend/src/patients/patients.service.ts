@@ -22,16 +22,13 @@ export class PatientsService {
       createPatientDto.phone
     );
 
-    const newPatient = this.patientsRepository.create({
-      ...createPatientDto,
-      isCompleted,
-    });
+    const newPatient = this.patientsRepository.create({ ...createPatientDto, isCompleted });
     return await this.patientsRepository.save(newPatient);
   }
 
   async findAll(patientAccountId?: number) {
     return await this.patientsRepository.find({
-      where: patientAccountId ? { patientAccountId } : {}
+      where: patientAccountId ? { patientAccountId } : {},
     });
   }
 
@@ -47,14 +44,14 @@ export class PatientsService {
   async findOne(id: number) {
     const patient = await this.patientsRepository.findOneBy({ id });
     if (!patient) {
-      throw new NotFoundException(`Không tìm thấy bệnh nhân với ID: ${id}`);
+      throw new NotFoundException({ i18nKey: 'errors.patient.not_found', args: { id } });
     }
     return patient;
   }
 
   async update(id: number, updatePatientDto: UpdatePatientDto) {
     const patient = await this.findOne(id);
-    
+
     const mergedData = { ...patient, ...updatePatientDto };
     const isCompleted = !!(
       mergedData.fullName &&
@@ -65,10 +62,7 @@ export class PatientsService {
       mergedData.phone
     );
 
-    await this.patientsRepository.update(id, {
-      ...updatePatientDto,
-      isCompleted,
-    });
+    await this.patientsRepository.update(id, { ...updatePatientDto, isCompleted });
     return this.findOne(id);
   }
 

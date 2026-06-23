@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { I18nModule, AcceptLanguageResolver, QueryResolver, I18nValidationPipe } from 'nestjs-i18n';
+import * as path from 'path';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SpecialtiesModule } from './specialties/specialties.module';
@@ -13,14 +17,11 @@ import { AdminModule } from './admin/admin.module';
 import { ShiftsModule } from './shifts/shifts.module';
 import { DoctorSchedulesModule } from './doctor-schedules/doctor-schedules.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 @Module({
   imports: [
-    // 1. Load file cấu hình .env
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    // 2. Cấu hình kết nối MySQL thông qua TypeORM
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST || 'localhost',
@@ -29,7 +30,18 @@ import { NotificationsModule } from './notifications/notifications.module';
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}', __dirname + '/entities/*{.ts,.js}'],
-      synchronize: false, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
+      synchronize: false,
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'vi',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+      ],
     }),
     SpecialtiesModule,
     UploadModule,
@@ -43,6 +55,13 @@ import { NotificationsModule } from './notifications/notifications.module';
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+    {
+      provide: APP_PIPE,
+      useFactory: () => new I18nValidationPipe({ whitelist: true, transform: true }),
+    },
+  ],
 })
 export class AppModule {}

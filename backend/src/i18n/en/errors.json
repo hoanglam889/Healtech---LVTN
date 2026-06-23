@@ -1,0 +1,38 @@
+{
+  "validation": "Input data is invalid",
+  "http": {
+    "400": "Bad request",
+    "401": "Unauthorized",
+    "403": "Forbidden",
+    "404": "Resource not found",
+    "409": "Data conflict",
+    "422": "Unprocessable entity",
+    "500": "Internal server error. Please try again later"
+  },
+  "auth": {
+    "missing_login_fields": "Please enter your phone/email and password",
+    "missing_register_fields": "Full name, email and password are required",
+    "missing_password_fields": "Please enter both old and new passwords",
+    "invalid_credentials": "Phone/email or password is incorrect",
+    "account_locked": "Your account has been locked or is not yet activated",
+    "account_not_activated": "Account is not activated. Please verify your code to continue",
+    "wrong_old_password": "Old password is incorrect",
+    "account_not_found": "Account does not exist",
+    "email_already_registered": "This email is already registered"
+  },
+  "appointment": {
+    "no_schedule": "The doctor has no schedule for this time slot. Please choose another",
+    "max_patients": "This session has reached the maximum number of patients. Please choose another",
+    "not_found": "Appointment with ID #{{id}} not found",
+    "invalid_transition": "Cannot change status from {{from}} to {{to}}",
+    "patient_incomplete": "Please complete the patient's profile (ID card, address,...) before check-in",
+    "create_failed": "Failed to create appointment: {{details}}"
+  },
+  "patient": {
+    "not_found": "Patient with ID {{id}} not found"
+  },
+  "schedule": {
+    "past_date": "Cannot schedule appointments for past dates",
+    "not_found": "Schedule with ID #{{id}} not found"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "validation": "Dữ liệu đầu vào không hợp lệ",
+  "http": {
+    "400": "Yêu cầu không hợp lệ",
+    "401": "Không có quyền truy cập",
+    "403": "Truy cập bị từ chối",
+    "404": "Không tìm thấy tài nguyên yêu cầu",
+    "409": "Dữ liệu bị xung đột",
+    "422": "Dữ liệu không hợp lệ",
+    "500": "Đã xảy ra lỗi máy chủ nội bộ. Vui lòng thử lại sau"
+  },
+  "auth": {
+    "missing_login_fields": "Vui lòng điền số điện thoại/email và mật khẩu",
+    "missing_register_fields": "Họ tên, email và mật khẩu là bắt buộc",
+    "missing_password_fields": "Vui lòng điền đầy đủ mật khẩu cũ và mật khẩu mới",
+    "invalid_credentials": "Số điện thoại/email hoặc mật khẩu không chính xác",
+    "account_locked": "Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt",
+    "account_not_activated": "Tài khoản chưa được kích hoạt. Vui lòng xác thực mã để tiếp tục",
+    "wrong_old_password": "Mật khẩu cũ không đúng",
+    "account_not_found": "Tài khoản không tồn tại",
+    "email_already_registered": "Email này đã được đăng ký tài khoản"
+  },
+  "appointment": {
+    "no_schedule": "Bác sĩ không có lịch làm việc vào khung giờ này. Vui lòng chọn lại",
+    "max_patients": "Ca khám này đã đạt tối đa số lượng bệnh nhân cho phép. Vui lòng chọn ca khác",
+    "not_found": "Không tìm thấy lịch hẹn có ID #{{id}}",
+    "invalid_transition": "Không thể chuyển trạng thái từ {{from}} sang {{to}}",
+    "patient_incomplete": "Vui lòng cập nhật đầy đủ thông tin bệnh nhân (CCCD, Địa chỉ,...) trước khi check-in",
+    "create_failed": "Lỗi tạo lịch khám: {{details}}"
+  },
+  "patient": {
+    "not_found": "Không tìm thấy bệnh nhân với ID: {{id}}"
+  },
+  "schedule": {
+    "past_date": "Không thể xếp lịch cho những ngày đã qua",
+    "not_found": "Không tìm thấy ca trực với ID #{{id}}"
+  }
+}

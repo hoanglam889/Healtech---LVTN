@@ -46,8 +46,8 @@ export class DoctorSchedulesService {
 
   async remove(id: number) {
     const schedule = await this.schedulesRepo.findOne({ where: { id } });
-    if (!schedule) throw new NotFoundException(`Không tìm thấy lịch trực #${id}`);
+    if (!schedule) throw new NotFoundException({ i18nKey: 'errors.schedule.not_found', args: { id } });
     await this.schedulesRepo.remove(schedule);
-    return { success: true, message: `Đã xóa lịch trực #${id}` };
+    return { success: true };
   }
 }

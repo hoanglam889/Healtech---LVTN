@@ -1,0 +1,16 @@
+{
+  "isString": "{{property}} phải là chuỗi ký tự",
+  "isInt": "{{property}} phải là số nguyên",
+  "isNumber": "{{property}} phải là số",
+  "isEnum": "Giá trị của trường {{property}} không hợp lệ",
+  "isDateString": "{{property}} phải có định dạng ngày hợp lệ (YYYY-MM-DD)",
+  "isNotEmpty": "{{property}} không được để trống",
+  "isEmail": "{{property}} không phải là địa chỉ email hợp lệ",
+  "isBoolean": "{{property}} phải là true hoặc false",
+  "isArray": "{{property}} phải là mảng",
+  "min": "{{property}} phải lớn hơn hoặc bằng {{constraints.0}}",
+  "max": "{{property}} phải nhỏ hơn hoặc bằng {{constraints.0}}",
+  "minLength": "{{property}} phải có ít nhất {{constraints.0}} ký tự",
+  "maxLength": "{{property}} không được vượt quá {{constraints.0}} ký tự",
+  "isOptional": "{{property}} là không bắt buộc"
+}

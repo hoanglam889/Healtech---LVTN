@@ -1,0 +1,16 @@
+{
+  "isString": "{{property}} must be a string",
+  "isInt": "{{property}} must be an integer",
+  "isNumber": "{{property}} must be a number",
+  "isEnum": "{{property}} value is invalid",
+  "isDateString": "{{property}} must be a valid date format (YYYY-MM-DD)",
+  "isNotEmpty": "{{property}} must not be empty",
+  "isEmail": "{{property}} must be a valid email address",
+  "isBoolean": "{{property}} must be a boolean (true/false)",
+  "isArray": "{{property}} must be an array",
+  "min": "{{property}} must be greater than or equal to {{constraints.0}}",
+  "max": "{{property}} must be less than or equal to {{constraints.0}}",
+  "minLength": "{{property}} must be at least {{constraints.0}} characters long",
+  "maxLength": "{{property}} must not exceed {{constraints.0}} characters",
+  "isOptional": "{{property}} is optional"
+}
