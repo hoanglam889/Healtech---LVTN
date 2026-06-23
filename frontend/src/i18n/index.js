@@ -13,6 +13,7 @@ import queueVI from './locales/vi/queue.json';
 import walkinVI from './locales/vi/walkin.json';
 import doctorVI from './locales/vi/doctor.json';
 import billingVI from './locales/vi/billing.json';
+import adminVI from './locales/vi/admin.json';
 
 import commonEN from './locales/en/common.json';
 import navEN from './locales/en/nav.json';
@@ -26,6 +27,7 @@ import queueEN from './locales/en/queue.json';
 import walkinEN from './locales/en/walkin.json';
 import doctorEN from './locales/en/doctor.json';
 import billingEN from './locales/en/billing.json';
+import adminEN from './locales/en/admin.json';
 
 const savedLang = localStorage.getItem('lang') || 'vi';
 
@@ -46,6 +48,7 @@ i18n
         walkin: walkinVI,
         doctor: doctorVI,
         billing: billingVI,
+        admin: adminVI,
       },
       en: {
         common: commonEN,
@@ -60,12 +63,13 @@ i18n
         walkin: walkinEN,
         doctor: doctorEN,
         billing: billingEN,
+        admin: adminEN,
       },
     },
     lng: savedLang,
     fallbackLng: 'vi',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'auth', 'landing', 'booking', 'patient', 'staff', 'checkin', 'queue', 'walkin', 'doctor', 'billing'],
+    ns: ['common', 'nav', 'auth', 'landing', 'booking', 'patient', 'staff', 'checkin', 'queue', 'walkin', 'doctor', 'billing', 'admin'],
     interpolation: { escapeValue: false },
   });
 

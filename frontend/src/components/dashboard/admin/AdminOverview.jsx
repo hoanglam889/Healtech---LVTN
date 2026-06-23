@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getAdminStats } from '../../../services/adminService';
 
 export default function AdminOverview() {
+  const { t } = useTranslation('admin');
   const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch stats from backend
   useEffect(() => {
     getAdminStats()
       .then((data) => {
@@ -23,7 +24,7 @@ export default function AdminOverview() {
     return (
       <div className="bg-white border border-gray-100 rounded-3xl p-12 text-center shadow-xl max-w-sm mx-auto mt-20">
         <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-400 font-bold text-xs uppercase tracking-wider">Đang tải thống kê thực tế...</p>
+        <p className="text-gray-400 font-bold text-xs uppercase tracking-wider">{t('overview.loading')}</p>
       </div>
     );
   }
@@ -35,16 +36,14 @@ export default function AdminOverview() {
   const recentActivities = statsData?.recentActivities || [];
 
   const stats = [
-    { label: 'Doanh thu tích lũy', value: totalRevenue, change: 'Tổng tiền hóa đơn đã đóng', icon: 'DollarSign', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-    { label: 'Tổng ca khám bệnh', value: `${totalAppointments} ca`, change: 'Lịch hẹn đặt qua hệ thống', icon: 'CalendarDays', color: 'bg-blue-50 text-blue-600 border-blue-100' },
-    { label: 'Hồ sơ bệnh nhân', value: `${totalPatients} hồ sơ`, change: 'Bệnh nhân đăng ký thông tin', icon: 'Users', color: 'bg-violet-50 text-violet-600 border-violet-100' },
-    { label: 'Bác sĩ trực thuộc', value: `${totalDoctors} bác sĩ`, change: 'Hồ sơ bác sĩ chuyên khoa', icon: 'HeartPulse', color: 'bg-rose-50 text-rose-600 border-rose-100' }
+    { label: t('overview.stat_revenue'), value: totalRevenue, change: t('overview.stat_revenue_desc'), icon: 'DollarSign', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+    { label: t('overview.stat_appointments'), value: `${totalAppointments} ${t('overview.stat_appointments_unit')}`, change: t('overview.stat_appointments_desc'), icon: 'CalendarDays', color: 'bg-blue-50 text-blue-600 border-blue-100' },
+    { label: t('overview.stat_patients'), value: `${totalPatients} ${t('overview.stat_patients_unit')}`, change: t('overview.stat_patients_desc'), icon: 'Users', color: 'bg-violet-50 text-violet-600 border-violet-100' },
+    { label: t('overview.stat_doctors'), value: `${totalDoctors} ${t('overview.stat_doctors_unit')}`, change: t('overview.stat_doctors_desc'), icon: 'HeartPulse', color: 'bg-rose-50 text-rose-600 border-rose-100' }
   ];
 
   return (
     <div className="space-y-8">
-      
-      {/* KHỐI CHỈ SỐ NHANH THỜI GIAN THỰC */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => {
           const IconComponent = Icons[stat.icon] || Icons.HelpCircle;
@@ -63,31 +62,30 @@ export default function AdminOverview() {
         })}
       </div>
 
-      {/* DANH SÁCH HOẠT ĐỘNG GẦN ĐÂY THỰC TẾ */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden animate-[fadeIn_0.3s_ease-out]">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <div>
-            <h3 className="font-extrabold text-gray-900 text-base">Hoạt động khám bệnh gần đây nhất</h3>
-            <p className="text-xs text-gray-400 font-semibold mt-0.5">Top 5 ca khám được ghi nhận gần đây</p>
+            <h3 className="font-extrabold text-gray-900 text-base">{t('overview.recent_title')}</h3>
+            <p className="text-xs text-gray-400 font-semibold mt-0.5">{t('overview.recent_subtitle')}</p>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           {recentActivities.length === 0 ? (
             <div className="p-12 text-center text-gray-400 font-bold text-sm">
-              Chưa ghi nhận ca khám nào trong hệ thống.
+              {t('overview.recent_empty')}
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-100 text-gray-400 text-[10px] font-bold uppercase tracking-wider bg-gray-50/30">
-                  <th className="py-4 px-6">Mã ca khám</th>
-                  <th className="py-4 px-6">Bệnh nhân</th>
-                  <th className="py-4 px-6">Bác sĩ phụ trách</th>
-                  <th className="py-4 px-6">Thời gian</th>
-                  <th className="py-4 px-6">Chuyên khoa</th>
-                  <th className="py-4 px-6">Phí dịch vụ</th>
-                  <th className="py-4 px-6 text-right">Trạng thái</th>
+                  <th className="py-4 px-6">{t('overview.col_id')}</th>
+                  <th className="py-4 px-6">{t('overview.col_patient')}</th>
+                  <th className="py-4 px-6">{t('overview.col_doctor')}</th>
+                  <th className="py-4 px-6">{t('overview.col_time')}</th>
+                  <th className="py-4 px-6">{t('overview.col_specialty')}</th>
+                  <th className="py-4 px-6">{t('overview.col_fee')}</th>
+                  <th className="py-4 px-6 text-right">{t('overview.col_status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-sm font-medium text-gray-700">
@@ -101,10 +99,10 @@ export default function AdminOverview() {
                     <td className="py-4 px-6 font-bold text-gray-900">{act.amount}</td>
                     <td className="py-4 px-6 text-right">
                       <span className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                        act.status === 'Hoàn thành' 
-                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                          : act.status === 'Đã check-in' 
-                            ? 'bg-amber-50 text-amber-600 border border-amber-100' 
+                        act.status === 'Hoàn thành'
+                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                          : act.status === 'Đã check-in'
+                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
                             : act.status === 'Đã hủy'
                               ? 'bg-red-50 text-red-600 border border-red-100'
                               : 'bg-blue-50 text-blue-600 border border-blue-100'
