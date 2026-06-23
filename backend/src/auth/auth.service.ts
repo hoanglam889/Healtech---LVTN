@@ -6,6 +6,7 @@ import { PatientAccounts } from '../entities/PatientAccounts';
 import { DoctorProfiles } from '../entities/DoctorProfiles';
 import { Patients } from '../entities/Patients';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from '../mail/mail.service';
 import { access } from 'fs';
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     @InjectRepository(Patients)
     private readonly patientsRepo: Repository<Patients>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   // Đăng nhập dành cho nhân viên (STAFF) và bác sĩ (DOCTOR)
@@ -105,18 +107,33 @@ export class AuthService {
     };
   }
 
-  // Đăng ký tài khoản cho bệnh nhân mới
+  // Đăng ký tài khoản cho bệnh nhân mới (Gửi mã OTP)
   async patientRegister(email: string, pass: string, name: string, dob?: string, gender?: 'MALE' | 'FEMALE') {
     const existing = await this.patientAccountsRepo.findOne({ where: { email } });
     if (existing) {
-      return { success: false, message: 'Email này đã được đăng ký tài khoản!' };
+      if (existing.isActive) {
+        return { success: false, message: 'Email này đã được đăng ký tài khoản!' };
+      } else {
+        // Tài khoản tồn tại nhưng chưa kích hoạt, cập nhật lại mã OTP mới
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        existing.otpCode = otp;
+        existing.passwordHash = pass; // Cập nhật pass mới
+        await this.patientAccountsRepo.save(existing);
+        
+        // Gửi mail
+        this.mailService.sendRegisterOTP(email, otp).catch(e => console.error(e));
+        
+        return { success: true, requireOtp: true, email: email, message: 'Mã xác thực mới đã được gửi đến email của bạn.' };
+      }
     }
 
     // 1. Tạo tài khoản bệnh nhân mới
     const newAccount = new PatientAccounts();
     newAccount.email = email;
     newAccount.passwordHash = pass;
-    newAccount.isActive = true;
+    newAccount.isActive = false; // Đợi OTP mới được kích hoạt
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    newAccount.otpCode = otp;
     const savedAccount = await this.patientAccountsRepo.save(newAccount);
 
     // 2. Tạo hồ sơ bệnh nhân chính đi kèm (Bản thân)
@@ -129,17 +146,53 @@ export class AuthService {
 
     await this.patientsRepo.save(newPatient);
 
-    const payload = { id: savedAccount.id, role: 'PATIENT' };
+    // 3. Gửi mail OTP
+    this.mailService.sendRegisterOTP(email, otp).catch(e => console.error(e));
+
+    return {
+      success: true,
+      requireOtp: true,
+      email: email,
+      message: 'Vui lòng kiểm tra email để lấy mã xác thực OTP.'
+    };
+  }
+
+  // Xác thực mã OTP
+  async patientVerifyOtp(email: string, otpCode: string) {
+    const account = await this.patientAccountsRepo.findOne({ where: { email } });
+    if (!account) {
+      throw new UnauthorizedException('Tài khoản không tồn tại!');
+    }
+
+    if (account.isActive) {
+      return { success: false, message: 'Tài khoản này đã được xác thực trước đó.' };
+    }
+
+    if (account.otpCode !== otpCode) {
+      throw new UnauthorizedException('Mã xác thực không chính xác!');
+    }
+
+    // Xác thực thành công
+    account.isActive = true;
+    account.otpCode = null;
+    await this.patientAccountsRepo.save(account);
+
+    const payload = { id: account.id, role: 'PATIENT' };
     const access_token = this.jwtService.sign(payload);
+
+    // Tìm thông tin bệnh nhân (Bản thân)
+    const primaryPatient = await this.patientsRepo.findOne({
+      where: { patientAccountId: account.id, relationship: 'Bản thân' }
+    });
 
     return {
       success: true,
       access_token,
       user: {
-        id: savedAccount.id,
-        email: savedAccount.email,
+        id: account.id,
+        email: account.email,
         role: 'PATIENT',
-        fullName: name,
+        fullName: primaryPatient ? primaryPatient.fullName : 'Bệnh nhân',
       },
     };
   }

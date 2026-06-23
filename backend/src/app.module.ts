@@ -10,7 +10,7 @@ import { PatientsModule } from './patients/patients.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
-
+import { MailerModule } from '@nestjs-modules/mailer';
 @Module({
   imports: [
     // 1. Load file cấu hình .env
@@ -27,6 +27,21 @@ import { AdminModule } from './admin/admin.module';
       database: process.env.DB_DATABASE, 
       entities: [__dirname + '/**/*.entity{.ts,.js}', __dirname + '/entities/*{.ts,.js}'],
       synchronize: false, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
+    }),
+
+     MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // true cho port 465, false cho port 587
+        auth: {
+          user: 'lamphan3107@gmail.com', // Điền email của bác vào đây
+          pass: 'vxrfwoveyaxapncd', // Đã cập nhật mã mới
+        },
+      },
+      defaults: {
+        from: '"Phòng khám Healtech" <lamphan3107@gmail.com>', 
+      },
     }),
     SpecialtiesModule,
     UploadModule,

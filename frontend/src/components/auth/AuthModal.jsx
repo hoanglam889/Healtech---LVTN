@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
-import { patientLogin, patientRegister } from '../../services/authService';
+import { patientLogin, patientRegister, patientVerifyOtp } from '../../services/authService';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
-  const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
+  const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register' | 'otp'
   
   // Login Form States
   const [loginEmail, setLoginEmail] = useState('');
@@ -15,6 +15,22 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [regDob, setRegDob] = useState('1995-01-01');
   const [regGender, setRegGender] = useState('MALE'); // 'MALE' | 'FEMALE'
   const [regPassword, setRegPassword] = useState('');
+  
+  // OTP Form States
+  const [otpCode, setOtpCode] = useState('');
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [countdown]);
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -76,11 +92,17 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       
       const data = await patientRegister(payload);
       if (data && data.success) {
-        setSuccessMsg('Đăng ký tài khoản thành công! Đang tự động đăng nhập...');
-        setTimeout(() => {
-          onLoginSuccess(data.user);
-          onClose();
-        }, 1200);
+        if (data.requireOtp) {
+          setSuccessMsg(data.message || 'Vui lòng kiểm tra email để lấy mã xác thực.');
+          setActiveTab('otp');
+          setCountdown(30);
+        } else {
+          setSuccessMsg('Đăng ký tài khoản thành công! Đang tự động đăng nhập...');
+          setTimeout(() => {
+            onLoginSuccess(data.user);
+            onClose();
+          }, 1200);
+        }
       } else {
         setErrorMsg(data.message || 'Đăng ký thất bại. Vui lòng thử lại!');
       }
@@ -98,6 +120,69 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     setLoginPassword(pass);
     setErrorMsg('');
     setSuccessMsg('');
+  };
+
+  // Handle OTP verification
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otpCode.trim()) {
+      setErrorMsg('Vui lòng nhập mã OTP!');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const data = await patientVerifyOtp(regEmail, otpCode);
+      if (data && data.success) {
+        setSuccessMsg('Xác thực thành công! Đang tự động đăng nhập...');
+        setTimeout(() => {
+          onLoginSuccess(data.user);
+          onClose();
+        }, 1200);
+      } else {
+        setErrorMsg(data.message || 'Xác thực thất bại!');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.message || 'Mã xác thực không chính xác!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Resend OTP
+  const handleResendOtp = async () => {
+    if (countdown > 0) return;
+    
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const payload = {
+        fullName: regName,
+        email: regEmail,
+        dob: regDob,
+        gender: regGender,
+        password: regPassword
+      };
+      
+      const data = await patientRegister(payload);
+      if (data && data.success) {
+        setSuccessMsg('Đã gửi lại mã xác thực mới vào email của bạn.');
+        setCountdown(30);
+      } else {
+        setErrorMsg(data.message || 'Gửi lại mã thất bại. Vui lòng thử lại!');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Có lỗi xảy ra khi gửi lại mã!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -134,7 +219,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           <button
             onClick={() => { setActiveTab('register'); setErrorMsg(''); setSuccessMsg(''); }}
             className={`flex-1 py-3 text-center text-sm font-extrabold rounded-xl transition-all cursor-pointer ${
-              activeTab === 'register' 
+              (activeTab === 'register' || activeTab === 'otp')
                 ? 'bg-white text-blue-600 shadow-sm' 
                 : 'text-gray-500 hover:text-gray-800'
             }`}
@@ -219,7 +304,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 </button>
               </div>
             </form>
-          ) : (
+          ) : activeTab === 'register' ? (
             /* ==========================================
                REGISTER FORM
                ========================================== */
@@ -300,8 +385,74 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 className="w-full bg-blue-600 text-white font-extrabold py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100 flex items-center justify-center gap-2 text-sm cursor-pointer mt-6"
               >
                 {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.UserPlus className="w-5 h-5" />}
-                <span>Đăng ký & Đăng nhập</span>
+                <span>Đăng ký ngay</span>
               </button>
+            </form>
+          ) : (
+            /* ==========================================
+               OTP VERIFICATION FORM
+               ========================================== */
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Icons.ShieldCheck className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Xác thực Email</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Vui lòng nhập mã OTP 6 số đã được gửi đến email <b>{regEmail}</b>
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block text-center">Mã xác thực OTP</label>
+                <div className="relative max-w-[240px] mx-auto">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    required
+                    placeholder="Nhập 6 số..."
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} // Chỉ cho phép nhập số
+                    className="w-full bg-gray-50 border border-gray-100 outline-none px-4 py-4 rounded-xl font-bold text-blue-600 text-2xl text-center tracking-[0.5em] focus:ring-2 focus:ring-blue-500/20 placeholder-gray-300 focus:bg-white focus:border-blue-600/40 transition-all"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || otpCode.length !== 6}
+                className="w-full bg-blue-600 text-white font-extrabold py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100 flex items-center justify-center gap-2 text-sm cursor-pointer mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.CheckCircle className="w-5 h-5" />}
+                <span>Xác nhận & Đăng nhập</span>
+              </button>
+
+              {/* Resend OTP */}
+              <div className="text-center mt-3">
+                <p className="text-xs text-gray-500 font-semibold mb-2">Chưa nhận được mã?</p>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={countdown > 0 || loading}
+                  className={`text-sm font-bold transition-colors ${
+                    countdown > 0
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-blue-600 hover:text-blue-800 underline'
+                  }`}
+                >
+                  {countdown > 0 ? `Gửi lại mã sau ${countdown}s` : 'Gửi lại mã ngay'}
+                </button>
+              </div>
+
+              <div className="text-center mt-6 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('register'); setCountdown(0); }}
+                  className="text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors"
+                >
+                  ← Quay lại Đăng ký
+                </button>
+              </div>
             </form>
           )}
         </div>

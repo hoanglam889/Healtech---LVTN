@@ -7,6 +7,8 @@ import { MedicalRecords } from '../entities/MedicalRecords';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { MailService } from '../mail/mail.service';
+import { Patients } from '../entities/Patients';
 
 @Injectable()
 export class AppointmentsService {
@@ -15,7 +17,8 @@ export class AppointmentsService {
     private appointmentsRepo: Repository<Appointments>,
     @InjectRepository(Invoices)
     private invoicesRepo: Repository<Invoices>,
-    private dataSource: DataSource
+    private dataSource: DataSource,
+    private mailService: MailService
   ) {}
 
   async create(createDto: CreateAppointmentDto) {
@@ -26,7 +29,17 @@ export class AppointmentsService {
     await queryRunner.startTransaction();
 
     try {
-      // 0. Kiểm tra số lượng bệnh nhân tối đa (max_patients)
+      // 0. Lấy thông tin bệnh nhân và kiểm tra
+      const patientData = await queryRunner.manager.createQueryBuilder(Patients, 'p')
+        .leftJoinAndSelect('p.patientAccount', 'pa')
+        .where('p.id = :patientId', { patientId })
+        .getOne();
+
+      if (!patientData) {
+        throw new BadRequestException('Hồ sơ bệnh nhân không tồn tại.');
+      }
+
+      // 1. Kiểm tra số lượng bệnh nhân tối đa (max_patients)
       // Tìm lịch làm việc của bác sĩ trong ngày và khung giờ đó
       const schedule = await queryRunner.manager.createQueryBuilder('doctor_schedules', 'ds')
         .innerJoinAndSelect('ds.shift', 's')
@@ -103,6 +116,31 @@ export class AppointmentsService {
 
       await queryRunner.commitTransaction();
 
+      // Sau khi lưu thành công, gửi email
+      try {
+        // Dùng lại thông tin patientData đã lấy ở trên cùng
+        if (patientData && patientData.patientAccount && patientData.patientAccount.email) {
+          // Lấy tên chủ tài khoản (Bản thân)
+          const accountOwner = await this.dataSource.manager.createQueryBuilder(Patients, 'p')
+            .where('p.patientAccountId = :accountId', { accountId: patientData.patientAccountId })
+            .andWhere('p.relationship = :rel', { rel: 'Bản thân' })
+            .getOne();
+            
+          const accountName = accountOwner ? accountOwner.fullName : 'Bệnh nhân';
+
+          this.mailService.sendBookingSuccess(
+            patientData.patientAccount.email,
+            qrCode,
+            appointmentDate,
+            schedule.shift.startTime,
+            accountName,
+            patientData.fullName
+          ).catch(e => console.error('Lỗi gửi mail:', e));
+        }
+      } catch (err) {
+        console.error('Lỗi khi truy vấn gửi mail:', err);
+      }
+
       return {
         success: true,
         appointment: savedAppointment,
@@ -173,8 +211,20 @@ export class AppointmentsService {
 
     // Nếu trạng thái đổi thành WAITING (Lễ tân check-in), tính điểm priority_score cho Smart Queue
     if (appointmentFields.status === 'WAITING') {
-      if (!appointment.patient?.isCompleted) {
-        throw new BadRequestException('Vui lòng cập nhật đầy đủ thông tin bệnh nhân (CCCD, Địa chỉ,...) trước khi check-in.');
+      let isCompleted = appointment.patient?.isCompleted;
+      
+      // Fallback tính toán lại cho các hồ sơ cũ chưa được hệ thống tự động cập nhật
+      if (!isCompleted && appointment.patient) {
+        const p = appointment.patient;
+        const birthYear = new Date(p.dob).getFullYear();
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - birthYear;
+        
+        isCompleted = !!(p.fullName && p.dob && (p.cccd || age < 16) && p.address && p.gender && p.phone);
+      }
+
+      if (!isCompleted) {
+        throw new BadRequestException('Vui lòng cập nhật đầy đủ thông tin bệnh nhân (SĐT, Địa chỉ, CCCD nếu >= 16 tuổi) trước khi check-in.');
       }
 
       let baseScore = 5; // Mặc định người trưởng thành là 5
@@ -224,6 +274,38 @@ export class AppointmentsService {
     // Cập nhật lịch khám
     if (appointmentFields && Object.keys(appointmentFields).length > 0) {
       await this.appointmentsRepo.update(id, appointmentFields);
+
+      // ===== THUẬT TOÁN HÀNG ĐỢI (SMART QUEUE) =====
+      // Khi bác sĩ gọi bệnh nhân này vào khám (EXAMINING), hàng đợi sẽ nhích lên 1 bậc.
+      // Tìm người đứng đầu hàng đợi
+      if (appointmentFields.status === 'EXAMINING') {
+        try {
+          const nextPatientInQueue = await this.appointmentsRepo.findOne({
+            where: {
+              doctorProfileId: appointment.doctorProfileId as number,
+              appointmentDate: appointment.appointmentDate,
+              status: 'WAITING' // Chỉ lấy những người đang chờ tại phòng khám
+            },
+            order: {
+              priorityScore: 'DESC', // Ưu tiên điểm cao nhất
+              appointmentTime: 'ASC' // Nếu bằng điểm thì ai tới trước (theo lịch) vào trước
+            },
+            relations: {
+              patient: {
+                patientAccount: true
+              }
+            }
+          });
+
+          // Nếu tìm thấy người đang xếp thứ 1 và có email
+          if (nextPatientInQueue && nextPatientInQueue.patient?.patientAccount?.email) {
+            this.mailService.sendTurnReminder(nextPatientInQueue.patient.patientAccount.email)
+              .catch(e => console.error('Lỗi gửi mail nhắc lượt:', e));
+          }
+        } catch (queueErr) {
+          console.error('Lỗi xử lý hàng đợi gửi mail:', queueErr);
+        }
+      }
     }
     
     // Cập nhật hóa đơn

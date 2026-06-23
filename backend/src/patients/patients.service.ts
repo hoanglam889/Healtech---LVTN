@@ -13,10 +13,14 @@ export class PatientsService {
   ) {}
 
   async create(createPatientDto: CreatePatientDto) {
+    const birthYear = new Date(createPatientDto.dob).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+
     const isCompleted = !!(
       createPatientDto.fullName &&
       createPatientDto.dob &&
-      createPatientDto.cccd &&
+      (createPatientDto.cccd || age < 16) &&
       createPatientDto.address &&
       createPatientDto.gender &&
       createPatientDto.phone
@@ -47,10 +51,14 @@ export class PatientsService {
     const patient = await this.findOne(id);
     
     const mergedData = { ...patient, ...updatePatientDto };
+    const birthYear = new Date(mergedData.dob).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+
     const isCompleted = !!(
       mergedData.fullName &&
       mergedData.dob &&
-      mergedData.cccd &&
+      (mergedData.cccd || age < 16) &&
       mergedData.address &&
       mergedData.gender &&
       mergedData.phone

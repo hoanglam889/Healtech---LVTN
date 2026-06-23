@@ -8,6 +8,7 @@ import { DoctorProfiles } from '../entities/DoctorProfiles';
 import { Patients } from '../entities/Patients';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JwtStrategy } from './jwt.strategy';
   
   JwtModule.register({secret: 'HEATH_TECH_SECRET_KEY', signOptions: {expiresIn: '5h'},
   }),
+  MailModule,
 ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

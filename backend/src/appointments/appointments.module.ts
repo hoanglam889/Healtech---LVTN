@@ -4,9 +4,10 @@ import { Appointments } from '../entities/Appointments';
 import { Invoices } from '../entities/Invoices';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointments, Invoices])],
+  imports: [TypeOrmModule.forFeature([Appointments, Invoices]), MailModule],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
   exports: [AppointmentsService]

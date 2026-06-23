@@ -15,3 +15,8 @@ export const staffLogin = async (email, password) => {
   return response.data;
 };
 
+export const patientVerifyOtp = async (email, otpCode) => {
+  const response = await apiClient.post('/auth/patient-verify-otp', { email, otpCode });
+  return response.data;
+};
+

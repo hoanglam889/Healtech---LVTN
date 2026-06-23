@@ -46,15 +46,26 @@ export class AuthController {
       throw new BadRequestException('Họ tên, email và mật khẩu là bắt buộc!');
     }
     const regData = await this.authService.patientRegister(email, password, fullName, dob, gender);
-    if (regData.success) {
-      res.cookie('acces_token', regData.access_token, {
+    // Không set cookie ở đây nữa vì người dùng chưa xác thực OTP
+    return regData;
+  }
+
+  @Post('patient-verify-otp')
+  async patientVerifyOtp(@Body() body: any, @Res({passthrough: true }) res: Response) {
+    const { email, otpCode } = body;
+    if (!email || !otpCode) {
+      throw new BadRequestException('Email và mã OTP là bắt buộc!');
+    }
+    const verifyData = await this.authService.patientVerifyOtp(email, otpCode);
+    if (verifyData.success) {
+      res.cookie('acces_token', verifyData.access_token, {
         httpOnly: true,
         secure: false,
         maxAge: 5 * 60 * 60 * 1000,
       });
-      const { access_token, ...userData} = regData;
+      const { access_token, ...userData} = verifyData;
       return userData;
     }
-    return regData;
+    return verifyData;
   }
 }

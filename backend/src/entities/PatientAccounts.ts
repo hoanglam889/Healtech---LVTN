@@ -14,8 +14,8 @@ export class PatientAccounts {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })
   id: number;
 
-  @Column("varchar", { name: "phone", unique: true, length: 20 })
-  phone: string;
+  @Column("varchar", { name: "phone", unique: true, length: 20, nullable: true })
+  phone: string | null;
 
   @Column("varchar", { name: "email", unique: true, length: 255, nullable: true })
   email: string | null;
@@ -27,9 +27,12 @@ export class PatientAccounts {
     name: "is_active",
     nullable: true,
     width: 1,
-    default: () => "'1'",
+    default: () => "'0'", // Đổi mặc định thành 0 (chưa kích hoạt)
   } as any)
   isActive: boolean | null;
+
+  @Column("varchar", { name: "otp_code", length: 10, nullable: true })
+  otpCode: string | null;
 
   @Column("timestamp", {
     name: "created_at",

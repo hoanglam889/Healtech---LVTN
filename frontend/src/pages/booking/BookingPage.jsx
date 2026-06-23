@@ -36,6 +36,7 @@ const BookingPage = ({ user, onGoHome }) => {
 
   // Trạng thái gửi dữ liệu lên server
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [createdAppointment, setCreatedAppointment] = useState(null);
   const [allAppointments, setAllAppointments] = useState([]);
 
@@ -202,6 +203,7 @@ const BookingPage = ({ user, onGoHome }) => {
       paymentMethod: paymentMethod
     };
 
+    setErrorMsg('');
     setSubmitting(true);
     createAppointment(appointmentData)
       .then((res) => {
@@ -210,13 +212,14 @@ const BookingPage = ({ user, onGoHome }) => {
           setCreatedAppointment(res.appointment);
           setCurrentStep(4);
         } else {
-          alert('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
+          setErrorMsg('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
         }
       })
       .catch((err) => {
         setSubmitting(false);
         console.error('Lỗi đặt lịch khám:', err);
-        alert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+        const errMsg = err.response?.data?.message || 'Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.';
+        setErrorMsg(errMsg);
       });
   };
 
@@ -636,6 +639,13 @@ const BookingPage = ({ user, onGoHome }) => {
                 </div>
               </div>
             </div>
+
+            {/* Error Message */}
+            {errorMsg && (
+              <div className="bg-red-50 text-red-600 text-sm font-semibold p-4 rounded-xl border border-red-100 mb-4 animate-pulse">
+                ⚠️ {errorMsg}
+              </div>
+            )}
 
             {/* Các nút điều hướng */}
             <div className="flex justify-between items-center pt-2">
