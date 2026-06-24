@@ -13,6 +13,7 @@ import { DoctorProfiles } from "./DoctorProfiles";
 import { AppointmentStatusLogs } from "./AppointmentStatusLogs";
 import { Invoices } from "./Invoices";
 import { MedicalRecords } from "./MedicalRecords";
+import { AppointmentServices } from "./AppointmentServices";
 
 @Index("qr_code", ["qrCode"], { unique: true })
 @Index("patient_id", ["patientId"], {})
@@ -87,4 +88,10 @@ export class Appointments {
     (medicalRecords) => medicalRecords.appointment
   )
   medicalRecords: MedicalRecords;
+
+  @OneToMany(
+    () => AppointmentServices,
+    (appointmentServices) => appointmentServices.appointment
+  )
+  appointmentServices: AppointmentServices[];
 }

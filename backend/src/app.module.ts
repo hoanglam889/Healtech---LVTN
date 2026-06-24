@@ -11,6 +11,8 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ServicesModule } from './services/services.module';
+import { AppointmentServicesModule } from './appointment-services/appointment-services.module';
 @Module({
   imports: [
     // 1. Load file cấu hình .env
@@ -50,6 +52,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
     AppointmentsModule,
     AuthModule,
     AdminModule,
+    ServicesModule,
+    AppointmentServicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
