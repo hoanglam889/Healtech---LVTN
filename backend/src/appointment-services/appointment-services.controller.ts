@@ -17,9 +17,9 @@ export class AppointmentServicesController {
     return this.appointmentServicesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.appointmentServicesService.findOne(+id);
+  @Get('appointment/:appointmentId')
+  findByAppointment(@Param('appointmentId') appointmentId: string) {
+    return this.appointmentServicesService.findByAppointment(+appointmentId);
   }
 
   @Patch(':id')
