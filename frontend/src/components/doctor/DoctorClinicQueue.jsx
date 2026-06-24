@@ -172,6 +172,31 @@ export default function DoctorClinicQueue({ staffUser }) {
     }
   };
 
+  // Bỏ qua / Vắng mặt (Đẩy xuống cuối hàng đợi)
+  const handleSkipPatient = async () => {
+    if (!examiningPatient) return;
+    setLoading(true);
+    try {
+      await updateAppointment(examiningPatient.id, {
+        status: 'WAITING',
+        priorityScore: 0 // Đẩy xuống cuối
+      });
+      showToast(`Đã đẩy bệnh nhân ${examiningPatient.patient?.fullName} xuống cuối hàng đợi!`, 'success');
+      setExaminingPatient(null);
+      setSymptoms('');
+      setDiagnosis('');
+      setNotes('');
+      setSelectedServices([]);
+      loadAppointments();
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi khi bỏ qua bệnh nhân', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   // Logic Thêm/Xóa Dịch vụ
   const handleAddService = async (serviceId) => {
     setLoadingService(true);
@@ -400,14 +425,26 @@ export default function DoctorClinicQueue({ staffUser }) {
                     <span>(*) Bắt buộc điền</span>
                   </span>
                   
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="bg-purple-600 text-white font-extrabold px-8 py-3.5 rounded-2xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-200 flex items-center gap-2 text-sm cursor-pointer"
-                  >
-                    {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.CheckCircle className="w-5 h-5" />}
-                    <span>Hoàn tất & Lưu bệnh án</span>
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={handleSkipPatient}
+                      className="bg-amber-100 text-amber-700 font-extrabold px-6 py-3.5 rounded-2xl hover:bg-amber-200 transition-all shadow-sm flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      <Icons.UserMinus className="w-5 h-5" />
+                      <span>Vắng mặt (Bỏ qua)</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="bg-purple-600 text-white font-extrabold px-8 py-3.5 rounded-2xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-200 flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.CheckCircle className="w-5 h-5" />}
+                      <span>Hoàn tất & Lưu bệnh án</span>
+                    </button>
+                  </div>
                 </div>
               </form>
             )}

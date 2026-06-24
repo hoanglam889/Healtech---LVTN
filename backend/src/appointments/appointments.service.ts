@@ -199,7 +199,7 @@ export class AppointmentsService {
       const validTransitions: Record<string, string[]> = {
         'BOOKED': ['WAITING', 'CANCELLED'],
         'WAITING': ['EXAMINING', 'CANCELLED'],
-        'EXAMINING': ['DONE', 'CANCELLED'],
+        'EXAMINING': ['DONE', 'CANCELLED', 'WAITING'],
         'DONE': [], // Không được phép thay đổi
         'CANCELLED': [] // Không được phép thay đổi
       };
@@ -268,7 +268,11 @@ export class AppointmentsService {
         }
       }
       
-      appointmentFields.priorityScore = baseScore + (isBookedViaApp ? 1 : 0) + (isPaidInAdvance ? 1 : 0) + lateModifier;
+      if (updateDto.priorityScore !== undefined) {
+        appointmentFields.priorityScore = updateDto.priorityScore;
+      } else {
+        appointmentFields.priorityScore = baseScore + (isBookedViaApp ? 1 : 0) + (isPaidInAdvance ? 1 : 0) + lateModifier;
+      }
     }
     
     // Cập nhật lịch khám
