@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
+import { getInvoiceDetails } from '../../services/invoiceService';
 import PaymentModal from './PaymentModal';
 import InvoiceTemplate from './InvoiceTemplate';
 import { useReactToPrint } from 'react-to-print';
@@ -13,14 +14,25 @@ export default function BillingManager() {
   const [selectedApptToPay, setSelectedApptToPay] = useState(null);
   
   const [apptToPrint, setApptToPrint] = useState(null);
+  const [invoiceDetailsToPrint, setInvoiceDetailsToPrint] = useState(null);
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
 
-  const handlePrintTrigger = (appt) => {
-    setApptToPrint(appt);
-    setTimeout(() => {
-      reactToPrintFn();
-    }, 100);
+  const handlePrintTrigger = async (appt) => {
+    try {
+      // Fetch detailed invoice with breakdown before printing
+      const details = await getInvoiceDetails(appt.id);
+      setApptToPrint(appt);
+      setInvoiceDetailsToPrint(details);
+      
+      // Đợi React render xong Dữ liệu mới vào Template rồi mới In
+      setTimeout(() => {
+        reactToPrintFn();
+      }, 300);
+    } catch (err) {
+      console.error('Lỗi khi lấy chi tiết hóa đơn:', err);
+      showToast('Không thể lấy chi tiết hóa đơn!', 'error');
+    }
   };
 
   // Load appointments
@@ -259,7 +271,7 @@ export default function BillingManager() {
 
       {/* ẨN COMPONENT IN HÓA ĐƠN */}
       <div style={{ display: 'none' }}>
-        <InvoiceTemplate ref={contentRef} appointment={apptToPrint} />
+        <InvoiceTemplate ref={contentRef} appointment={apptToPrint} invoiceDetails={invoiceDetailsToPrint} />
       </div>
     </div>
   );

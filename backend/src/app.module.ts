@@ -13,6 +13,7 @@ import { AdminModule } from './admin/admin.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ServicesModule } from './services/services.module';
 import { AppointmentServicesModule } from './appointment-services/appointment-services.module';
+import { InvoicesModule } from './invoices/invoices.module';
 @Module({
   imports: [
     // 1. Load file cấu hình .env
@@ -54,6 +55,7 @@ import { AppointmentServicesModule } from './appointment-services/appointment-se
     AdminModule,
     ServicesModule,
     AppointmentServicesModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
