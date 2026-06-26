@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
-import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
+import { getAllAppointments, updateAppointment, createAppointment } from '../../services/appointmentService';
+import { createPatient } from '../../services/patientService';
 import { getDoctors } from '../../services/doctorService';
 
 export default function ClinicQueue() {
@@ -13,6 +14,14 @@ export default function ClinicQueue() {
   const [rescheduleItem, setRescheduleItem] = useState(null);
   const [rescheduleData, setRescheduleData] = useState({ date: '', time: '', doctorId: '' });
   const [isConfirmingReschedule, setIsConfirmingReschedule] = useState(false);
+
+  // Thêm state cho Walk-In Modal
+  const [showWalkInModal, setShowWalkInModal] = useState(false);
+  const [walkInData, setWalkInData] = useState({
+    fullName: '', phone: '', cccd: '', dob: '', gender: 'MALE', address: '',
+    date: '', time: '', doctorId: ''
+  });
+  const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
 
   // Thêm formatDate để xài cho confirm modal
   const formatDate = (dateString) => {
@@ -95,6 +104,53 @@ export default function ClinicQueue() {
     }
   };
 
+  // Xử lý tạo lịch khám tại quầy (Walk-In)
+  const handleCreateWalkIn = async () => {
+    try {
+      if (!walkInData.fullName || !walkInData.phone || !walkInData.date || !walkInData.time || !walkInData.doctorId) {
+        showToast('Vui lòng điền đủ Tên, SĐT và thông tin khám!', 'warning');
+        return;
+      }
+      setIsSubmittingWalkIn(true);
+
+      // Bước 1: Tạo bệnh nhân vãng lai (không patientAccountId)
+      const newPatient = await createPatient({
+        fullName: walkInData.fullName,
+        phone: walkInData.phone,
+        cccd: walkInData.cccd || null,
+        dob: walkInData.dob || '2000-01-01',
+        gender: walkInData.gender,
+        address: walkInData.address || '',
+        relationship: 'Bản thân'
+      });
+
+      // Bước 2: Tạo lịch khám với ID bệnh nhân vừa tạo
+      const formattedTime = walkInData.time.length === 5 ? `${walkInData.time}:00` : walkInData.time;
+
+      await createAppointment({
+        patientId: newPatient.id,
+        doctorProfileId: parseInt(walkInData.doctorId, 10),
+        appointmentDate: walkInData.date,
+        appointmentTime: formattedTime,
+        paymentMethod: 'CASH'
+      });
+
+      showToast('Đã tạo lịch khám vãng lai thành công!', 'success');
+      setShowWalkInModal(false);
+      setWalkInData({ fullName: '', phone: '', cccd: '', dob: '', gender: 'MALE', address: '', date: '', time: '', doctorId: '' });
+      loadAppointments(true);
+    } catch (error) {
+      console.error(error);
+      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi tạo lịch khám!';
+      
+      // Nếu message là một mảng (do class-validator trả về) thì lấy phần tử đầu tiên
+      const displayMsg = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+      showToast(displayMsg, 'error');
+    } finally {
+      setIsSubmittingWalkIn(false);
+    }
+  };
+
   // Group appointments by Doctor Profile
   const getQueuesByDoctor = () => {
     const grouped = {};
@@ -164,14 +220,23 @@ export default function ClinicQueue() {
           <Icons.LayoutGrid className="w-5 h-5 text-blue-600" />
           Giám sát hàng đợi phòng khám
         </h2>
-        <button
-          onClick={() => loadAppointments(true)}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 rounded-xl font-bold text-sm transition-all cursor-pointer shadow-sm hover:shadow active:scale-95 disabled:opacity-50"
-        >
-          <Icons.RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>Đồng bộ hàng đợi</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowWalkInModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all cursor-pointer shadow-sm hover:shadow active:scale-95"
+          >
+            <Icons.UserPlus className="w-4 h-4" />
+            <span>Thêm khách vãng lai</span>
+          </button>
+          <button
+            onClick={() => loadAppointments(true)}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 rounded-xl font-bold text-sm transition-all cursor-pointer shadow-sm hover:shadow active:scale-95 disabled:opacity-50"
+          >
+            <Icons.RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Đồng bộ hàng đợi</span>
+          </button>
+        </div>
       </div>
 
       {/* HEADER STATS */}
@@ -489,6 +554,165 @@ export default function ClinicQueue() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* WALK-IN MODAL */}
+      {showWalkInModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isSubmittingWalkIn && setShowWalkInModal(false)}></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <Icons.UserPlus className="w-5 h-5" />
+                </div>
+                Tạo hồ sơ vãng lai & Đặt lịch
+              </h3>
+              <button 
+                onClick={() => !isSubmittingWalkIn && setShowWalkInModal(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <Icons.X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Cột 1: Thông tin bệnh nhân */}
+              <div className="space-y-5">
+                <h4 className="font-bold text-gray-800 border-b pb-2 flex items-center gap-2">
+                  <Icons.User className="w-4 h-4 text-indigo-500" /> Thông tin Hành chính
+                </h4>
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase">Họ và tên <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="text" 
+                    value={walkInData.fullName}
+                    onChange={(e) => setWalkInData({...walkInData, fullName: e.target.value})}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                    placeholder="VD: Nguyễn Văn A"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Số điện thoại <span className="text-rose-500">*</span></label>
+                    <input 
+                      type="text" 
+                      value={walkInData.phone}
+                      onChange={(e) => setWalkInData({...walkInData, phone: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                      placeholder="VD: 0912345678"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Ngày sinh</label>
+                    <input 
+                      type="date" 
+                      value={walkInData.dob}
+                      onChange={(e) => setWalkInData({...walkInData, dob: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Giới tính</label>
+                    <select 
+                      value={walkInData.gender}
+                      onChange={(e) => setWalkInData({...walkInData, gender: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                    >
+                      <option value="MALE">Nam</option>
+                      <option value="FEMALE">Nữ</option>
+                      <option value="OTHER">Khác</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">CCCD / CMND</label>
+                    <input 
+                      type="text" 
+                      value={walkInData.cccd}
+                      onChange={(e) => setWalkInData({...walkInData, cccd: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                      placeholder="Tùy chọn"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Cột 2: Thông tin khám */}
+              <div className="space-y-5">
+                <h4 className="font-bold text-gray-800 border-b pb-2 flex items-center gap-2">
+                  <Icons.CalendarClock className="w-4 h-4 text-blue-500" /> Thông tin Đặt Khám
+                </h4>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase">Ngày khám <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="date" 
+                    value={walkInData.date}
+                    onChange={(e) => setWalkInData({...walkInData, date: e.target.value})}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase">Bác sĩ tiếp nhận <span className="text-rose-500">*</span></label>
+                  <select 
+                    value={walkInData.doctorId}
+                    onChange={(e) => setWalkInData({...walkInData, doctorId: e.target.value})}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  >
+                    <option value="">-- Chọn bác sĩ --</option>
+                    {doctors.filter(doc => {
+                      if (!walkInData.date) return true;
+                      return doc.doctorSchedules?.some(sched => sched.date === walkInData.date);
+                    }).map(doc => (
+                      <option key={doc.id} value={doc.id}>{doc.fullName} ({doc.specialty?.name})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase">Giờ khám <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="time" 
+                    value={walkInData.time}
+                    onChange={(e) => setWalkInData({...walkInData, time: e.target.value})}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-5 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-3xl">
+              <button 
+                onClick={() => setShowWalkInModal(false)}
+                disabled={isSubmittingWalkIn}
+                className="px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl font-bold transition-colors disabled:opacity-50"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleCreateWalkIn}
+                disabled={isSubmittingWalkIn}
+                className="flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 rounded-xl font-bold transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              >
+                {isSubmittingWalkIn ? (
+                  <><Icons.Loader2 className="w-5 h-5 animate-spin" /> Đang xử lý...</>
+                ) : (
+                  <><Icons.CheckCircle2 className="w-5 h-5" /> Tạo & Đặt Lịch</>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
