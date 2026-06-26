@@ -198,9 +198,12 @@ export class AppointmentsService {
     return this.appointmentsRepo.find({
       where: userId ? { patient: { patientAccountId: userId } } : {},
       relations: {
-        patient: true,
+        patient: {
+          patientAccount: true,
+        },
         doctorProfile: {
           specialty: true,
+          user: true,
         },
         invoices: true,
         medicalRecords: true,
@@ -212,9 +215,12 @@ export class AppointmentsService {
     const appointment = await this.appointmentsRepo.findOne({
       where: { id },
       relations: {
-        patient: true,
+        patient: {
+          patientAccount: true,
+        },
         doctorProfile: {
           specialty: true,
+          user: true,
         },
         invoices: true,
         medicalRecords: true,

@@ -4,6 +4,7 @@ import StaffLogin from '../../../components/auth/StaffLogin';
 import CheckinPanel from '../../../components/reception/CheckinPanel';
 import ClinicQueue from '../../../components/reception/ClinicQueue';
 import BillingManager from '../../../components/reception/BillingManager';
+import AppointmentMonitor from '../../../components/reception/AppointmentMonitor';
 import DoctorClinicQueue from '../../../components/doctor/DoctorClinicQueue';
 
 export default function StaffDashboard() {
@@ -133,6 +134,18 @@ export default function StaffDashboard() {
                 </button>
 
                 <button
+                  onClick={() => { setActiveTab('appointments'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                    activeTab === 'appointments'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icons.CalendarClock className="w-5 h-5" />
+                  <span>Lịch hẹn & Nhắc nhở</span>
+                </button>
+
+                <button
                   onClick={() => { setActiveTab('billing'); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                     activeTab === 'billing'
@@ -201,6 +214,7 @@ export default function StaffDashboard() {
               <h2 className="font-bold text-gray-900 text-sm lg:text-lg whitespace-nowrap">
                 {activeTab === 'checkin' && 'Tiếp đón Bệnh nhân mới'}
                 {activeTab === 'queue' && 'Giám sát Hàng đợi Phòng khám'}
+                {activeTab === 'appointments' && 'Giám sát Lịch hẹn Đặt trước'}
                 {activeTab === 'billing' && 'Quản lý Thu ngân / Thanh toán'}
                 {activeTab === 'doctor-queue' && 'Phòng Khám Nội / Ngoại khoa'}
               </h2>
@@ -219,6 +233,7 @@ export default function StaffDashboard() {
         <div className="p-4 lg:p-8 flex-1 overflow-y-auto">
           {activeTab === 'checkin' && <CheckinPanel />}
           {activeTab === 'queue' && <ClinicQueue />}
+          {activeTab === 'appointments' && <AppointmentMonitor />}
           {activeTab === 'billing' && <BillingManager />}
           {activeTab === 'doctor-queue' && <DoctorClinicQueue staffUser={staffUser} />}
         </div>
