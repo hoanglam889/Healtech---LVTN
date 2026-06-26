@@ -33,14 +33,16 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt!');
+      throw new UnauthorizedException(
+        'Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt!',
+      );
     }
 
     const normalizedRole = user.role ? user.role.toString().toUpperCase() : '';
 
     let fullName = 'Nhân viên lễ tân';
-    if(normalizedRole === "ADMIN") {
-      fullName = "Quản trị viên";
+    if (normalizedRole === 'ADMIN') {
+      fullName = 'Quản trị viên';
     }
     let doctorProfileId: number | null = null;
     if (normalizedRole === 'DOCTOR') {
@@ -80,14 +82,17 @@ export class AuthService {
     }
 
     if (account.isActive == false) {
-      throw new UnauthorizedException('Tài khoản chưa được kích hoạt! Vui lòng xác thực mã để tiếp tục.');
+      throw new UnauthorizedException(
+        'Tài khoản chưa được kích hoạt! Vui lòng xác thực mã để tiếp tục.',
+      );
     }
 
     // Lấy tên bệnh nhân chính của tài khoản (quan hệ Bản thân hoặc bệnh nhân đầu tiên)
     let fullName = 'Bệnh nhân';
-    const mainPatient = account.patients?.find(
-      (p) => p.relationship === 'Bản thân' || p.relationship === 'SELF'
-    ) || account.patients?.[0];
+    const mainPatient =
+      account.patients?.find(
+        (p) => p.relationship === 'Bản thân' || p.relationship === 'SELF',
+      ) || account.patients?.[0];
     if (mainPatient) {
       fullName = mainPatient.fullName;
     }
@@ -108,22 +113,40 @@ export class AuthService {
   }
 
   // Đăng ký tài khoản cho bệnh nhân mới (Gửi mã OTP)
-  async patientRegister(email: string, pass: string, name: string, dob?: string, gender?: 'MALE' | 'FEMALE') {
-    const existing = await this.patientAccountsRepo.findOne({ where: { email } });
+  async patientRegister(
+    email: string,
+    pass: string,
+    name: string,
+    dob?: string,
+    gender?: 'MALE' | 'FEMALE',
+  ) {
+    const existing = await this.patientAccountsRepo.findOne({
+      where: { email },
+    });
     if (existing) {
       if (existing.isActive) {
-        return { success: false, message: 'Email này đã được đăng ký tài khoản!' };
+        return {
+          success: false,
+          message: 'Email này đã được đăng ký tài khoản!',
+        };
       } else {
         // Tài khoản tồn tại nhưng chưa kích hoạt, cập nhật lại mã OTP mới
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         existing.otpCode = otp;
         existing.passwordHash = pass; // Cập nhật pass mới
         await this.patientAccountsRepo.save(existing);
-        
+
         // Gửi mail
-        this.mailService.sendRegisterOTP(email, otp).catch(e => console.error(e));
-        
-        return { success: true, requireOtp: true, email: email, message: 'Mã xác thực mới đã được gửi đến email của bạn.' };
+        this.mailService
+          .sendRegisterOTP(email, otp)
+          .catch((e) => console.error(e));
+
+        return {
+          success: true,
+          requireOtp: true,
+          email: email,
+          message: 'Mã xác thực mới đã được gửi đến email của bạn.',
+        };
       }
     }
 
@@ -147,25 +170,30 @@ export class AuthService {
     await this.patientsRepo.save(newPatient);
 
     // 3. Gửi mail OTP
-    this.mailService.sendRegisterOTP(email, otp).catch(e => console.error(e));
+    this.mailService.sendRegisterOTP(email, otp).catch((e) => console.error(e));
 
     return {
       success: true,
       requireOtp: true,
       email: email,
-      message: 'Vui lòng kiểm tra email để lấy mã xác thực OTP.'
+      message: 'Vui lòng kiểm tra email để lấy mã xác thực OTP.',
     };
   }
 
   // Xác thực mã OTP
   async patientVerifyOtp(email: string, otpCode: string) {
-    const account = await this.patientAccountsRepo.findOne({ where: { email } });
+    const account = await this.patientAccountsRepo.findOne({
+      where: { email },
+    });
     if (!account) {
       throw new UnauthorizedException('Tài khoản không tồn tại!');
     }
 
     if (account.isActive) {
-      return { success: false, message: 'Tài khoản này đã được xác thực trước đó.' };
+      return {
+        success: false,
+        message: 'Tài khoản này đã được xác thực trước đó.',
+      };
     }
 
     if (account.otpCode !== otpCode) {
@@ -182,7 +210,7 @@ export class AuthService {
 
     // Tìm thông tin bệnh nhân (Bản thân)
     const primaryPatient = await this.patientsRepo.findOne({
-      where: { patientAccountId: account.id, relationship: 'Bản thân' }
+      where: { patientAccountId: account.id, relationship: 'Bản thân' },
     });
 
     return {

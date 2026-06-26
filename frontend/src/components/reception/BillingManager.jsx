@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
-import { getInvoiceDetails } from '../../services/invoiceService';
+import { getInvoiceDetails, createPaymentUrl } from '../../services/invoiceService';
 import PaymentModal from './PaymentModal';
 import InvoiceTemplate from './InvoiceTemplate';
 import { useReactToPrint } from 'react-to-print';
@@ -74,9 +74,22 @@ export default function BillingManager() {
     setLoading(true);
     setSelectedApptToPay(null);
     try {
-      await updateAppointment(apptId, { invoiceStatus: 'PAID', paymentMethod });
-      showToast('Xác nhận đã thu tiền thành công!', 'success');
-      loadAppointments();
+      if (paymentMethod === 'VNPAY') {
+        const appt = appointments.find(a => a.id === apptId);
+        if (!appt || !appt.invoices) throw new Error('Không tìm thấy hóa đơn');
+        
+        // Gọi API tạo link VNPay
+        const { url } = await createPaymentUrl(appt.invoices.id, appt.invoices.totalAmount);
+        
+        // Chuyển hướng sang VNPay
+        window.location.href = url;
+        return; // Dừng tại đây, không set loading(false) để màn hình không chớp
+      } else {
+        // Tiền mặt - API cũ
+        await updateAppointment(apptId, { invoiceStatus: 'PAID', paymentMethod });
+        showToast('Xác nhận đã thu tiền thành công!', 'success');
+        loadAppointments();
+      }
     } catch (err) {
       console.error(err);
       showToast('Đã xảy ra lỗi!', 'error');

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Appointments } from '../entities/Appointments';
@@ -58,14 +62,17 @@ export class AdminService {
 
     const recentActivities = recentAppointments.map((act) => {
       let statusLabel = 'Đã đặt';
-      if (act.status === 'WAITING' || act.status === 'EXAMINING') statusLabel = 'Đã check-in';
+      if (act.status === 'WAITING' || act.status === 'EXAMINING')
+        statusLabel = 'Đã check-in';
       if (act.status === 'DONE') statusLabel = 'Hoàn thành';
       if (act.status === 'CANCELLED') statusLabel = 'Đã hủy';
 
       return {
         id: act.qrCode || `HT-${act.id}`,
         patient: act.patient?.fullName || 'N/A',
-        doctor: act.doctorProfile?.fullName ? `BS. ${act.doctorProfile.fullName}` : 'N/A',
+        doctor: act.doctorProfile?.fullName
+          ? `BS. ${act.doctorProfile.fullName}`
+          : 'N/A',
         time: `${act.appointmentTime?.substring(0, 5) || ''} - ${this.formatDate(act.appointmentDate)}`,
         type: act.doctorProfile?.specialty?.name || 'Khám tổng quát',
         status: statusLabel,
@@ -100,37 +107,52 @@ export class AdminService {
 
     return list.map((item) => ({
       id: item.id,
-      doctor: item.doctorProfile?.fullName ? `BS. ${item.doctorProfile.fullName}` : 'N/A',
+      doctor: item.doctorProfile?.fullName
+        ? `BS. ${item.doctorProfile.fullName}`
+        : 'N/A',
       doctorProfileId: item.doctorProfileId,
       specialty: item.doctorProfile?.specialty?.name || 'Chuyên khoa',
       specialtyId: item.doctorProfile?.specialty?.id || null,
       day: this.getWeekdayLabel(item.date),
       date: item.date,
-      shift: item.shift ? `${item.shift.name} (${item.shift.startTime.substring(0, 5)} - ${item.shift.endTime.substring(0, 5)})` : 'Chưa xếp ca',
+      shift: item.shift
+        ? `${item.shift.name} (${item.shift.startTime.substring(0, 5)} - ${item.shift.endTime.substring(0, 5)})`
+        : 'Chưa xếp ca',
       shiftId: item.shiftId,
       shiftName: item.shift?.name || '',
-      shiftTime: item.shift ? `${item.shift.startTime.substring(0, 5)} - ${item.shift.endTime.substring(0, 5)}` : '',
+      shiftTime: item.shift
+        ? `${item.shift.startTime.substring(0, 5)} - ${item.shift.endTime.substring(0, 5)}`
+        : '',
       clinicRoom: `Phòng ${item.doctorProfile?.id ? 100 + item.doctorProfile.id : 101}`, // Mock phòng khám theo ID bác sĩ
     }));
   }
 
   // 3. Phân ca trực mới cho bác sĩ
-  async createSchedule(dto: { doctorProfileId: number; shiftId: any; date: string; maxPatients?: number }) {
+  async createSchedule(dto: {
+    doctorProfileId: number;
+    shiftId: any;
+    date: string;
+    maxPatients?: number;
+  }) {
     // Không xếp lịch cho ngày trong quá khứ
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const scheduleDate = new Date(dto.date);
     scheduleDate.setHours(0, 0, 0, 0);
     if (scheduleDate < today) {
-      throw new BadRequestException('Không thể xếp lịch cho những ngày đã qua!');
+      throw new BadRequestException(
+        'Không thể xếp lịch cho những ngày đã qua!',
+      );
     }
 
     const shiftVal = dto.shiftId;
     if (typeof shiftVal === 'string' || isNaN(+shiftVal)) {
       const sessionName = shiftVal; // "Sáng", "Chiều" hoặc "Tối"
       const allShifts = await this.shiftsRepo.find();
-      const targetShifts = allShifts.filter((s) => s.name?.includes(sessionName));
-      
+      const targetShifts = allShifts.filter((s) =>
+        s.name?.includes(sessionName),
+      );
+
       const savedSchedules: DoctorSchedules[] = [];
       for (const shift of targetShifts) {
         // Tránh tạo trùng lặp lịch trực nếu đã tồn tại
@@ -191,7 +213,9 @@ export class AdminService {
         relations: { shift: true },
       });
 
-      const targets = schedulesToDelete.filter((item) => item.shift?.name?.includes(prefix));
+      const targets = schedulesToDelete.filter((item) =>
+        item.shift?.name?.includes(prefix),
+      );
       await this.doctorSchedulesRepo.remove(targets);
     } else {
       await this.doctorSchedulesRepo.remove(schedule);
@@ -224,7 +248,15 @@ export class AdminService {
     try {
       const date = new Date(dateStr);
       const day = date.getDay();
-      const labels = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+      const labels = [
+        'Chủ Nhật',
+        'Thứ Hai',
+        'Thứ Ba',
+        'Thứ Tư',
+        'Thứ Năm',
+        'Thứ Sáu',
+        'Thứ Bảy',
+      ];
       return labels[day] || dateStr;
     } catch {
       return dateStr;

@@ -12,6 +12,7 @@ import PatientDashboard from './pages/dashboard/patient/PatientDashboard';
 import StaffDashboard from './pages/dashboard/staff/StaffDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthModal from './components/auth/AuthModal';
+import PaymentResult from './pages/reception/PaymentResult';
 
 
 function App() {
@@ -66,6 +67,10 @@ function App() {
 
   if (currentPath === '/staff') {
     return <StaffDashboard />;
+  }
+
+  if (currentPath === '/payment-result') {
+    return <PaymentResult />;
   }
 
   return (

@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateDoctorProfileDto } from './dto/create-doctor-profile.dto';
 import { UpdateDoctorProfileDto } from './dto/update-doctor-profile.dto';
 import { DoctorProfiles } from 'src/entities/DoctorProfiles';
@@ -17,16 +21,27 @@ export class DoctorProfilesService {
 
   // 1. Tạo mới Bác sĩ (Tạo User -> Tạo DoctorProfile)
   async create(dto: any) {
-    const { phone, password, fullName, specialtyId, experienceYears, avatarUrl } = dto;
+    const {
+      phone,
+      password,
+      fullName,
+      specialtyId,
+      experienceYears,
+      avatarUrl,
+    } = dto;
 
     if (!phone || !password || !fullName || !specialtyId) {
-      throw new BadRequestException('Vui lòng điền đầy đủ các trường bắt buộc!');
+      throw new BadRequestException(
+        'Vui lòng điền đầy đủ các trường bắt buộc!',
+      );
     }
 
     // Kiểm tra trùng số điện thoại trong hệ thống
     const existingUser = await this.usersRepo.findOne({ where: { phone } });
     if (existingUser) {
-      throw new BadRequestException('Số điện thoại này đã được đăng ký tài khoản!');
+      throw new BadRequestException(
+        'Số điện thoại này đã được đăng ký tài khoản!',
+      );
     }
 
     // Bước A: Tạo tài khoản User đăng nhập
@@ -46,7 +61,7 @@ export class DoctorProfilesService {
     profile.avatarUrl = avatarUrl || '/uploads/default-doctor.png';
 
     const savedProfile = await this.doctorProfilesRepo.save(profile);
-    
+
     return this.findOne(savedProfile.id);
   }
 
@@ -84,7 +99,14 @@ export class DoctorProfilesService {
   // 4. Cập nhật thông tin bác sĩ
   async update(id: number, dto: any) {
     const profile = await this.findOne(id);
-    const { phone, password, fullName, specialtyId, experienceYears, avatarUrl } = dto;
+    const {
+      phone,
+      password,
+      fullName,
+      specialtyId,
+      experienceYears,
+      avatarUrl,
+    } = dto;
 
     // Cập nhật tài khoản User đi kèm nếu có gửi phone/password
     if (profile.userId) {
@@ -93,7 +115,9 @@ export class DoctorProfilesService {
         // Kiểm tra xem số điện thoại mới có bị trùng với người khác không
         const existing = await this.usersRepo.findOne({ where: { phone } });
         if (existing && existing.id !== profile.userId) {
-          throw new BadRequestException('Số điện thoại này đã tồn tại trên hệ thống!');
+          throw new BadRequestException(
+            'Số điện thoại này đã tồn tại trên hệ thống!',
+          );
         }
         userUpdate.phone = phone;
       }
@@ -112,7 +136,8 @@ export class DoctorProfilesService {
     const profileUpdate: any = {};
     if (fullName) profileUpdate.fullName = fullName;
     if (specialtyId) profileUpdate.specialtyId = +specialtyId;
-    if (experienceYears !== undefined) profileUpdate.experienceYears = +experienceYears;
+    if (experienceYears !== undefined)
+      profileUpdate.experienceYears = +experienceYears;
     if (avatarUrl) profileUpdate.avatarUrl = avatarUrl;
 
     if (Object.keys(profileUpdate).length > 0) {
@@ -128,6 +153,9 @@ export class DoctorProfilesService {
     if (profile.userId) {
       await this.usersRepo.update(profile.userId, { isActive: false });
     }
-    return { success: true, message: `Đã khóa tài khoản bác sĩ #${id} thành công` };
+    return {
+      success: true,
+      message: `Đã khóa tài khoản bác sĩ #${id} thành công`,
+    };
   }
 }

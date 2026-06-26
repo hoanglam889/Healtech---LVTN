@@ -16,25 +16,25 @@ export class ServicesService {
   }
 
   async findAll() {
-    return this.servicesRepo.find({where: {isActive: true}});
+    return this.servicesRepo.find({ where: { isActive: true } });
   }
 
   async findOne(id: number) {
     return this.servicesRepo.findOne({
       where: {
         id: id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
   }
 
   async update(id: number, updateServiceDto: UpdateServiceDto) {
-    await this.servicesRepo.update(id, updateServiceDto); 
+    await this.servicesRepo.update(id, updateServiceDto);
     return await this.findOne(id);
   }
 
   async remove(id: number) {
     await this.servicesRepo.update(id, { isActive: false });
-    return { message: "Đã ngưng sử dụng dịch vụ này" };
+    return { message: 'Đã ngưng sử dụng dịch vụ này' };
   }
 }

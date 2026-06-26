@@ -5,45 +5,53 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { AppointmentStatusLogs } from "./AppointmentStatusLogs";
-import { DoctorProfiles } from "./DoctorProfiles";
+} from 'typeorm';
+import { AppointmentStatusLogs } from './AppointmentStatusLogs';
+import { DoctorProfiles } from './DoctorProfiles';
 
-@Index("phone", ["phone"], { unique: true })
-@Entity("users", { schema: "clinic_flow_erp" })
+@Index('phone', ['phone'], { unique: true })
+@Entity('users', { schema: 'clinic_flow_erp' })
 export class Users {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column("varchar", { name: "phone", unique: true, length: 20 })
+  @Column('varchar', { name: 'phone', unique: true, length: 20 })
   phone: string;
 
-  @Column("varchar", { name: "email", unique: true, length: 255, nullable: true })
+  @Column('varchar', {
+    name: 'email',
+    unique: true,
+    length: 255,
+    nullable: true,
+  })
   email: string | null;
 
-  @Column("varchar", { name: "password_hash", length: 255 })
+  @Column('varchar', { name: 'password_hash', length: 255 })
   passwordHash: string;
 
-  @Column("enum", { name: "role", enum: ["ADMIN", "DOCTOR", "STAFF"] })
-  role: "ADMIN" | "DOCTOR" | "STAFF";
+  @Column('enum', { name: 'role', enum: ['ADMIN', 'DOCTOR', 'STAFF'] })
+  role: 'ADMIN' | 'DOCTOR' | 'STAFF';
 
-  @Column("tinyint" as any, {
-    name: "is_active",
-    nullable: true,
-    width: 1,
-    default: () => "'1'",
-  } as any)
+  @Column(
+    'tinyint' as any,
+    {
+      name: 'is_active',
+      nullable: true,
+      width: 1,
+      default: () => "'1'",
+    } as any,
+  )
   isActive: boolean | null;
 
-  @Column("timestamp", {
-    name: "created_at",
-    default: () => "CURRENT_TIMESTAMP",
+  @Column('timestamp', {
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @OneToMany(
     () => AppointmentStatusLogs,
-    (appointmentStatusLogs) => appointmentStatusLogs.changedBy2
+    (appointmentStatusLogs) => appointmentStatusLogs.changedBy2,
   )
   appointmentStatusLogs: AppointmentStatusLogs[];
 

@@ -29,9 +29,16 @@ export class MailService {
   }
 
   // 2. Hàm gửi mail Đặt khám thành công
-  async sendBookingSuccess(email: string, qrCode: string, date: string, time: string, accountName: string, patientName: string) {
+  async sendBookingSuccess(
+    email: string,
+    qrCode: string,
+    date: string,
+    time: string,
+    accountName: string,
+    patientName: string,
+  ) {
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${qrCode}`;
-    
+
     await this.mailerService.sendMail({
       to: email,
       subject: 'Xác nhận Đặt lịch khám thành công - Healtech',

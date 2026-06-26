@@ -17,7 +17,8 @@ export class UploadController {
       storage: diskStorage({
         destination: 'public/images',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `img-${uniqueSuffix}${ext}`);
         },
@@ -25,7 +26,9 @@ export class UploadController {
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
           return callback(
-            new BadRequestException('Chỉ cho phép tải lên các định dạng ảnh (jpg, jpeg, png, gif, webp)!'),
+            new BadRequestException(
+              'Chỉ cho phép tải lên các định dạng ảnh (jpg, jpeg, png, gif, webp)!',
+            ),
             false,
           );
         }

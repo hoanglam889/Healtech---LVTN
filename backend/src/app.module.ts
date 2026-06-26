@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,6 +14,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ServicesModule } from './services/services.module';
 import { AppointmentServicesModule } from './appointment-services/appointment-services.module';
 import { InvoicesModule } from './invoices/invoices.module';
+import { PaymentsModule } from './payments/payments.module';
+
 @Module({
   imports: [
     // 1. Load file cấu hình .env
@@ -27,12 +29,15 @@ import { InvoicesModule } from './invoices/invoices.module';
       port: parseInt(process.env.DB_PORT || '3306', 10),
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_DATABASE, 
-      entities: [__dirname + '/**/*.entity{.ts,.js}', __dirname + '/entities/*{.ts,.js}'],
+      database: process.env.DB_DATABASE,
+      entities: [
+        __dirname + '/**/*.entity{.ts,.js}',
+        __dirname + '/entities/*{.ts,.js}',
+      ],
       synchronize: false, // Tự động đồng bộ các Entity (Model) vào DB - Rất tiện khi phát triển
     }),
 
-     MailerModule.forRoot({
+    MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
         port: 465,
@@ -43,9 +48,10 @@ import { InvoicesModule } from './invoices/invoices.module';
         },
       },
       defaults: {
-        from: '"Phòng khám Healtech" <lamphan3107@gmail.com>', 
+        from: '"Phòng khám Healtech" <lamphan3107@gmail.com>',
       },
     }),
+
     SpecialtiesModule,
     UploadModule,
     DoctorProfilesModule,
@@ -56,6 +62,7 @@ import { InvoicesModule } from './invoices/invoices.module';
     ServicesModule,
     AppointmentServicesModule,
     InvoicesModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

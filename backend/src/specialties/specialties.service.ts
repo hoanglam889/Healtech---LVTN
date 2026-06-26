@@ -3,15 +3,15 @@ import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
 import { Repository } from 'typeorm';
 import { Specialties } from 'src/entities/Specialties';
-import {InjectRepository} from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class SpecialtiesService {
   constructor(
     @InjectRepository(Specialties)
-    private specialtiesRepository: Repository<Specialties>
+    private specialtiesRepository: Repository<Specialties>,
   ) {}
-  
+
   async create(createSpecialtyDto: CreateSpecialtyDto) {
     const specialty = this.specialtiesRepository.create(createSpecialtyDto);
     return this.specialtiesRepository.save(specialty);
@@ -22,7 +22,9 @@ export class SpecialtiesService {
   }
 
   async findOne(id: number) {
-    const specialty = await this.specialtiesRepository.findOne({ where: { id } });
+    const specialty = await this.specialtiesRepository.findOne({
+      where: { id },
+    });
     if (!specialty) {
       throw new NotFoundException(`Không tìm thấy chuyên khoa #${id}`);
     }

@@ -18,7 +18,10 @@ export default function StaffDashboard() {
   });
 
   // Quản lý tab hiển thị
-  const [activeTab, setActiveTab] = useState('checkin');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'checkin';
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Xử lý đăng nhập

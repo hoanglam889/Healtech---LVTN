@@ -12,12 +12,19 @@ import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users, PatientAccounts, DoctorProfiles, Patients]),
-  
-  JwtModule.register({secret: 'HEATH_TECH_SECRET_KEY', signOptions: {expiresIn: '5h'},
-  }),
-  MailModule,
-],
+    TypeOrmModule.forFeature([
+      Users,
+      PatientAccounts,
+      DoctorProfiles,
+      Patients,
+    ]),
+
+    JwtModule.register({
+      secret: 'HEATH_TECH_SECRET_KEY',
+      signOptions: { expiresIn: '5h' },
+    }),
+    MailModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],

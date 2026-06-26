@@ -5,14 +5,13 @@ import { join } from 'path';
 import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   //lấy link FRONTEND_URL ở .env hoặc chạy link mặc định
-    app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', 
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
   });
 
-  
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
   });

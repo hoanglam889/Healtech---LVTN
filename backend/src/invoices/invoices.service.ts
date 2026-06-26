@@ -15,7 +15,7 @@ export class InvoicesService {
 
   async getInvoiceDetails(appointmentId: number) {
     const invoice = await this.invoicesRepo.findOne({
-      where: { appointmentId }
+      where: { appointmentId },
     });
 
     if (!invoice) {
@@ -25,7 +25,7 @@ export class InvoicesService {
     // Lấy danh sách dịch vụ
     const servicesList = await this.apptServicesRepo.find({
       where: { appointmentId },
-      relations: { service: true }
+      relations: { service: true },
     });
 
     const BASE_FEE = 150000;
@@ -41,16 +41,16 @@ export class InvoicesService {
       breakdown: {
         examFee: {
           name: 'Phí thăm khám ban đầu',
-          price: BASE_FEE
+          price: BASE_FEE,
         },
-        services: servicesList.map(item => ({
+        services: servicesList.map((item) => ({
           id: item.id,
           serviceId: item.serviceId,
           name: item.service?.name,
           snapshotPrice: Number(item.snapshotPrice),
-          quantity: item.quantity
-        }))
-      }
+          quantity: item.quantity,
+        })),
+      },
     };
   }
 }

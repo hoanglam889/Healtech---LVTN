@@ -10,9 +10,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // Chỉ định cách lấy Token: Lấy từ trong Cookie có tên là 'access_token'
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let data = request?.cookies['access_token']; 
+          let data = request?.cookies['access_token'];
           if (!data) {
-             data = request?.cookies['acces_token']; // Đề phòng bạn gõ sai chính tả lúc set cookie
+            data = request?.cookies['acces_token']; // Đề phòng bạn gõ sai chính tả lúc set cookie
           }
           if (!data) {
             return null;
@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ]),
       ignoreExpiration: false, // Bắt buộc phải kiểm tra thời hạn (8 tiếng)
       // Chú ý: Phải giống y chang chuỗi secret bạn đã khai báo trong auth.module.ts
-      secretOrKey: 'HEATH_TECH_SECRET_KEY', 
+      secretOrKey: 'HEATH_TECH_SECRET_KEY',
     });
   }
 

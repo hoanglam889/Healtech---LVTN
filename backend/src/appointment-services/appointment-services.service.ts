@@ -16,7 +16,10 @@ export class AppointmentServicesService {
   ) {}
 
   // Helper tính toán lại tổng tiền Hóa đơn
-  async recalculateInvoiceTotal(appointmentId: number, queryRunner: any = null) {
+  async recalculateInvoiceTotal(
+    appointmentId: number,
+    queryRunner: any = null,
+  ) {
     const manager = queryRunner ? queryRunner.manager : this.dataSource.manager;
 
     // Lấy tất cả dịch vụ của lịch khám này
@@ -26,7 +29,7 @@ export class AppointmentServicesService {
 
     // Tính tổng tiền các dịch vụ
     const servicesTotal = services.reduce((sum, item) => {
-      return sum + (Number(item.snapshotPrice) * (item.quantity || 1));
+      return sum + Number(item.snapshotPrice) * (item.quantity || 1);
     }, 0);
 
     // Tiền khám gốc
@@ -34,7 +37,9 @@ export class AppointmentServicesService {
     const finalTotal = BASE_FEE + servicesTotal;
 
     // Cập nhật hóa đơn
-    const invoice = await manager.findOne(Invoices, { where: { appointmentId } });
+    const invoice = await manager.findOne(Invoices, {
+      where: { appointmentId },
+    });
     if (invoice) {
       invoice.totalAmount = finalTotal.toString();
       await manager.save(Invoices, invoice);
@@ -49,7 +54,7 @@ export class AppointmentServicesService {
     try {
       // 1. Kiểm tra hóa đơn
       const invoice = await queryRunner.manager.findOne(Invoices, {
-        where: { appointmentId: dto.appointmentId }
+        where: { appointmentId: dto.appointmentId },
       });
 
       if (!invoice) {
@@ -57,25 +62,34 @@ export class AppointmentServicesService {
       }
 
       if (invoice.status === 'PAID' || invoice.status === 'CANCELLED') {
-        throw new BadRequestException('Không thể thêm dịch vụ vào hóa đơn đã Thanh toán hoặc Đã hủy!');
+        throw new BadRequestException(
+          'Không thể thêm dịch vụ vào hóa đơn đã Thanh toán hoặc Đã hủy!',
+        );
       }
 
       // 2. Lấy thông tin giá dịch vụ gốc
       const serviceInfo = await queryRunner.manager.findOne(Services, {
-        where: { id: dto.serviceId, isActive: true }
+        where: { id: dto.serviceId, isActive: true },
       });
 
       if (!serviceInfo) {
-        throw new BadRequestException('Dịch vụ không tồn tại hoặc đã ngừng hoạt động!');
+        throw new BadRequestException(
+          'Dịch vụ không tồn tại hoặc đã ngừng hoạt động!',
+        );
       }
 
       // 3. Kiểm tra xem dịch vụ này đã có trong lịch khám chưa
-      const existingService = await queryRunner.manager.findOne(AppointmentServices, {
-        where: { appointmentId: dto.appointmentId, serviceId: dto.serviceId }
-      });
+      const existingService = await queryRunner.manager.findOne(
+        AppointmentServices,
+        {
+          where: { appointmentId: dto.appointmentId, serviceId: dto.serviceId },
+        },
+      );
 
       if (existingService) {
-        throw new BadRequestException('Dịch vụ này đã được thêm vào lịch khám! Vui lòng dùng tính năng Cập nhật số lượng.');
+        throw new BadRequestException(
+          'Dịch vụ này đã được thêm vào lịch khám! Vui lòng dùng tính năng Cập nhật số lượng.',
+        );
       }
 
       // 4. Lưu dịch vụ mới
@@ -83,7 +97,7 @@ export class AppointmentServicesService {
         appointmentId: dto.appointmentId,
         serviceId: dto.serviceId,
         quantity: dto.quantity || 1,
-        snapshotPrice: serviceInfo.price
+        snapshotPrice: serviceInfo.price,
       });
       await queryRunner.manager.save(AppointmentServices, newApptService);
 
@@ -93,7 +107,6 @@ export class AppointmentServicesService {
       // Lưu transaction
       await queryRunner.commitTransaction();
       return newApptService;
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -110,8 +123,8 @@ export class AppointmentServicesService {
     return await this.apptServicesRepo.find({
       where: { appointmentId: appointmentId },
       relations: {
-        service: true // Lấy luôn thông tin chi tiết của dịch vụ (Tên, Giá)
-      }
+        service: true, // Lấy luôn thông tin chi tiết của dịch vụ (Tên, Giá)
+      },
     });
   }
 
@@ -121,13 +134,26 @@ export class AppointmentServicesService {
     await queryRunner.startTransaction();
 
     try {
-      const existingService = await queryRunner.manager.findOne(AppointmentServices, { where: { id } });
-      if (!existingService) throw new BadRequestException('Không tìm thấy dịch vụ trong lịch khám này!');
+      const existingService = await queryRunner.manager.findOne(
+        AppointmentServices,
+        { where: { id } },
+      );
+      if (!existingService)
+        throw new BadRequestException(
+          'Không tìm thấy dịch vụ trong lịch khám này!',
+        );
 
       // Check invoice status
-      const invoice = await queryRunner.manager.findOne(Invoices, { where: { appointmentId: existingService.appointmentId } });
-      if (invoice && (invoice.status === 'PAID' || invoice.status === 'CANCELLED')) {
-        throw new BadRequestException('Không thể sửa số lượng vì Hóa đơn đã Thanh toán hoặc Đã hủy!');
+      const invoice = await queryRunner.manager.findOne(Invoices, {
+        where: { appointmentId: existingService.appointmentId },
+      });
+      if (
+        invoice &&
+        (invoice.status === 'PAID' || invoice.status === 'CANCELLED')
+      ) {
+        throw new BadRequestException(
+          'Không thể sửa số lượng vì Hóa đơn đã Thanh toán hoặc Đã hủy!',
+        );
       }
 
       // Update quantity
@@ -137,7 +163,10 @@ export class AppointmentServicesService {
       }
 
       // Recalculate
-      await this.recalculateInvoiceTotal(existingService.appointmentId, queryRunner);
+      await this.recalculateInvoiceTotal(
+        existingService.appointmentId,
+        queryRunner,
+      );
 
       await queryRunner.commitTransaction();
       return existingService;
@@ -155,17 +184,30 @@ export class AppointmentServicesService {
     await queryRunner.startTransaction();
 
     try {
-      const existingService = await queryRunner.manager.findOne(AppointmentServices, { where: { id } });
-      if (!existingService) throw new BadRequestException('Không tìm thấy dịch vụ trong lịch khám này!');
+      const existingService = await queryRunner.manager.findOne(
+        AppointmentServices,
+        { where: { id } },
+      );
+      if (!existingService)
+        throw new BadRequestException(
+          'Không tìm thấy dịch vụ trong lịch khám này!',
+        );
 
       // Check invoice status
-      const invoice = await queryRunner.manager.findOne(Invoices, { where: { appointmentId: existingService.appointmentId } });
-      if (invoice && (invoice.status === 'PAID' || invoice.status === 'CANCELLED')) {
-        throw new BadRequestException('Không thể xóa dịch vụ vì Hóa đơn đã Thanh toán hoặc Đã hủy!');
+      const invoice = await queryRunner.manager.findOne(Invoices, {
+        where: { appointmentId: existingService.appointmentId },
+      });
+      if (
+        invoice &&
+        (invoice.status === 'PAID' || invoice.status === 'CANCELLED')
+      ) {
+        throw new BadRequestException(
+          'Không thể xóa dịch vụ vì Hóa đơn đã Thanh toán hoặc Đã hủy!',
+        );
       }
 
       const appointmentId = existingService.appointmentId;
-      
+
       // Delete (Hard delete since it's just an item in cart)
       await queryRunner.manager.remove(AppointmentServices, existingService);
 

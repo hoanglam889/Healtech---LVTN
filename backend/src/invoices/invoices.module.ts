@@ -7,7 +7,9 @@ import { AppointmentServices } from '../entities/AppointmentServices';
 import { Services } from '../entities/Services';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoices, AppointmentServices, Services])],
+  imports: [
+    TypeOrmModule.forFeature([Invoices, AppointmentServices, Services]),
+  ],
   controllers: [InvoicesController],
   providers: [InvoicesService],
 })

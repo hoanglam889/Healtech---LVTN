@@ -4,45 +4,58 @@ import {
   Index,
   OneToMany,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { Notifications } from "./Notifications";
-import { Patients } from "./Patients";
+} from 'typeorm';
+import { Notifications } from './Notifications';
+import { Patients } from './Patients';
 
-@Index("phone", ["phone"], { unique: true })
-@Entity("patient_accounts", { schema: "clinic_flow_erp" })
+@Index('phone', ['phone'], { unique: true })
+@Entity('patient_accounts', { schema: 'clinic_flow_erp' })
 export class PatientAccounts {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column("varchar", { name: "phone", unique: true, length: 20, nullable: true })
+  @Column('varchar', {
+    name: 'phone',
+    unique: true,
+    length: 20,
+    nullable: true,
+  })
   phone: string | null;
 
-  @Column("varchar", { name: "email", unique: true, length: 255, nullable: true })
+  @Column('varchar', {
+    name: 'email',
+    unique: true,
+    length: 255,
+    nullable: true,
+  })
   email: string | null;
 
-  @Column("varchar", { name: "password_hash", length: 255 })
+  @Column('varchar', { name: 'password_hash', length: 255 })
   passwordHash: string;
 
-  @Column("tinyint" as any, {
-    name: "is_active",
-    nullable: true,
-    width: 1,
-    default: () => "'0'", // Đổi mặc định thành 0 (chưa kích hoạt)
-  } as any)
+  @Column(
+    'tinyint' as any,
+    {
+      name: 'is_active',
+      nullable: true,
+      width: 1,
+      default: () => "'0'", // Đổi mặc định thành 0 (chưa kích hoạt)
+    } as any,
+  )
   isActive: boolean | null;
 
-  @Column("varchar", { name: "otp_code", length: 10, nullable: true })
+  @Column('varchar', { name: 'otp_code', length: 10, nullable: true })
   otpCode: string | null;
 
-  @Column("timestamp", {
-    name: "created_at",
-    default: () => "CURRENT_TIMESTAMP",
+  @Column('timestamp', {
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
   @OneToMany(
     () => Notifications,
-    (notifications) => notifications.patientAccount
+    (notifications) => notifications.patientAccount,
   )
   notifications: Notifications[];
 

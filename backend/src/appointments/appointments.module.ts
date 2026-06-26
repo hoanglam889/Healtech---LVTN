@@ -10,6 +10,6 @@ import { MailModule } from '../mail/mail.module';
   imports: [TypeOrmModule.forFeature([Appointments, Invoices]), MailModule],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
-  exports: [AppointmentsService]
+  exports: [AppointmentsService],
 })
 export class AppointmentsModule {}

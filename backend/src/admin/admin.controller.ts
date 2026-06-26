@@ -16,7 +16,15 @@ export class AdminController {
   }
 
   @Post('schedules')
-  createSchedule(@Body() dto: { doctorProfileId: number; shiftId: number; date: string; maxPatients?: number }) {
+  createSchedule(
+    @Body()
+    dto: {
+      doctorProfileId: number;
+      shiftId: number;
+      date: string;
+      maxPatients?: number;
+    },
+  ) {
     return this.adminService.createSchedule(dto);
   }
 

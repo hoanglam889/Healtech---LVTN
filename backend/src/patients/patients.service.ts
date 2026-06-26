@@ -35,7 +35,7 @@ export class PatientsService {
 
   async findAll(patientAccountId?: number) {
     return await this.patientsRepository.find({
-      where: patientAccountId ? { patientAccountId } : {}
+      where: patientAccountId ? { patientAccountId } : {},
     });
   }
 
@@ -49,7 +49,7 @@ export class PatientsService {
 
   async update(id: number, updatePatientDto: UpdatePatientDto) {
     const patient = await this.findOne(id);
-    
+
     const mergedData = { ...patient, ...updatePatientDto };
     const birthYear = new Date(mergedData.dob).getFullYear();
     const currentYear = new Date().getFullYear();
