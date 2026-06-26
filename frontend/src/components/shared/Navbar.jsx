@@ -9,7 +9,8 @@ const Navbar = ({
   onLogout, 
   onLoginClick, 
   onBookClick, 
-  onHomeClick 
+  onHomeClick,
+  onAccountClick
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -96,7 +97,11 @@ const Navbar = ({
                     <div className="fixed inset-0 z-30" onClick={() => setIsDropdownOpen(false)} />
                     <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-40 animate-[fadeIn_0.15s_ease-out]">
                       <button 
-                        onClick={() => { setIsDropdownOpen(false); alert('Chức năng Tài khoản đang phát triển!'); }}
+                        onClick={() => { 
+                          setIsDropdownOpen(false); 
+                          if (onAccountClick) onAccountClick(); 
+                          else setActiveTab('account'); 
+                        }}
                         className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-600 font-semibold flex items-center gap-2 cursor-pointer"
                       >
                         <Icons.User className="w-4 h-4" />

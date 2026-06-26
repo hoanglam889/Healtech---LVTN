@@ -7,6 +7,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import PatientProfiles from '../../../components/dashboard/patient/PatientProfiles';
 import MyAppointments from '../../../components/dashboard/patient/MyAppointments';
 import HealthBook from '../../../components/dashboard/patient/HealthBook';
+import PersonalAccount from '../../../components/dashboard/patient/PersonalAccount';
 
 const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
   const [appointments, setAppointments] = useState([]);
@@ -58,6 +59,10 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
 
   if (activeTab === 'history') {
     return <HealthBook user={user} />;
+  }
+
+  if (activeTab === 'account') {
+    return <PersonalAccount user={user} />;
   }
 
   return (
@@ -195,6 +200,13 @@ const PatientDashboard = ({ user, onBookClick, activeTab, setActiveTab }) => {
                 </button>
                 <button className="w-full text-left p-3 rounded-xl hover:bg-blue-50 text-gray-600 hover:text-blue-600 font-semibold transition-all flex items-center justify-between opacity-50 cursor-not-allowed">
                   <span>Hồ sơ sức khỏe cá nhân</span>
+                  <Icons.ChevronRight className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setActiveTab('account')}
+                  className="w-full text-left p-3 rounded-xl hover:bg-blue-50 text-gray-600 hover:text-blue-600 font-semibold transition-all flex items-center justify-between cursor-pointer"
+                >
+                  <span>Tài khoản cá nhân</span>
                   <Icons.ChevronRight className="w-4 h-4" />
                 </button>
                 <button className="w-full text-left p-3 rounded-xl hover:bg-blue-50 text-gray-600 hover:text-blue-600 font-semibold transition-all flex items-center justify-between opacity-50 cursor-not-allowed">

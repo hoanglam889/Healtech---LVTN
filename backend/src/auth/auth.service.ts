@@ -224,4 +224,40 @@ export class AuthService {
       },
     };
   }
+
+  // Cập nhật thông tin tài khoản (Email, Mật khẩu)
+  async updatePatientAccount(accountId: number, updateDto: { email?: string, oldPassword?: string, newPassword?: string }) {
+    const account = await this.patientAccountsRepo.findOne({ where: { id: accountId } });
+    if (!account) {
+      throw new UnauthorizedException('Không tìm thấy tài khoản');
+    }
+
+    if (updateDto.email) {
+      // Check duplicate email
+      const existingEmail = await this.patientAccountsRepo.findOne({ where: { email: updateDto.email } });
+      if (existingEmail && existingEmail.id !== accountId) {
+        throw new UnauthorizedException('Email này đã được sử dụng bởi tài khoản khác');
+      }
+      account.email = updateDto.email;
+    }
+
+    if (updateDto.oldPassword && updateDto.newPassword) {
+      if (account.passwordHash !== updateDto.oldPassword) {
+        throw new UnauthorizedException('Mật khẩu hiện tại không chính xác');
+      }
+      account.passwordHash = updateDto.newPassword;
+    }
+
+    await this.patientAccountsRepo.save(account);
+
+    return {
+      success: true,
+      message: 'Cập nhật tài khoản thành công',
+      user: {
+        id: account.id,
+        email: account.email,
+        phone: account.phone,
+      }
+    };
+  }
 }

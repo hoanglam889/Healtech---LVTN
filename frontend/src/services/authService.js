@@ -20,3 +20,8 @@ export const patientVerifyOtp = async (email, otpCode) => {
   return response.data;
 };
 
+export const updatePatientAccount = async (data) => {
+  const response = await apiClient.put('/auth/patient-account/update', data);
+  return response.data;
+};
+

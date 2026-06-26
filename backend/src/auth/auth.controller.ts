@@ -4,9 +4,13 @@ import {
   Body,
   BadRequestException,
   Res,
+  Put,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -91,5 +95,16 @@ export class AuthController {
       return userData;
     }
     return verifyData;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('patient-account/update')
+  async updatePatientAccount(@Req() req: any, @Body() body: any) {
+    const userId = req.user.id;
+    if (!userId || req.user.role !== 'PATIENT') {
+      throw new BadRequestException('Bạn không có quyền thực hiện thao tác này');
+    }
+    
+    return this.authService.updatePatientAccount(userId, body);
   }
 }

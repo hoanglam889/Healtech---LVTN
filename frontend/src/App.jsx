@@ -91,6 +91,7 @@ function App() {
             }
           }} 
           onHomeClick={() => { setIsBooking(false); setActiveTab('dashboard'); }} 
+          onAccountClick={() => { setIsBooking(false); setActiveTab('account'); }}
         />
         
         {isBooking ? (
