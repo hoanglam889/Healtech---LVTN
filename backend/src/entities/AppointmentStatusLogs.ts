@@ -41,6 +41,9 @@ export class AppointmentStatusLogs {
   })
   changedAt: Date;
 
+  @Column('varchar', { name: 'notes', length: 255, nullable: true })
+  notes: string | null;
+
   @ManyToOne(
     () => Appointments,
     (appointments) => appointments.appointmentStatusLogs,

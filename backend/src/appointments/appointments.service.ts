@@ -8,6 +8,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Appointments } from '../entities/Appointments';
 import { Invoices } from '../entities/Invoices';
 import { MedicalRecords } from '../entities/MedicalRecords';
+import { AppointmentStatusLogs } from '../entities/AppointmentStatusLogs';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -21,6 +22,8 @@ export class AppointmentsService {
     private appointmentsRepo: Repository<Appointments>,
     @InjectRepository(Invoices)
     private invoicesRepo: Repository<Invoices>,
+    @InjectRepository(AppointmentStatusLogs)
+    private appointmentStatusLogsRepo: Repository<AppointmentStatusLogs>,
     private dataSource: DataSource,
     private mailService: MailService,
   ) {}
@@ -208,6 +211,10 @@ export class AppointmentsService {
         invoices: true,
         medicalRecords: true,
       },
+      order: {
+        appointmentDate: 'DESC',
+        appointmentTime: 'DESC',
+      },
     });
   }
 
@@ -349,7 +356,34 @@ export class AppointmentsService {
 
     // Cập nhật lịch khám
     if (appointmentFields && Object.keys(appointmentFields).length > 0) {
+      // Kiểm tra xem có đổi ngày/giờ/bác sĩ không
+      const isShiftChanged = 
+        (appointmentFields.appointmentDate && appointmentFields.appointmentDate !== appointment.appointmentDate) ||
+        (appointmentFields.appointmentTime && appointmentFields.appointmentTime !== appointment.appointmentTime) ||
+        (appointmentFields.doctorProfileId && appointmentFields.doctorProfileId !== appointment.doctorProfileId);
+        
       await this.appointmentsRepo.update(id, appointmentFields);
+      
+      // Nếu có dời lịch, ghi log
+      if (isShiftChanged) {
+        let noteStr = `Lễ tân dời lịch khám: `;
+        if (appointmentFields.appointmentDate && appointmentFields.appointmentDate !== appointment.appointmentDate) {
+          noteStr += `Ngày (${appointment.appointmentDate} -> ${appointmentFields.appointmentDate}). `;
+        }
+        if (appointmentFields.appointmentTime && appointmentFields.appointmentTime !== appointment.appointmentTime) {
+          noteStr += `Giờ (${appointment.appointmentTime} -> ${appointmentFields.appointmentTime}). `;
+        }
+        if (appointmentFields.doctorProfileId && appointmentFields.doctorProfileId !== appointment.doctorProfileId) {
+          noteStr += `Bác sĩ ID (${appointment.doctorProfileId} -> ${appointmentFields.doctorProfileId}). `;
+        }
+        
+        await this.appointmentStatusLogsRepo.save({
+          appointmentId: id,
+          oldStatus: appointment.status as any,
+          newStatus: appointment.status as any,
+          notes: noteStr,
+        });
+      }
 
       // ===== THUẬT TOÁN HÀNG ĐỢI (SMART QUEUE) =====
       // Khi bác sĩ gọi bệnh nhân này vào khám (EXAMINING), hàng đợi sẽ nhích lên 1 bậc.

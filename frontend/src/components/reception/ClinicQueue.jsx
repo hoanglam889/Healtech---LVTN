@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
+import { getDoctors } from '../../services/doctorService';
 
 export default function ClinicQueue() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [cancelConfirmId, setCancelConfirmId] = useState(null);
+  
+  const [doctors, setDoctors] = useState([]);
+  const [rescheduleItem, setRescheduleItem] = useState(null);
+  const [rescheduleData, setRescheduleData] = useState({ date: '', time: '', doctorId: '' });
+  const [isConfirmingReschedule, setIsConfirmingReschedule] = useState(false);
+
+  // Thêm formatDate để xài cho confirm modal
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch (e) {
+      return dateString;
+    }
+  };
 
   // Load appointments
   const loadAppointments = async (showSpinner = true) => {
@@ -24,6 +43,8 @@ export default function ClinicQueue() {
   useEffect(() => {
     // Tải lần đầu có hiện spinner
     loadAppointments(true);
+    getDoctors().then(docs => setDoctors(docs || [])).catch(console.error);
+
 
     // Thiết lập tự động đồng bộ ngầm sau mỗi 5 giây
     const interval = setInterval(() => {
@@ -47,6 +68,30 @@ export default function ClinicQueue() {
     } catch (err) {
       console.error(err);
       showToast('Lỗi khi hủy ca khám', 'error');
+    }
+  };
+
+  // Xử lý dời lịch khám
+  const handleReschedule = async () => {
+    try {
+      if (!rescheduleData.date || !rescheduleData.time || !rescheduleData.doctorId) {
+        showToast('Vui lòng chọn đầy đủ Bác sĩ, Ngày và Giờ!', 'warning');
+        return;
+      }
+      
+      await updateAppointment(rescheduleItem.id, { 
+        appointmentDate: rescheduleData.date,
+        appointmentTime: rescheduleData.time,
+        doctorProfileId: parseInt(rescheduleData.doctorId, 10)
+      });
+      
+      setRescheduleItem(null);
+      setIsConfirmingReschedule(false);
+      showToast('Đã dời lịch khám thành công!', 'success');
+      loadAppointments(false);
+    } catch (err) {
+      console.error(err);
+      showToast('Không thể dời lịch khám này!', 'error');
     }
   };
 
@@ -261,13 +306,29 @@ export default function ClinicQueue() {
                               </span>
                             </div>
                           </div>
-                          <button
-                            onClick={() => setCancelConfirmId(appt.id)}
-                            title="Hủy lịch"
-                            className="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                          >
-                            <Icons.X className="w-4 h-4" />
-                          </button>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => {
+                                setRescheduleItem(appt);
+                                setRescheduleData({
+                                  date: appt.appointmentDate || '',
+                                  time: appt.appointmentTime ? appt.appointmentTime.slice(0, 5) : '',
+                                  doctorId: appt.doctorProfileId || ''
+                                });
+                              }}
+                              title="Dời lịch"
+                              className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Icons.CalendarClock className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setCancelConfirmId(appt.id)}
+                              title="Hủy lịch"
+                              className="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Icons.X className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -317,6 +378,117 @@ export default function ClinicQueue() {
                 Hủy lịch
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* RESCHEDULE MODAL */}
+      {rescheduleItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => { setRescheduleItem(null); setIsConfirmingReschedule(false); }}></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200">
+            {!isConfirmingReschedule ? (
+              <>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">Dời lịch khám</h3>
+                <p className="text-sm text-gray-500 font-medium mb-6">
+                  Bệnh nhân: <span className="font-bold text-gray-700">{rescheduleItem.patient?.fullName}</span>
+                </p>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Ngày khám</label>
+                    <input 
+                      type="date" 
+                      value={rescheduleData.date}
+                      onChange={(e) => setRescheduleData({...rescheduleData, date: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Chọn bác sĩ (có ca trực trong ngày)</label>
+                    <select 
+                      value={rescheduleData.doctorId}
+                      onChange={(e) => setRescheduleData({...rescheduleData, doctorId: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    >
+                      <option value="">-- Chọn bác sĩ --</option>
+                      {doctors.filter(doc => {
+                        if (!rescheduleData.date) return true;
+                        return doc.doctorSchedules?.some(sched => {
+                          if (sched.date !== rescheduleData.date) return false;
+                          if (!rescheduleData.time) return true;
+                          
+                          const st = sched.shift?.startTime?.slice(0, 5);
+                          const et = sched.shift?.endTime?.slice(0, 5);
+                          if (!st || !et) return true;
+                          
+                          return rescheduleData.time >= st && rescheduleData.time <= et;
+                        });
+                      }).map(doc => (
+                        <option key={doc.id} value={doc.id}>{doc.fullName} ({doc.specialty?.name})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Giờ khám</label>
+                    <input 
+                      type="time" 
+                      value={rescheduleData.time}
+                      onChange={(e) => setRescheduleData({...rescheduleData, time: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => { setRescheduleItem(null); setIsConfirmingReschedule(false); }}
+                    className="flex-1 p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (!rescheduleData.date || !rescheduleData.time || !rescheduleData.doctorId) {
+                        showToast('Vui lòng chọn đầy đủ Bác sĩ, Ngày và Giờ!', 'warning');
+                        return;
+                      }
+                      setIsConfirmingReschedule(true);
+                    }}
+                    className="flex-1 p-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-xl font-bold transition-all cursor-pointer"
+                  >
+                    Tiếp tục
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icons.CalendarClock className="w-8 h-8" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Xác nhận dời lịch</h4>
+                <p className="text-sm text-gray-500 mb-6">
+                  Bạn có chắc chắn muốn dời lịch khám của bệnh nhân <span className="font-bold text-gray-800">{rescheduleItem.patient?.fullName}</span> sang 
+                  <span className="font-bold text-blue-600"> {rescheduleData.time} ngày {formatDate(rescheduleData.date)}</span> không?
+                </p>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setIsConfirmingReschedule(false)}
+                    className="flex-1 p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all"
+                  >
+                    Quay lại
+                  </button>
+                  <button 
+                    onClick={handleReschedule}
+                    className="flex-1 p-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-xl font-bold transition-all"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

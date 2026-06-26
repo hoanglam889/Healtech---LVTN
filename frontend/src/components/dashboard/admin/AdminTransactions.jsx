@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../../services/appointmentService';
+import { getDoctors } from '../../../services/doctorService';
 
 export default function AdminTransactions() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelConfirmId, setCancelConfirmId] = useState(null);
+  
+  const [doctors, setDoctors] = useState([]);
+  const [rescheduleItem, setRescheduleItem] = useState(null);
+  const [rescheduleData, setRescheduleData] = useState({ date: '', time: '', doctorId: '' });
+  const [isConfirmingReschedule, setIsConfirmingReschedule] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('ALL'); // 'ALL' | 'PAID' | 'UNPAID' | 'CANCELLED'
@@ -26,17 +33,43 @@ export default function AdminTransactions() {
 
   useEffect(() => {
     loadData();
+    getDoctors().then(docs => setDoctors(docs || [])).catch(console.error);
   }, []);
+
+  const showToast = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   // Xử lý Hủy lịch khám (Gọi API)
   const handleCancel = async (id) => {
     try {
       setCancelConfirmId(null);
       await updateAppointment(id, { status: 'CANCELLED' });
+      showToast('Hủy lịch khám thành công!');
       loadData();
     } catch (err) {
       console.error(err);
-      alert('Không thể hủy lịch khám này!');
+      showToast('Không thể hủy lịch khám này!', 'error');
+    }
+  };
+
+  // Xử lý Dời lịch khám
+  const handleReschedule = async () => {
+    try {
+      await updateAppointment(rescheduleItem.id, { 
+        appointmentDate: rescheduleData.date,
+        appointmentTime: rescheduleData.time,
+        doctorProfileId: parseInt(rescheduleData.doctorId, 10)
+      });
+      
+      setRescheduleItem(null);
+      setIsConfirmingReschedule(false);
+      showToast('Dời lịch khám thành công!', 'success');
+      loadData();
+    } catch (err) {
+      console.error(err);
+      showToast('Không thể dời lịch khám này!', 'error');
     }
   };
 
@@ -71,6 +104,15 @@ export default function AdminTransactions() {
 
   return (
     <div className="space-y-6">
+      {/* Thông báo Toast */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl font-bold shadow-2xl flex items-center gap-3 animate-in slide-in-from-right-8 ${
+          notification.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+        }`}>
+          {notification.type === 'success' ? <Icons.CheckCircle2 className="w-5 h-5" /> : <Icons.AlertCircle className="w-5 h-5" />}
+          {notification.message}
+        </div>
+      )}
       
       {/* THANH TÌM KIẾM VÀ BỘ LỌC */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
@@ -192,12 +234,27 @@ export default function AdminTransactions() {
                       {/* Thao tác hủy lịch khám */}
                       <td className="py-4 px-6 text-right">
                         {(!isDone && !isCancelled) ? (
-                          <button
-                            onClick={() => setCancelConfirmId(item.id)}
-                            className="text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition-all cursor-pointer"
-                          >
-                            Hủy lịch hẹn
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setRescheduleItem(item);
+                                setRescheduleData({
+                                  date: item.appointmentDate || '',
+                                  time: item.appointmentTime ? item.appointmentTime.slice(0, 5) : '',
+                                  doctorId: item.doctorProfileId || ''
+                                });
+                              }}
+                              className="text-xs font-bold text-blue-500 hover:text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-transparent hover:border-blue-100 transition-all cursor-pointer"
+                            >
+                              Dời lịch
+                            </button>
+                            <button
+                              onClick={() => setCancelConfirmId(item.id)}
+                              className="text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition-all cursor-pointer"
+                            >
+                              Hủy
+                            </button>
+                          </div>
                         ) : (
                           <span className="text-xs text-gray-400 font-semibold italic">Không khả dụng</span>
                         )}
@@ -237,6 +294,108 @@ export default function AdminTransactions() {
                 Xác nhận Hủy
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* RESCHEDULE MODAL */}
+      {rescheduleItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setRescheduleItem(null)}></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200">
+            {!isConfirmingReschedule ? (
+              <>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">Dời lịch khám</h3>
+                <p className="text-sm text-gray-500 font-medium mb-6">
+                  Bệnh nhân: <span className="font-bold text-gray-700">{rescheduleItem.patient?.fullName}</span>
+                </p>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Ngày khám</label>
+                    <input 
+                      type="date" 
+                      value={rescheduleData.date}
+                      onChange={(e) => setRescheduleData({...rescheduleData, date: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Chọn bác sĩ (có ca trực trong ngày)</label>
+                    <select 
+                      value={rescheduleData.doctorId}
+                      onChange={(e) => setRescheduleData({...rescheduleData, doctorId: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    >
+                      <option value="">-- Chọn bác sĩ --</option>
+                      {doctors.filter(doc => {
+                        if (!rescheduleData.date) return true;
+                        return doc.doctorSchedules?.some(sched => sched.date === rescheduleData.date);
+                      }).map(doc => (
+                        <option key={doc.id} value={doc.id}>{doc.fullName} ({doc.specialty?.name})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Giờ khám</label>
+                    <input 
+                      type="time" 
+                      value={rescheduleData.time}
+                      onChange={(e) => setRescheduleData({...rescheduleData, time: e.target.value})}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => { setRescheduleItem(null); setIsConfirmingReschedule(false); }}
+                    className="flex-1 p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (!rescheduleData.date || !rescheduleData.time || !rescheduleData.doctorId) {
+                        showToast('Vui lòng chọn đầy đủ Bác sĩ, Ngày và Giờ!', 'warning');
+                        return;
+                      }
+                      setIsConfirmingReschedule(true);
+                    }}
+                    className="flex-1 p-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-xl font-bold transition-all cursor-pointer"
+                  >
+                    Tiếp tục
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icons.CalendarClock className="w-8 h-8" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Xác nhận dời lịch</h4>
+                <p className="text-sm text-gray-500 mb-6">
+                  Bạn có chắc chắn muốn dời lịch khám của bệnh nhân <span className="font-bold text-gray-800">{rescheduleItem.patient?.fullName}</span> sang 
+                  <span className="font-bold text-blue-600"> {rescheduleData.time} ngày {formatDate(rescheduleData.date)}</span> không?
+                </p>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setIsConfirmingReschedule(false)}
+                    className="flex-1 p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all"
+                  >
+                    Quay lại
+                  </button>
+                  <button 
+                    onClick={handleReschedule}
+                    className="flex-1 p-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-xl font-bold transition-all"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
