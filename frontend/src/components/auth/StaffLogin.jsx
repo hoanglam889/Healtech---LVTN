@@ -149,35 +149,7 @@ export default function StaffLogin({ onLoginSuccess, onGoHome }) {
             </form>
           </div>
 
-          {/* NUT CHỌN TÀI KHOẢN MẪU ĐỂ CHẤM ĐỒ ÁN NHANH */}
-          <div className="mt-10 pt-6 border-t border-gray-100">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-3">Tài khoản thử nghiệm (Click để điền nhanh)</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('0900000000', '123')}
-                className="p-3 text-left bg-gray-50/80 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-100 rounded-2xl flex items-center gap-2.5 transition-all text-xs font-semibold text-gray-600 cursor-pointer"
-              >
-                <Icons.UserCog className="w-4 h-4 text-blue-600" />
-                <div>
-                  <p className="font-extrabold text-gray-900 leading-tight">Mẫu Lễ Tân</p>
-                  <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">0900000000 / MK: 123</span>
-                </div>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => handleQuickFill('0000004', 'dummy_password')}
-                className="p-3 text-left bg-gray-50/80 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-100 rounded-2xl flex items-center gap-2.5 transition-all text-xs font-semibold text-gray-600 cursor-pointer"
-              >
-                <Icons.Stethoscope className="w-4 h-4 text-blue-600" />
-                <div>
-                  <p className="font-extrabold text-gray-900 leading-tight">Mẫu Bác sĩ Mỹ Ái</p>
-                  <span className="text-[10px] text-gray-400 leading-none mt-0.5 block">0000004 / MK: dummy_password</span>
-                </div>
-              </button>
-            </div>
-          </div>
 
         </div>
 

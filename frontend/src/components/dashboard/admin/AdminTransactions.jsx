@@ -5,6 +5,7 @@ import { getAllAppointments, updateAppointment } from '../../../services/appoint
 export default function AdminTransactions() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancelConfirmId, setCancelConfirmId] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('ALL'); // 'ALL' | 'PAID' | 'UNPAID' | 'CANCELLED'
@@ -29,13 +30,9 @@ export default function AdminTransactions() {
 
   // Xử lý Hủy lịch khám (Gọi API)
   const handleCancel = async (id) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn hủy lịch khám có mã #${id} không?`)) {
-      return;
-    }
-
     try {
+      setCancelConfirmId(null);
       await updateAppointment(id, { status: 'CANCELLED' });
-      alert('Đã hủy lịch khám thành công!');
       loadData();
     } catch (err) {
       console.error(err);
@@ -194,9 +191,9 @@ export default function AdminTransactions() {
 
                       {/* Thao tác hủy lịch khám */}
                       <td className="py-4 px-6 text-right">
-                        {isUpcoming ? (
+                        {(!isDone && !isCancelled) ? (
                           <button
-                            onClick={() => handleCancel(item.id)}
+                            onClick={() => setCancelConfirmId(item.id)}
                             className="text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition-all cursor-pointer"
                           >
                             Hủy lịch hẹn
@@ -214,6 +211,35 @@ export default function AdminTransactions() {
         )}
       </div>
 
+      {/* CONFIRM CANCELLATION MODAL */}
+      {cancelConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setCancelConfirmId(null)}></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4 mx-auto text-rose-600">
+              <Icons.AlertTriangle className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Hủy ca khám?</h3>
+            <p className="text-center text-sm text-gray-500 font-medium mb-6">
+              Bạn có chắc chắn muốn hủy lịch khám này? Mọi thông tin hàng đợi sẽ bị xóa.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setCancelConfirmId(null)}
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors"
+              >
+                Quay lại
+              </button>
+              <button 
+                onClick={() => handleCancel(cancelConfirmId)}
+                className="flex-1 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-200 rounded-xl font-bold transition-all cursor-pointer"
+              >
+                Xác nhận Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
