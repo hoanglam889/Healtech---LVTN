@@ -453,7 +453,17 @@ export class AppointmentsService {
           invoice.paymentMethod = paymentMethod;
         }
         await this.invoicesRepo.save(invoice);
+        
+        // PHÁT SÓNG: Hóa đơn được thanh toán
+        if (invoiceStatus === 'PAID') {
+          this.eventsGateway.emitUpdate('invoice_paid', { invoiceId: invoice.id });
+        }
       }
+    }
+
+    // PHÁT SÓNG: Sinh ra hóa đơn chờ thu ngân khi bác sĩ khám xong (DONE)
+    if (appointmentFields.status === 'DONE') {
+      this.eventsGateway.emitUpdate('invoice_created', { appointmentId: id });
     }
 
     // Cập nhật bệnh án (Medical Record)

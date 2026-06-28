@@ -9,9 +9,12 @@ import { VnpayModule } from 'nestjs-vnpay';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ignoreLogger, HashAlgorithm } from 'vnpay';
 
+import { EventsModule } from '../events/events.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Invoices, Appointments]),
+    EventsModule,
     VnpayModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

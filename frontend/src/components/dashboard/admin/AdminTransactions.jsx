@@ -37,13 +37,13 @@ export default function AdminTransactions() {
     loadData();
     getDoctors().then(docs => setDoctors(docs || [])).catch(console.error);
 
-    // Nghe sự kiện update để cập nhật danh sách lịch hẹn/hóa đơn
-    socket.on('appointment_updated', () => {
-      console.log('⚡ Admin nhận: appointment_updated');
+    // Admin quan tâm doanh thu, nên chỉ nghe khi có người thanh toán xong
+    socket.on('invoice_paid', () => {
+      console.log('⚡ Admin nhận: invoice_paid');
       loadData();
     });
 
-    return () => socket.off('appointment_updated');
+    return () => socket.off('invoice_paid');
   }, []);
 
   const showToast = (message, type = 'success') => {

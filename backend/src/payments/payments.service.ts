@@ -9,6 +9,7 @@ import {
 import { VnpayService } from 'nestjs-vnpay';
 import { Invoices } from '../entities/Invoices';
 import { Appointments } from '../entities/Appointments';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class PaymentsService {
@@ -19,6 +20,7 @@ export class PaymentsService {
     @InjectRepository(Invoices) private invoicesRepo: Repository<Invoices>,
     @InjectRepository(Appointments)
     private appointmentsRepo: Repository<Appointments>,
+    private readonly eventsGateway: EventsGateway,
   ) {}
 
   async createPaymentUrl(invoiceId: string, amount: number): Promise<string> {
@@ -88,6 +90,9 @@ export class PaymentsService {
       invoice.paidAt = new Date();
       invoice.paymentMethod = 'VNPAY';
       await this.invoicesRepo.save(invoice);
+
+      // PHÁT SÓNG: Hóa đơn thanh toán thành công qua VNPAY
+      this.eventsGateway.emitUpdate('invoice_paid', { invoiceId: invoice.id });
 
       return {
         status: 'success',

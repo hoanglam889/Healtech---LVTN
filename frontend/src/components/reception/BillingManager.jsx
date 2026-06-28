@@ -54,13 +54,21 @@ export default function BillingManager() {
   useEffect(() => {
     loadAppointments();
     
-    // Nghe sự kiện update để cập nhật danh sách hóa đơn
-    socket.on('appointment_updated', () => {
-      console.log('⚡ Thu ngân nhận: appointment_updated');
+    // Thu ngân quan tâm tới 2 event:
+    socket.on('invoice_created', () => {
+      console.log('⚡ Thu ngân nhận: invoice_created');
       loadAppointments();
     });
 
-    return () => socket.off('appointment_updated');
+    socket.on('invoice_paid', () => {
+      console.log('⚡ Thu ngân nhận: invoice_paid');
+      loadAppointments();
+    });
+
+    return () => {
+      socket.off('invoice_created');
+      socket.off('invoice_paid');
+    };
   }, []);
 
   const showToast = (message, type = 'success') => {
