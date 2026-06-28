@@ -60,7 +60,11 @@ export default function ClinicQueue() {
       console.log('⚡ Socket nhận: appointment_created');
       loadAppointments(false);
     });
-
+    //socket for event update appoiment
+    socket.on('appointment_updated', () => {
+      console.log('⚡ Lễ tân nhận: appointment_updated');
+      loadAppointments(false);
+    });
     // Tắt loa khi rời khỏi trang
     return () => {
       socket.off('appointment_created');

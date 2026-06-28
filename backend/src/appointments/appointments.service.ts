@@ -478,7 +478,9 @@ export class AppointmentsService {
 
       await medicalRecordsRepo.save(record);
     }
-
+    this.eventsGateway.emitUpdate('appointment_updated', { 
+      appointmentId: id 
+    });
     return this.findOne(id);
   }
 

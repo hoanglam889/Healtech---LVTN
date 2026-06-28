@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../../services/appointmentService';
 import { getDoctors } from '../../../services/doctorService';
+import { socket } from '../../../services/socket';
 
 export default function AdminTransactions() {
   const [appointments, setAppointments] = useState([]);
@@ -31,9 +32,18 @@ export default function AdminTransactions() {
       });
   };
 
+
   useEffect(() => {
     loadData();
     getDoctors().then(docs => setDoctors(docs || [])).catch(console.error);
+
+    // Nghe sự kiện update để cập nhật danh sách lịch hẹn/hóa đơn
+    socket.on('appointment_updated', () => {
+      console.log('⚡ Admin nhận: appointment_updated');
+      loadData();
+    });
+
+    return () => socket.off('appointment_updated');
   }, []);
 
   const showToast = (message, type = 'success') => {

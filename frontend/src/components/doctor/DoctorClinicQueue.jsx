@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 import { getAllServices, getAppointmentServices, addAppointmentService, removeAppointmentService } from '../../services/clinicService';
+import { socket } from '../../services/socket';
 
 export default function DoctorClinicQueue({ staffUser }) {
   const [appointments, setAppointments] = useState([]);
@@ -84,11 +85,11 @@ export default function DoctorClinicQueue({ staffUser }) {
     loadAppointments(true);
     loadAvailableServices();
 
-    const interval = setInterval(() => {
+    socket.on('appointment_updated', () => {
+      console.log('⚡ Bác sĩ nhận: appointment_updated');
       loadAppointments(false);
-    }, 5000);
-
-    return () => clearInterval(interval);
+    });
+    return () => socket.off('appointment_updated');
   }, []);
 
   const showToast = (message, type = 'success') => {

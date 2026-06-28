@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 import { getInvoiceDetails, createPaymentUrl } from '../../services/invoiceService';
+import { socket } from '../../services/socket';
 import PaymentModal from './PaymentModal';
 import InvoiceTemplate from './InvoiceTemplate';
 import { useReactToPrint } from 'react-to-print';
@@ -48,9 +49,18 @@ export default function BillingManager() {
     }
   };
 
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     loadAppointments();
+    
+    // Nghe sự kiện update để cập nhật danh sách hóa đơn
+    socket.on('appointment_updated', () => {
+      console.log('⚡ Thu ngân nhận: appointment_updated');
+      loadAppointments();
+    });
+
+    return () => socket.off('appointment_updated');
   }, []);
 
   const showToast = (message, type = 'success') => {

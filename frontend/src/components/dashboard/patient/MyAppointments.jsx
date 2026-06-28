@@ -3,6 +3,7 @@ import * as Icons from 'lucide-react';
 import { getAppointmentsByUserId, updateAppointment } from '../../../services/appointmentService';
 import AppointmentCard from '../AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
+import { socket } from '../../../services/socket';
 
 const MyAppointments = ({ user, onBookClick }) => {
   const [appointments, setAppointments] = useState([]);
@@ -29,6 +30,11 @@ const MyAppointments = ({ user, onBookClick }) => {
 
   useEffect(() => {
     loadAppointments();
+     socket.on('appointment_updated', () => {
+      console.log('⚡ Bệnh nhân nhận: appointment_updated');
+      loadAppointments();
+    });
+    return () => socket.off('appointment_updated');
   }, [user?.id]);
 
   // Hàm xử lý Hủy lịch khám
