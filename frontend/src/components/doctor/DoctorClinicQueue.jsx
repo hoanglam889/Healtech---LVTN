@@ -79,7 +79,7 @@ export default function DoctorClinicQueue({ staffUser }) {
       if (showSpinner) setLoading(false);
     }
   };
-
+  //load trang lên auto gọi thằng này
   useEffect(() => {
     loadAppointments(true);
     loadAvailableServices();

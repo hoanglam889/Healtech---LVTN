@@ -14,6 +14,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { MailService } from '../mail/mail.service';
 import { Patients } from '../entities/Patients';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class AppointmentsService {
@@ -26,6 +27,7 @@ export class AppointmentsService {
     private appointmentStatusLogsRepo: Repository<AppointmentStatusLogs>,
     private dataSource: DataSource,
     private mailService: MailService,
+    private eventsGateway: EventsGateway,
   ) {}
 
   async create(createDto: CreateAppointmentDto) {
@@ -147,6 +149,11 @@ export class AppointmentsService {
       await queryRunner.manager.save(Invoices, invoice);
 
       await queryRunner.commitTransaction();
+
+      // PHÁT SÓNG 1: Báo có lịch khám mới
+      this.eventsGateway.emitUpdate('appointment_created', { 
+        appointmentId: savedAppointment.id 
+      });
 
       // Sau khi lưu thành công, gửi email
       try {

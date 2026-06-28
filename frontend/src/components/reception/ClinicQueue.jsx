@@ -3,6 +3,7 @@ import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment, createAppointment } from '../../services/appointmentService';
 import { createPatient } from '../../services/patientService';
 import { getDoctors } from '../../services/doctorService';
+import { socket } from '../../services/socket';
 
 export default function ClinicQueue() {
   const [appointments, setAppointments] = useState([]);
@@ -49,19 +50,24 @@ export default function ClinicQueue() {
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
     // Tải lần đầu có hiện spinner
     loadAppointments(true);
     getDoctors().then(docs => setDoctors(docs || [])).catch(console.error);
 
-
-    // Thiết lập tự động đồng bộ ngầm sau mỗi 5 giây
-    const interval = setInterval(() => {
+    // BẬT LOA: Lắng nghe sự kiện từ Backend qua Socket.IO
+    socket.on('appointment_created', () => {
+      console.log('⚡ Socket nhận: appointment_created');
       loadAppointments(false);
-    }, 5000);
+    });
 
-    return () => clearInterval(interval);
+    // Tắt loa khi rời khỏi trang
+    return () => {
+      socket.off('appointment_created');
+      socket.off('appointment_updated');
+    };
   }, []);
+
 
   const showToast = (message, type = 'success') => {
     setNotification({ message, type });

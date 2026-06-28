@@ -15,7 +15,7 @@ import { ServicesModule } from './services/services.module';
 import { AppointmentServicesModule } from './appointment-services/appointment-services.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { PaymentsModule } from './payments/payments.module';
-
+import { EventsModule } from './events/events.module';
 @Module({
   imports: [
     // 1. Load file cấu hình .env
@@ -63,6 +63,7 @@ import { PaymentsModule } from './payments/payments.module';
     AppointmentServicesModule,
     InvoicesModule,
     PaymentsModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

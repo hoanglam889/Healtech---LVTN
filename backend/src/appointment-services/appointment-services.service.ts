@@ -6,6 +6,7 @@ import { AppointmentServices } from '../entities/AppointmentServices';
 import { DataSource, Repository } from 'typeorm';
 import { Services } from '../entities/Services';
 import { Invoices } from '../entities/Invoices';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class AppointmentServicesService {
@@ -13,6 +14,7 @@ export class AppointmentServicesService {
     @InjectRepository(AppointmentServices)
     private readonly apptServicesRepo: Repository<AppointmentServices>,
     private dataSource: DataSource,
+     private eventsGateway: EventsGateway,
   ) {}
 
   // Helper tính toán lại tổng tiền Hóa đơn
@@ -106,6 +108,10 @@ export class AppointmentServicesService {
 
       // Lưu transaction
       await queryRunner.commitTransaction();
+      //bắn socket
+      this.eventsGateway.emitUpdate('invoice_created', { 
+        appointmentId: dto.appointmentId 
+      });
       return newApptService;
     } catch (error) {
       await queryRunner.rollbackTransaction();
