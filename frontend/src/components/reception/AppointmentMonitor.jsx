@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
+import { socket } from '../../services/socket';
 
 export default function AppointmentMonitor() {
   const [appointments, setAppointments] = useState([]);
@@ -20,13 +21,24 @@ export default function AppointmentMonitor() {
     }
   };
 
+
   useEffect(() => {
     loadAppointments();
-    // Auto refresh every 10s
-    const interval = setInterval(() => {
+    
+    socket.on('appointment_created', () => {
+      console.log('⚡ Monitor nhận: appointment_created');
       loadAppointments(false);
-    }, 10000);
-    return () => clearInterval(interval);
+    });
+
+    socket.on('appointment_updated', () => {
+      console.log('⚡ Monitor nhận: appointment_updated');
+      loadAppointments(false);
+    });
+
+    return () => {
+      socket.off('appointment_created');
+      socket.off('appointment_updated');
+    };
   }, []);
 
   // Update clock every 10 seconds for the "late" timer

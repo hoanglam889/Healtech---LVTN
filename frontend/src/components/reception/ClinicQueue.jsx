@@ -4,7 +4,6 @@ import { getAllAppointments, updateAppointment, createAppointment } from '../../
 import { createPatient } from '../../services/patientService';
 import { getDoctors } from '../../services/doctorService';
 import { socket } from '../../services/socket';
-
 export default function ClinicQueue() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,28 +49,19 @@ export default function ClinicQueue() {
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     // Tải lần đầu có hiện spinner
     loadAppointments(true);
     getDoctors().then(docs => setDoctors(docs || [])).catch(console.error);
 
-    // BẬT LOA: Lắng nghe sự kiện từ Backend qua Socket.IO
-    socket.on('appointment_created', () => {
-      console.log('⚡ Socket nhận: appointment_created');
-      loadAppointments(false);
-    });
-    //socket for event update appoiment
+    // Lắng nghe sự kiện từ Backend qua Socket.IO (Chỉ nghe update)
     socket.on('appointment_updated', () => {
       console.log('⚡ Lễ tân nhận: appointment_updated');
       loadAppointments(false);
     });
-    // Tắt loa khi rời khỏi trang
-    return () => {
-      socket.off('appointment_created');
-      socket.off('appointment_updated');
-    };
-  }, []);
 
+    return () => socket.off('appointment_updated');
+  }, []);
 
   const showToast = (message, type = 'success') => {
     setNotification({ message, type });
