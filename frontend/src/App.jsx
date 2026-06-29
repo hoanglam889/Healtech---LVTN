@@ -13,6 +13,7 @@ import StaffDashboard from './pages/dashboard/staff/StaffDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthModal from './components/auth/AuthModal';
 import PaymentResult from './pages/reception/PaymentResult';
+import FloatingAIAssistant from './components/shared/FloatingAIAssistant';
 
 
 function App() {
@@ -31,6 +32,15 @@ function App() {
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  
+  // Trạng thái AI Chat
+  const [isAiChatOpen, setIsAiChatOpen] = useState(() => {
+    return localStorage.getItem('ai_chat_open') === 'true';
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('ai_chat_open', isAiChatOpen);
+  }, [isAiChatOpen]);
 
   React.useEffect(() => {
     const handlePopState = () => {
@@ -48,34 +58,44 @@ function App() {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('user', JSON.stringify(userData));
     setIsAuthModalOpen(false);
-    setActiveTab('dashboard');
   };
 
-  // Đăng xuất
+  // Xử lý Đăng xuất
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('user');
-    setIsBooking(false);
-    setActiveTab('dashboard');
+    localStorage.removeItem('ai_chat_history'); // Tự động xóa lịch sử chat AI khi đăng xuất
+    window.location.href = '/';
   };
 
   if (currentPath === '/admin') {
-    return <AdminDashboard />;
+    return (
+      <>
+        <AdminDashboard user={user} onLogout={handleLogout} />
+        <FloatingAIAssistant isChatOpen={isAiChatOpen} setIsChatOpen={setIsAiChatOpen} />
+      </>
+    );
   }
 
   if (currentPath === '/staff') {
-    return <StaffDashboard />;
+    return (
+      <>
+        <StaffDashboard user={user} onLogout={handleLogout} />
+        <FloatingAIAssistant isChatOpen={isAiChatOpen} setIsChatOpen={setIsAiChatOpen} />
+      </>
+    );
   }
 
-  if (currentPath === '/payment-result') {
+  if (currentPath.startsWith('/payment-result')) {
     return <PaymentResult />;
   }
 
   return (
-    <div className="font-sans text-gray-900 bg-white min-h-screen flex flex-col justify-between">
-      <div>
+    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
+      {/* Main Content wrapper */}
+      <div className="flex-1 flex flex-col min-h-screen">
         <Navbar 
           isLoggedIn={isLoggedIn}
           user={user}
@@ -90,33 +110,47 @@ function App() {
               setIsAuthModalOpen(true);
             }
           }} 
-          onHomeClick={() => { setIsBooking(false); setActiveTab('dashboard'); }} 
+          onHomeClick={() => { setIsBooking(false); setActiveTab('dashboard'); window.history.pushState({}, '', '/'); setCurrentPath('/'); }} 
           onAccountClick={() => { setIsBooking(false); setActiveTab('account'); }}
         />
-        
-        {isBooking ? (
-          <BookingPage user={user} onGoHome={() => setIsBooking(false)} />
-        ) : isLoggedIn ? (
-          // Đã đăng nhập -> Hiển thị trang quản lý lịch khám cá nhân (Dashboard)
-          <PatientDashboard 
-            user={user} 
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            onBookClick={() => setIsBooking(true)} 
-          />
-        ) : (
-          // Chưa đăng nhập -> Hiển thị trang chủ giới thiệu (Landing Page)
-          <main>
-            <HeroSection />
-            <SpecialtySection />
-            <DoctorSection />
-            <QueueFeatureSection />
-            <ArticleSection />
-            <ContactSection />
-          </main>
-        )}
+        <div className="flex-grow">
+          {isBooking ? (
+            // Trang Đặt lịch khám
+            <BookingPage 
+              user={user} 
+              onBack={() => {
+                setIsBooking(false);
+                window.history.pushState({}, '', '/');
+                setCurrentPath('/');
+              }} 
+            />
+          ) : isLoggedIn && user?.role === 'PATIENT' ? (
+            // Đã đăng nhập -> Hiển thị trang quản lý lịch khám cá nhân (Dashboard)
+            <PatientDashboard 
+              user={user} 
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              onBookClick={() => {
+                setIsBooking(true);
+              }} 
+            />
+          ) : (
+            // Chưa đăng nhập -> Hiển thị trang chủ giới thiệu (Landing Page)
+            <main>
+              <HeroSection />
+              <SpecialtySection />
+              <DoctorSection />
+              <QueueFeatureSection />
+              <ArticleSection />
+              <ContactSection />
+            </main>
+          )}
+        </div>
+        <Footer />
       </div>
-      <Footer />
+
+      {/* Tích hợp Trợ lý AI Gợi ý chuyên khoa */}
+      <FloatingAIAssistant isChatOpen={isAiChatOpen} setIsChatOpen={setIsAiChatOpen} />
 
       {/* Patient Auth Modal (Login / Registration) */}
       <AuthModal 

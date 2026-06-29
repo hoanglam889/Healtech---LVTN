@@ -50,6 +50,42 @@ const BookingPage = ({ user, onGoHome }) => {
         setDoctors(doctorData);
         setAllAppointments(apptsData || []);
         setLoading(false);
+
+        // Xử lý auto-select từ URL Parameters
+        const params = new URLSearchParams(window.location.search);
+        const urlSpecialtyId = params.get('specialty');
+        
+        if (urlSpecialtyId) {
+          const specId = parseInt(urlSpecialtyId, 10);
+          
+          // 1. Tự động chọn hồ sơ đầu tiên (nếu có) để tránh lỗi quên id patient
+          if (patientData && patientData.length > 0) {
+            setSelectedProfileId(patientData[0].id);
+          }
+          
+          // 2. Chuyển sang Bước 2
+          setCurrentStep(2);
+          
+          // 3. Tự động chọn chuyên khoa
+          setSelectedSpecialtyId(specId);
+          setSelectedDoctorId(null);
+          setSelectedDate(null);
+          setSelectedTimeSlot(null);
+          
+          // 4. Lọc lịch của các bác sĩ thuộc khoa này (sử dụng dữ liệu doctorData vừa tải)
+          const specialtyDoctors = doctorData.filter(doc => doc.specialtyId === specId);
+          const allSchedules = specialtyDoctors.reduce((acc, doc) => {
+            if (doc.doctorSchedules) {
+              const docSchedulesWithDoc = doc.doctorSchedules.map(schedule => ({
+                ...schedule,
+                doctor: doc
+              }));
+              return [...acc, ...docSchedulesWithDoc];
+            }
+            return acc;
+          }, []);
+          setDoctorSchedules(allSchedules);
+        }
       })
       .catch((err) => {
         console.error('Lỗi khi tải dữ liệu đặt lịch:', err);
