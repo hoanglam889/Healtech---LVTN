@@ -141,6 +141,7 @@ export default function AppointmentMonitor() {
                 {appts.map((appt) => {
                   const lateMins = calculateLateMinutes(appt.appointmentDate, appt.appointmentTime);
                   const isVeryLate = lateMins >= 30;
+                  const isPaid = appt.invoices?.status === 'PAID';
 
                   return (
                     <div 
@@ -161,12 +162,18 @@ export default function AppointmentMonitor() {
 
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="font-bold text-gray-900 text-lg">{appt.patient?.fullName}</span>
                             {appt.patient?.gender === 'MALE' ? (
                               <Icons.User className="w-4 h-4 text-blue-500" />
                             ) : (
                               <Icons.User className="w-4 h-4 text-pink-500" />
+                            )}
+                            {isPaid && (
+                              <span className="ml-1 bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">
+                                <Icons.CheckCircle2 className="w-3 h-3" />
+                                Đã thanh toán
+                              </span>
                             )}
                           </div>
                           <div className="text-sm text-gray-500 flex items-center gap-1">
@@ -202,11 +209,19 @@ export default function AppointmentMonitor() {
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleCancel(appt.id)}
+                          onClick={() => {
+                            if (isPaid) {
+                              alert('Không thể hủy lịch này vì bệnh nhân đã thanh toán (VNPAY).\nVui lòng liên hệ bệnh nhân để đổi lịch thay vì hủy.');
+                            } else {
+                              handleCancel(appt.id);
+                            }
+                          }}
                           className={`flex-1 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm ${
-                            isVeryLate
-                              ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200'
-                              : 'bg-gray-100 hover:bg-rose-500 hover:text-white text-gray-700'
+                            isPaid
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-80'
+                              : isVeryLate
+                                ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200'
+                                : 'bg-gray-100 hover:bg-rose-500 hover:text-white text-gray-700'
                           }`}
                         >
                           <Icons.XCircle className="w-4 h-4" />

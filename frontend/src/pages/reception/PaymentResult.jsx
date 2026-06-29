@@ -8,6 +8,7 @@ export default function PaymentResult() {
   const invoiceId = searchParams.get('invoiceId');
   const amount = searchParams.get('amount');
   const message = searchParams.get('message');
+  const source = searchParams.get('source');
 
   const isSuccess = status === 'success';
 
@@ -39,13 +40,23 @@ export default function PaymentResult() {
           </div>
         </div>
 
-        <button
-          onClick={() => window.location.href = '/staff?tab=billing'}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
-        >
-          <Icons.ArrowLeft className="w-5 h-5" />
-          Quay lại Quầy thu ngân
-        </button>
+        {source === 'patient' ? (
+          <button
+            onClick={() => window.location.href = '/booking'}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+          >
+            <Icons.ArrowLeft className="w-5 h-5" />
+            Về trang Đặt lịch
+          </button>
+        ) : (
+          <button
+            onClick={() => window.location.href = '/staff?tab=billing'}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+          >
+            <Icons.ArrowLeft className="w-5 h-5" />
+            Quay lại Quầy thu ngân
+          </button>
+        )}
       </div>
     </div>
   );

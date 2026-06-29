@@ -123,8 +123,11 @@ export class AppointmentsService {
       appointment.patientId = patientId;
       appointment.doctorProfileId = doctorProfileId;
       appointment.appointmentDate = appointmentDate;
-      appointment.appointmentTime = appointmentTime;
-      appointment.status = 'BOOKED';
+      if (paymentMethod === 'VNPAY') {
+        appointment.status = 'PENDING'; // Chờ thanh toán xong mới đổi thành BOOKED
+      } else {
+        appointment.status = 'BOOKED';
+      }
       appointment.priorityScore = 1;
 
       const savedAppointment = await queryRunner.manager.save(
@@ -139,8 +142,8 @@ export class AppointmentsService {
       invoice.paymentMethod = paymentMethod;
 
       if (paymentMethod === 'VNPAY') {
-        invoice.status = 'PAID';
-        invoice.paidAt = new Date();
+        invoice.status = 'UNPAID'; // Phải chờ webhook của VNPAY gọi về mới đổi sang PAID
+        invoice.paidAt = null;
       } else {
         invoice.status = 'UNPAID';
         invoice.paidAt = null;
@@ -150,13 +153,15 @@ export class AppointmentsService {
 
       await queryRunner.commitTransaction();
 
-      // PHÁT SÓNG 1: Báo có lịch khám mới
-      this.eventsGateway.emitUpdate('appointment_created', { 
-        appointmentId: savedAppointment.id 
-      });
+      // Chỉ phát sóng và gửi mail nếu đã BOOKED (tiền mặt)
+      if (appointment.status === 'BOOKED') {
+        // PHÁT SÓNG 1: Báo có lịch khám mới
+        this.eventsGateway.emitUpdate('appointment_created', { 
+          appointmentId: savedAppointment.id 
+        });
 
-      // Sau khi lưu thành công, gửi email
-      try {
+        // Sau khi lưu thành công, gửi email
+        try {
         // Dùng lại thông tin patientData đã lấy ở trên cùng
         if (
           patientData &&
@@ -190,6 +195,7 @@ export class AppointmentsService {
       } catch (err) {
         console.error('Lỗi khi truy vấn gửi mail:', err);
       }
+      } // Đóng if (appointment.status === 'BOOKED')
 
       return {
         success: true,

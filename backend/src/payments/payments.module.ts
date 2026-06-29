@@ -10,11 +10,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ignoreLogger, HashAlgorithm } from 'vnpay';
 
 import { EventsModule } from '../events/events.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Invoices, Appointments]),
     EventsModule,
+    MailModule,
     VnpayModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

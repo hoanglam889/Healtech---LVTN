@@ -20,9 +20,17 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
           )}
         </div>
         <div className="space-y-1">
-          <h4 className="font-bold text-gray-800 text-base">
-            BS. {apt.doctorProfile?.fullName || 'Chuyên khoa'}
-          </h4>
+          <div className="flex items-center gap-2">
+            <h4 className="font-bold text-gray-800 text-base">
+              BS. {apt.doctorProfile?.fullName || 'Chuyên khoa'}
+            </h4>
+            {isPaid && (
+              <span className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">
+                <Icons.CheckCircle2 className="w-3 h-3" />
+                Đã thanh toán
+              </span>
+            )}
+          </div>
           <p className="text-xs text-gray-400 font-semibold">
             Chuyên khoa: <span className="text-gray-700">{apt.doctorProfile?.specialty?.name || 'Khám tổng quát'}</span>
           </p>
@@ -65,8 +73,18 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
         <div className="flex gap-2">
           {isUpcoming && onCancel && (
             <button 
-              onClick={() => onCancel(apt.id)}
-              className="text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50/50 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition-all cursor-pointer flex items-center gap-1"
+              onClick={() => {
+                if (isPaid) {
+                  alert('Bạn không thể hủy lịch này vì đơn khám đã được thanh toán.\nVui lòng liên hệ trực tiếp với Phòng khám để được hỗ trợ đổi lịch.');
+                } else {
+                  onCancel(apt.id);
+                }
+              }}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1 ${
+                isPaid 
+                  ? 'text-gray-400 bg-gray-50 border-gray-100 cursor-not-allowed opacity-80' 
+                  : 'text-red-500 hover:text-red-600 hover:bg-red-50/50 border-transparent hover:border-red-100 cursor-pointer'
+              }`}
             >
               <Icons.X className="w-3.5 h-3.5" />
               <span>Hủy lịch</span>

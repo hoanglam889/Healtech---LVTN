@@ -10,6 +10,8 @@ import { VnpayService } from 'nestjs-vnpay';
 import { Invoices } from '../entities/Invoices';
 import { Appointments } from '../entities/Appointments';
 import { EventsGateway } from '../events/events.gateway';
+import { MailService } from '../mail/mail.service';
+import { Patients } from '../entities/Patients';
 
 @Injectable()
 export class PaymentsService {
@@ -21,9 +23,10 @@ export class PaymentsService {
     @InjectRepository(Appointments)
     private appointmentsRepo: Repository<Appointments>,
     private readonly eventsGateway: EventsGateway,
+    private readonly mailService: MailService,
   ) {}
 
-  async createPaymentUrl(invoiceId: string, amount: number): Promise<string> {
+  async createPaymentUrl(invoiceId: string, amount: number, source?: string): Promise<string> {
     const invoice = await this.invoicesRepo.findOne({
       where: { id: parseInt(invoiceId, 10) },
     });
@@ -32,13 +35,13 @@ export class PaymentsService {
     }
 
     const totalAmount = amount || Number(invoice.totalAmount);
-    const returnUrl = `http://localhost:3000/payments/vnpay-return`; // IPN webhook
+    const returnUrl = `http://localhost:3000/payments/vnpay-return${source ? '?source=' + source : ''}`; // IPN webhook
 
     // Tạo TxnRef duy nhất: ID Hóa Đơn + Timestamp
     const txnRef = `${invoice.id}_${Date.now()}`;
 
     const urlString = this.vnpayService.buildPaymentUrl({
-      vnp_Amount: totalAmount * 100, // VNPay yêu cầu nhân 100
+      vnp_Amount: totalAmount, // Thư viện đã tự xử lý nhân 100, truyền thẳng số tiền gốc
       vnp_IpAddr: '127.0.0.1',
       vnp_TxnRef: txnRef,
       vnp_OrderInfo: `Thanh toan hoa don ${invoice.id}`,
@@ -90,6 +93,61 @@ export class PaymentsService {
       invoice.paidAt = new Date();
       invoice.paymentMethod = 'VNPAY';
       await this.invoicesRepo.save(invoice);
+
+      // Cập nhật trạng thái lịch khám từ PENDING sang BOOKED
+      if (invoice.appointmentId) {
+        const appointment = await this.appointmentsRepo.findOne({
+          where: { id: invoice.appointmentId },
+          relations: {
+            patient: {
+              patientAccount: true,
+            },
+            doctorProfile: {
+              specialty: true,
+              user: true,
+            },
+          },
+        });
+
+        if (appointment && appointment.status === 'PENDING') {
+          appointment.status = 'BOOKED';
+          await this.appointmentsRepo.save(appointment);
+
+          // Phát sóng báo lễ tân có lịch mới
+          this.eventsGateway.emitUpdate('appointment_created', { 
+            appointmentId: appointment.id 
+          });
+
+          // Gửi mail thông báo đặt lịch thành công
+          if (appointment.patient?.patientAccount?.email) {
+            try {
+              const accountOwner = await this.appointmentsRepo.manager
+                .createQueryBuilder(Patients, 'p')
+                .where('p.patientAccountId = :accountId', {
+                  accountId: appointment.patient.patientAccountId,
+                })
+                .andWhere('p.relationship = :rel', { rel: 'Bản thân' })
+                .getOne();
+
+              const accountName = accountOwner ? accountOwner.fullName : 'Bệnh nhân';
+              
+              // Giả sử có lấy được giờ khám (startTime)
+              const startTime = appointment.appointmentTime || '';
+
+              this.mailService.sendBookingSuccess(
+                appointment.patient.patientAccount.email,
+                appointment.qrCode,
+                appointment.appointmentDate,
+                startTime,
+                accountName,
+                appointment.patient.fullName,
+              ).catch(e => this.logger.error('Lỗi gửi mail VNPAY:', e));
+            } catch (err) {
+              this.logger.error('Lỗi truy vấn gửi mail VNPAY:', err);
+            }
+          }
+        }
+      }
 
       // PHÁT SÓNG: Hóa đơn thanh toán thành công qua VNPAY
       this.eventsGateway.emitUpdate('invoice_paid', { invoiceId: invoice.id });

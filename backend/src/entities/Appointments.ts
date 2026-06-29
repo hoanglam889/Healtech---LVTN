@@ -41,10 +41,10 @@ export class Appointments {
   @Column('enum', {
     name: 'status',
     nullable: true,
-    enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DONE', 'CANCELLED'],
+    enum: ['PENDING', 'BOOKED', 'WAITING', 'EXAMINING', 'DONE', 'CANCELLED'],
     default: () => "'BOOKED'",
   })
-  status: 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DONE' | 'CANCELLED' | null;
+  status: 'PENDING' | 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DONE' | 'CANCELLED' | null;
 
   @Column('int', {
     name: 'priority_score',

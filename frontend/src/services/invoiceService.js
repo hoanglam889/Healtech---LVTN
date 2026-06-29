@@ -5,7 +5,7 @@ export const getInvoiceDetails = async (appointmentId) => {
   return response.data;
 };
 
-export const createPaymentUrl = async (invoiceId, amount) => {
-  const response = await apiClient.post('/payments/create-payment-url', { invoiceId, amount });
+export const createPaymentUrl = async (invoiceId, amount, source) => {
+  const response = await apiClient.post('/payments/create-payment-url', { invoiceId, amount, source });
   return response.data;
 };

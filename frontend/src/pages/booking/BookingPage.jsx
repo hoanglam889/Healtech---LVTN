@@ -9,6 +9,7 @@ import { getPatientsByAccountId, createPatient } from '../../services/patientSer
 import { getSpecialties } from '../../services/specialtyService';
 import { getDoctors, getDoctorById } from '../../services/doctorService';
 import { createAppointment, getAllAppointments } from '../../services/appointmentService';
+import { createPaymentUrl } from '../../services/invoiceService';
 import { BASE_URL } from '../../services/apiClient';
 import * as Icons from 'lucide-react';
 
@@ -206,10 +207,28 @@ const BookingPage = ({ user, onGoHome }) => {
     setErrorMsg('');
     setSubmitting(true);
     createAppointment(appointmentData)
-      .then((res) => {
+      .then(async (res) => {
         setSubmitting(false);
         if (res.success || res.appointment) {
           setCreatedAppointment(res.appointment);
+          
+          // Kiểm tra nếu chọn thanh toán VNPAY
+          if (paymentMethod === 'VNPAY' && res.invoice?.id) {
+            try {
+              // Gọi API tạo link VNPAY với source = patient để phân biệt
+              const paymentResponse = await createPaymentUrl(res.invoice.id, null, 'patient');
+              if (paymentResponse && paymentResponse.url) {
+                // Chuyển hướng người dùng qua VNPAY
+                window.location.href = paymentResponse.url;
+                return; // Dừng lại ở đây vì đã redirect
+              }
+            } catch (err) {
+              console.error('Lỗi tạo link VNPAY:', err);
+              setErrorMsg('Không thể tạo link thanh toán VNPAY, nhưng lịch khám đã được ghi nhận.');
+            }
+          }
+          
+          // Nếu không dùng VNPAY hoặc lỗi tạo link, hiện màn hình thành công bình thường
           setCurrentStep(4);
         } else {
           setErrorMsg('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại.');
