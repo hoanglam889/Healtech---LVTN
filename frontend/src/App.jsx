@@ -4,7 +4,6 @@ import Footer from './components/shared/Footer';
 import HeroSection from './components/landing/HeroSection';
 import SpecialtySection from './components/landing/SpecialtySection';
 import DoctorSection from './components/landing/DoctorSection';
-import QueueFeatureSection from './components/landing/QueueFeatureSection';
 import ArticleSection from './components/landing/ArticleSection';
 import ContactSection from './components/landing/ContactSection';
 import BookingPage from './pages/booking/BookingPage';
@@ -71,12 +70,7 @@ function App() {
   };
 
   if (currentPath === '/admin') {
-    return (
-      <>
-        <AdminDashboard user={user} onLogout={handleLogout} />
-        <FloatingAIAssistant isChatOpen={isAiChatOpen} setIsChatOpen={setIsAiChatOpen} />
-      </>
-    );
+    return <AdminDashboard user={user} onLogout={handleLogout} />;
   }
 
   if (currentPath === '/staff') {
@@ -140,7 +134,7 @@ function App() {
               <HeroSection />
               <SpecialtySection />
               <DoctorSection />
-              <QueueFeatureSection />
+
               <ArticleSection />
               <ContactSection />
             </main>

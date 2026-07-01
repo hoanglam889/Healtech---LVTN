@@ -18,12 +18,14 @@ export default function AdminUsers({ roleType }) {
 
   // States cho Form bác sĩ
   const [docName, setDocName] = useState('');
+  const [docEmail, setDocEmail] = useState('');
   const [docPhone, setDocPhone] = useState('');
   const [docPassword, setDocPassword] = useState('');
   const [docSpecialtyId, setDocSpecialtyId] = useState('');
   const [docExpYears, setDocExpYears] = useState('0');
   const [docAvatarUrl, setDocAvatarUrl] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Load danh sách dữ liệu từ Backend
   const loadData = () => {
@@ -40,6 +42,7 @@ export default function AdminUsers({ roleType }) {
           fullName: doc.fullName.startsWith('BS.') ? doc.fullName : `BS. ${doc.fullName}`,
           rawName: doc.fullName.replace(/^BS\.\s*/, ''),
           phone: doc.user?.phone || 'N/A',
+          email: doc.user?.email || '',
           role: 'DOCTOR',
           status: doc.user?.isActive ? 'ACTIVE' : 'LOCKED',
           department: doc.specialty?.name || 'Tổng quát',
@@ -91,11 +94,13 @@ export default function AdminUsers({ roleType }) {
   const handleOpenAdd = () => {
     setEditingDoctor(null);
     setDocName('');
+    setDocEmail('');
     setDocPhone('');
     setDocPassword('');
     setDocExpYears('0');
     setDocAvatarUrl('');
     setUploading(false);
+    setErrorMsg('');
     if (specialties.length > 0) {
       setDocSpecialtyId(specialties[0].id.toString());
     }
@@ -103,15 +108,17 @@ export default function AdminUsers({ roleType }) {
   };
 
   // Mở Modal Sửa
-  const handleOpenEdit = (doctorItem) => {
-    setEditingDoctor(doctorItem);
-    setDocName(doctorItem.rawName);
-    setDocPhone(doctorItem.phone);
-    setDocPassword(''); // Mật khẩu để trống, nếu điền mới cập nhật
-    setDocSpecialtyId(doctorItem.specialtyId?.toString() || '');
-    setDocExpYears(doctorItem.experienceYears?.toString() || '0');
-    setDocAvatarUrl(doctorItem.avatarUrl || '');
+  const handleOpenEdit = (doctor) => {
+    setEditingDoctor(doctor);
+    setDocName(doctor.rawName);
+    setDocEmail(doctor.email || '');
+    setDocPhone(doctor.phone === 'N/A' ? '' : doctor.phone);
+    setDocPassword(''); // Reset mật khẩu để trống, nếu điền mới cập nhật
+    setDocSpecialtyId(doctor.specialtyId?.toString() || '');
+    setDocExpYears(doctor.experienceYears?.toString() || '0');
+    setDocAvatarUrl(doctor.avatarUrl || '');
     setUploading(false);
+    setErrorMsg('');
     setIsModalOpen(true);
   };
 
@@ -166,9 +173,10 @@ export default function AdminUsers({ roleType }) {
       setUploading(true);
       const res = await uploadImage(file);
       setDocAvatarUrl(res.filePath);
+      setErrorMsg('');
     } catch (err) {
       console.error('Lỗi upload ảnh:', err);
-      alert('Không thể tải ảnh lên. Vui lòng thử lại!');
+      setErrorMsg('Không thể tải ảnh lên. Vui lòng thử lại!');
     } finally {
       setUploading(false);
     }
@@ -177,16 +185,32 @@ export default function AdminUsers({ roleType }) {
   // Gửi Form thêm / sửa Bác sĩ
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!docName.trim() || !docPhone.trim() || (!editingDoctor && !docPassword.trim()) || !docSpecialtyId) {
-      alert('Vui lòng điền đầy đủ các thông tin bắt buộc!');
+    setErrorMsg('');
+
+    if (!docName.trim() || !docEmail.trim() || !docPhone.trim() || !docSpecialtyId) {
+      setErrorMsg('Vui lòng điền đầy đủ tên, email, SĐT và chọn chuyên khoa!');
       return;
+    }
+
+    if (!editingDoctor && !docPassword.trim()) {
+      setErrorMsg('Vui lòng nhập mật khẩu cho tài khoản mới!');
+      return;
+    }
+
+    if (docPassword.trim()) {
+      const passwordRegex = /^(?=.*[a-zA-Z]).{8,}$/;
+      if (!passwordRegex.test(docPassword.trim())) {
+        setErrorMsg('Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất 1 chữ cái!');
+        return;
+      }
     }
 
     try {
       const payload = {
         fullName: docName.trim(),
+        email: docEmail.trim(),
         phone: docPhone.trim(),
-        specialtyId: +docSpecialtyId,
+        specialtyId: parseInt(docSpecialtyId, 10),
         experienceYears: +docExpYears,
         avatarUrl: docAvatarUrl
       };
@@ -196,20 +220,15 @@ export default function AdminUsers({ roleType }) {
       }
 
       if (editingDoctor) {
-        // Cập nhật thông tin bác sĩ
         await updateDoctor(editingDoctor.id, payload);
-        alert('Cập nhật thông tin bác sĩ thành công!');
       } else {
-        // Tạo mới bác sĩ
         await createDoctor(payload);
-        alert('Thêm tài khoản bác sĩ mới thành công!');
       }
-
       setIsModalOpen(false);
       loadData();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin bác sĩ!');
+      setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng kiểm tra lại!');
     }
   };
 
@@ -376,6 +395,13 @@ export default function AdminUsers({ roleType }) {
                 <Icons.X className="w-5 h-5" />
               </button>
             </div>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl border border-red-100 flex items-start gap-2">
+                <Icons.AlertCircle className="w-5 h-5 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
             
             <form onSubmit={handleFormSubmit} className="space-y-4">
               {/* Ảnh đại diện bác sĩ */}
@@ -425,7 +451,19 @@ export default function AdminUsers({ roleType }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Số điện thoại đăng nhập *</label>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email đăng nhập *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="VD: doctor@healtech.com..."
+                  value={docEmail}
+                  onChange={(e) => setDocEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all text-xs font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Số điện thoại liên hệ *</label>
                 <input
                   type="text"
                   required

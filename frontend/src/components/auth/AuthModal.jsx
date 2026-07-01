@@ -77,6 +77,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       return;
     }
 
+    // Validate mật khẩu: ít nhất 8 ký tự, ít nhất 1 chữ cái
+    const passwordRegex = /^(?=.*[a-zA-Z]).{8,}$/;
+    if (!passwordRegex.test(regPassword)) {
+      setErrorMsg('Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất 1 chữ cái!');
+      return;
+    }
+
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
@@ -288,21 +295,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <span>Đăng nhập ngay</span>
               </button>
 
-              {/* Quick Fill Box for Evaluation */}
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Tài khoản mẫu (Click để điền nhanh)</span>
-                <button
-                  type="button"
-                  onClick={() => handleQuickFill('0987654321', '$2b$10$xP4.Wk.9y2...dummyhash987654321')}
-                  className="w-full p-3 text-left bg-gray-50/80 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-100 rounded-2xl flex items-center gap-2.5 transition-all text-xs font-semibold text-gray-600 cursor-pointer"
-                >
-                  <Icons.UserCheck className="w-4 h-4 text-blue-600" />
-                  <div>
-                    <p className="font-extrabold text-gray-900 leading-tight">Bệnh nhân Hoàng Lâm (Seeded)</p>
-                    <span className="text-[9px] text-gray-400 leading-none mt-0.5 block">0987654321 / MK: $2b$10$xP4.Wk.9y2...dummyhash987654321</span>
-                  </div>
-                </button>
-              </div>
+
             </form>
           ) : activeTab === 'register' ? (
             /* ==========================================

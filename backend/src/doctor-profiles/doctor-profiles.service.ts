@@ -23,6 +23,7 @@ export class DoctorProfilesService {
   async create(dto: any) {
     const {
       phone,
+      email,
       password,
       fullName,
       specialtyId,
@@ -30,7 +31,7 @@ export class DoctorProfilesService {
       avatarUrl,
     } = dto;
 
-    if (!phone || !password || !fullName || !specialtyId) {
+    if (!phone || !email || !password || !fullName || !specialtyId) {
       throw new BadRequestException(
         'Vui lòng điền đầy đủ các trường bắt buộc!',
       );
@@ -44,9 +45,17 @@ export class DoctorProfilesService {
       );
     }
 
+    const existingEmail = await this.usersRepo.findOne({ where: { email } });
+    if (existingEmail) {
+      throw new BadRequestException(
+        'Email này đã được đăng ký tài khoản!',
+      );
+    }
+
     // Bước A: Tạo tài khoản User đăng nhập
     const user = new Users();
     user.phone = phone;
+    user.email = email;
     user.passwordHash = password; // Sử dụng mật khẩu thô dạng seed tương tự patient
     user.role = 'DOCTOR';
     user.isActive = true;
@@ -101,6 +110,7 @@ export class DoctorProfilesService {
     const profile = await this.findOne(id);
     const {
       phone,
+      email,
       password,
       fullName,
       specialtyId,
@@ -120,6 +130,15 @@ export class DoctorProfilesService {
           );
         }
         userUpdate.phone = phone;
+      }
+      if (email) {
+        const existingEmail = await this.usersRepo.findOne({ where: { email } });
+        if (existingEmail && existingEmail.id !== profile.userId) {
+          throw new BadRequestException(
+            'Email này đã tồn tại trên hệ thống!',
+          );
+        }
+        userUpdate.email = email;
       }
       if (password) {
         userUpdate.passwordHash = password;

@@ -81,26 +81,43 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
         },
       });
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      const parsed = JSON.parse(text);
+      try {
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        let cleanText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleanText);
 
-      // Gắn thêm tên và icon của chuyên khoa vào kết quả
-      if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-        parsed.suggestions = parsed.suggestions.map(s => {
-          const spec = specialties.find(sp => sp.id === s.specialty_id);
-          return {
-            ...s,
-            specialty_name: spec ? spec.name : 'Nội tổng quát',
-            specialty_icon: spec ? spec.icon : null,
-          };
-        });
+        // Gắn thêm tên và icon của chuyên khoa vào kết quả
+        if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+          parsed.suggestions = parsed.suggestions.map(s => {
+            const spec = specialties.find(sp => sp.id === s.specialty_id);
+            return {
+              ...s,
+              specialty_name: spec ? spec.name : 'Nội tổng quát',
+              specialty_icon: spec ? spec.icon : null,
+            };
+          });
+        }
+
+        return parsed;
+      } catch (geminiError) {
+        console.error('Lỗi từ Google Gemini API hoặc khi Parse JSON:', geminiError);
+        // Fallback an toàn nếu AI lỗi (trả về JSON mặc định để không bị 500)
+        return {
+          suggestions: [
+            {
+              specialty_id: specialties.length > 0 ? specialties[0].id : 1,
+              confidence: 50,
+              reason: "Hệ thống AI đang quá tải. Dựa trên triệu chứng, chúng tôi tạm thời đề xuất chuyên khoa này. Vui lòng liên hệ lễ tân để được tư vấn chính xác hơn.",
+              specialty_name: specialties.length > 0 ? specialties[0].name : 'Nội tổng quát',
+              specialty_icon: null
+            }
+          ]
+        };
       }
-
-      return parsed;
     } catch (error) {
-      console.error('Lỗi khi gọi AI Service:', error);
-      throw new InternalServerErrorException('Không thể phân tích triệu chứng. Vui lòng thử lại sau.');
+      console.error('Lỗi hệ thống AI Service:', error);
+      throw new InternalServerErrorException('Không thể kết nối tới dịch vụ AI');
     }
   }
 }

@@ -29,6 +29,14 @@ export default function PersonalAccount({ user }) {
       return;
     }
 
+    if (newPassword) {
+      const passwordRegex = /^(?=.*[a-zA-Z]).{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        showToast('Mật khẩu mới phải có ít nhất 8 ký tự và chứa ít nhất 1 chữ cái!', 'error');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const data = {};

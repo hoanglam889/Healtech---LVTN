@@ -6,6 +6,7 @@ import AdminUsers from '../../components/dashboard/admin/AdminUsers';
 import AdminSpecialties from '../../components/dashboard/admin/AdminSpecialties';
 import AdminSchedules from '../../components/dashboard/admin/AdminSchedules';
 import AdminTransactions from '../../components/dashboard/admin/AdminTransactions';
+import AdminArticles from '../../components/dashboard/admin/AdminArticles';
 
 export default function AdminDashboard() {
   // Trạng thái admin đang đăng nhập (lấy từ localStorage độc lập)
@@ -90,9 +91,9 @@ export default function AdminDashboard() {
           {/* LOGO */}
           <div className="flex flex-col gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
             <img 
-              src="/images/logo.png" 
+              src="/images/logo2.png" 
               alt="Healtech Logo" 
-              className="h-14 w-auto object-contain scale-[1.5] origin-left -ml-2" 
+              className="h-12 w-auto object-contain" 
             />
             <span className="text-[10px] text-indigo-600 font-bold tracking-wider uppercase block mt-2">Admin Portal</span>
           </div>
@@ -188,6 +189,18 @@ export default function AdminDashboard() {
               <Icons.Receipt className="w-5 h-5" />
               <span>Hóa đơn & Lịch hẹn</span>
             </button>
+
+            <button
+              onClick={() => { setActiveTab('articles'); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                activeTab === 'articles'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <Icons.FileText className="w-5 h-5" />
+              <span>Quản lý Bài viết</span>
+            </button>
           </nav>
         </div>
 
@@ -232,6 +245,7 @@ export default function AdminDashboard() {
                 {activeTab === 'specialties' && 'Quản lý Danh mục Chuyên khoa'}
                 {activeTab === 'schedules' && 'Cấu hình Lịch trực Bác sĩ'}
                 {activeTab === 'transactions' && 'Quản lý Giao dịch & Ca hẹn'}
+                {activeTab === 'articles' && 'Quản lý Bài viết & Tin tức'}
               </h2>
               <p className="text-[10px] lg:text-xs text-gray-400 font-semibold mt-0.5">Trang dành riêng cho Quản trị viên phòng khám</p>
             </div>
@@ -252,6 +266,7 @@ export default function AdminDashboard() {
           {activeTab === 'specialties' && <AdminSpecialties />}
           {activeTab === 'schedules' && <AdminSchedules />}
           {activeTab === 'transactions' && <AdminTransactions />}
+          {activeTab === 'articles' && <AdminArticles />}
         </div>
       </main>
 

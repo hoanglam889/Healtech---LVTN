@@ -8,9 +8,9 @@ const Footer = () => {
         {/* Thông tin thương hiệu */}
         <div className="flex flex-col items-center md:items-start space-y-3 text-center md:text-left">
           <img 
-            src="/images/logo.png" 
+            src="/images/logo2.png" 
             alt="Healtech Logo" 
-            className="h-12 md:h-14 w-auto object-contain brightness-0 invert scale-[1.5] origin-center md:origin-left" 
+            className="h-12 md:h-14 w-auto object-contain" 
           />
           <p className="text-sm leading-relaxed max-w-sm text-gray-400">
             Trải nghiệm chăm sóc sức khỏe chất lượng cao, tinh gọn và lấy bệnh nhân làm trung tâm.

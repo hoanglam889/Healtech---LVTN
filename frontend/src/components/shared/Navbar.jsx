@@ -23,9 +23,9 @@ const Navbar = ({
         {/* LOGO */}
         <div className="flex items-center cursor-pointer -ml-2 md:ml-0" onClick={() => { onHomeClick(); setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}>
           <img 
-            src="/images/logo.png" 
+            src="/images/logo2.png" 
             alt="Healtech Logo" 
-            className="h-12 md:h-16 w-auto object-contain scale-[1.5] origin-left" 
+            className="h-12 md:h-14 w-auto object-contain" 
           />
         </div>
         

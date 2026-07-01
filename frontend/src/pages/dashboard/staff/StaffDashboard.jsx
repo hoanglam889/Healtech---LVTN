@@ -80,9 +80,9 @@ export default function StaffDashboard() {
           {/* LOGO */}
           <div className="flex flex-col gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
             <img 
-              src="/images/logo.png" 
+              src="/images/logo2.png" 
               alt="Healtech Logo" 
-              className="h-14 w-auto object-contain scale-[1.5] origin-left -ml-2" 
+              className="h-12 w-auto object-contain" 
             />
             <span className="text-[10px] text-blue-600 font-bold tracking-wider uppercase block mt-2">Staff Portal</span>
           </div>

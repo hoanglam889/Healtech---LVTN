@@ -17,6 +17,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EventsModule } from './events/events.module';
 import { AiModule } from './ai/ai.module';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { AiModule } from './ai/ai.module';
     PaymentsModule,
     EventsModule,
     AiModule,
+    ArticlesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

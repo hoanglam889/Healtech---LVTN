@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { getDoctors } from '../../services/doctorService';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
+import DoctorDetailModal from './DoctorDetailModal';
 
 const DoctorSection = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => {
     getDoctors()
@@ -118,10 +120,13 @@ const DoctorSection = () => {
 
                 {/* Buttons */}
                 <div className="flex gap-3 mt-6">
-                  <button className="flex-1 py-2.5 px-2 border-2 border-blue-600 text-blue-600 rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-50 transition-colors">
+                  <button 
+                    onClick={() => setSelectedDoctor(doc)}
+                    className="flex-1 py-2.5 px-2 border-2 border-blue-600 text-blue-600 rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-50 transition-colors cursor-pointer"
+                  >
                     Xem hồ sơ <Icons.ChevronRightCircle className="w-4 h-4" />
                   </button>
-                  <button className="flex-1 py-2.5 px-2 bg-blue-600 text-white rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                  <button className="flex-1 py-2.5 px-2 bg-blue-600 text-white rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200 cursor-pointer">
                     Đặt lịch khám <Icons.CalendarDays className="w-4 h-4" />
                   </button>
                 </div>
@@ -130,6 +135,17 @@ const DoctorSection = () => {
           })}
         </div>
       </div>
+
+      {/* MODAL CHI TIẾT BÁC SĨ */}
+      <DoctorDetailModal 
+        doctor={selectedDoctor} 
+        onClose={() => setSelectedDoctor(null)} 
+        onBooking={(doc) => {
+          // Hiện tại landing page xử lý đặt lịch bằng cách chuyển hướng 
+          // (sẽ tùy logic của App, tạm thời alert nếu chưa có hàm onBooking truyền vào)
+          window.location.href = '#booking-section'; // hoặc kích hoạt modal
+        }}
+      />
     </section>
   );
 };
