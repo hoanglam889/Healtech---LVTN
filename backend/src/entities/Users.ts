@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { AppointmentStatusLogs } from './AppointmentStatusLogs';
 import { DoctorProfiles } from './DoctorProfiles';
+import { Articles } from './Articles';
 
 @Index('phone', ['phone'], { unique: true })
 @Entity('users', { schema: 'clinic_flow_erp' })
@@ -38,7 +39,7 @@ export class Users {
       name: 'is_active',
       nullable: true,
       width: 1,
-      default: () => "'1'",
+      default: '1',
     } as any,
   )
   isActive: boolean | null;
@@ -57,4 +58,7 @@ export class Users {
 
   @OneToOne(() => DoctorProfiles, (doctorProfiles) => doctorProfiles.user)
   doctorProfiles: DoctorProfiles;
+
+  @OneToMany(() => Articles, (articles) => articles.user)
+  articles: Articles[];
 }

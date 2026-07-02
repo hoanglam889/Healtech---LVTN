@@ -24,7 +24,7 @@ export class Invoices {
     name: 'status',
     nullable: true,
     enum: ['UNPAID', 'PAID', 'CANCELLED'],
-    default: () => "'UNPAID'",
+    default: 'UNPAID',
   })
   status: 'UNPAID' | 'PAID' | 'CANCELLED' | null;
 

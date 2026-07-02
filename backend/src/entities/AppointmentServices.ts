@@ -22,7 +22,7 @@ export class AppointmentServices {
   @Column('int', { name: 'service_id' })
   serviceId: number;
 
-  @Column('int', { name: 'quantity', nullable: true, default: () => "'1'" })
+  @Column('int', { name: 'quantity', nullable: true, default: '1' })
   quantity: number | null;
 
   @Column('decimal', { name: 'snapshot_price', precision: 12, scale: 2 })

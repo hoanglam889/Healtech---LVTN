@@ -20,7 +20,7 @@ const ArticleDetailModal = ({ article, onClose }) => {
 
   if (!article) return null;
 
-  const imageUrl = getImageUrl(article.imageUrl);
+  const imageUrl = getImageUrl(article.image_url);
   
   // Format date
   const publishDate = new Date(article.createdAt).toLocaleDateString('vi-VN', {
@@ -75,20 +75,24 @@ const ArticleDetailModal = ({ article, onClose }) => {
               <span className="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
                 {article.category || 'Tin tức'}
               </span>
-              <span className="text-sm text-gray-500 font-medium flex items-center gap-1.5">
-                <Icons.Calendar className="w-4 h-4" /> {publishDate}
-              </span>
+              <span className="flex items-center gap-1.5"><Icons.Calendar className="w-3.5 h-3.5" /> {new Date(article.created_at).toLocaleDateString('vi-VN')}</span>
+              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span className="flex items-center gap-1.5"><Icons.Clock className="w-3.5 h-3.5" /> 5 phút đọc</span>
             </div>
             
             <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
               {article.title}
             </h1>
             
-            <div className="flex items-center gap-3 text-sm text-gray-600 font-medium">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                <Icons.User className="w-4 h-4" />
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                  {article.author_name ? article.author_name.charAt(0).toUpperCase() : 'H'}
+                </div>
+                <div className="text-sm">
+                  Bởi <span className="text-gray-900 font-bold">{article.author_name || 'Ban biên tập Healtech'}</span>
+                </div>
               </div>
-              Bởi <span className="text-gray-900 font-bold">{article.authorName || 'Ban biên tập Healtech'}</span>
             </div>
           </div>
 

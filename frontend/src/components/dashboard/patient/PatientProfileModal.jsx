@@ -199,7 +199,10 @@ const PatientProfileModal = ({ isOpen, onClose, editingProfile, user, onSuccess 
                 disabled={editingProfile?.relationship === 'Bản thân'}
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <option value="Bản thân">Bản thân</option>
+                {editingProfile?.relationship === 'Bản thân' && (
+                  <option value="Bản thân">Bản thân</option>
+                )}
+                {!editingProfile && <option value="" disabled>-- Chọn quan hệ --</option>}
                 <option value="Bố/Mẹ">Bố/Mẹ</option>
                 <option value="Vợ/Chồng">Vợ/Chồng</option>
                 <option value="Con cái">Con cái</option>

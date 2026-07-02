@@ -4,7 +4,7 @@ import { getAppointmentsByUserId, updateAppointment } from '../../../services/ap
 import AppointmentCard from '../AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
 import { socket } from '../../../services/socket';
-
+import  RatingModal  from './RatingModal';
 const MyAppointments = ({ user, onBookClick }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,9 @@ const MyAppointments = ({ user, onBookClick }) => {
   // Bộ lọc tìm kiếm & trạng thái
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'BOOKED' | 'DONE' | 'CANCELLED'
+
+  //Bộ hiển thị chức năng rate
+  const [selectedRatingApt, setSelectedRatingApt] = useState(null);
 
   // Load danh sách lịch hẹn
   const loadAppointments = () => {
@@ -169,11 +172,25 @@ const MyAppointments = ({ user, onBookClick }) => {
                 onShowQr={setSelectedQr}
                 formatDate={formatDate}
                 onCancel={apt.status === 'BOOKED' ? handleCancel : null}
+                onRate={setSelectedRatingApt}
               />
             ))}
           </div>
         )}
       </div>
+
+    {/* ========================================== MODAL ĐÁNH GIÁ BÁC SĨ ========================================== */}
+      {selectedRatingApt && (
+        <RatingModal 
+          appointment={selectedRatingApt}
+          onClose={() => setSelectedRatingApt(null)} // Bấm nút X hoặc bấm ra ngoài thì reset về null để giấu đi
+          onSuccess={() => {
+            setSelectedRatingApt(null);
+            loadAppointments(); // Cập nhật lại giao diện ngay lập tức
+          }}
+        />
+      )}
+
 
       {/* ==========================================
          MODAL HIỂN THỊ MÃ QR CODE LỊCH HẸN

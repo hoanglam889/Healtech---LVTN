@@ -49,9 +49,9 @@ const AdminArticles = () => {
     setTitle(article.title);
     setCategory(article.category);
     setContent(article.content);
-    setImageUrl(article.imageUrl || '');
-    setAuthorName(article.authorName || '');
-    setIsPublished(article.isPublished);
+    setImageUrl(article.image_url || '');
+    setAuthorName(article.author_name || '');
+    setIsPublished(article.is_published);
     setShowModal(true);
   };
 
@@ -90,13 +90,15 @@ const AdminArticles = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
     const payload = {
       title,
       category,
       content,
-      imageUrl,
-      authorName,
-      isPublished
+      image_url: imageUrl,
+      author_name: authorName,
+      is_published: isPublished,
+      user_id: adminUser.id || null
     };
 
     if (currentArticle) {
@@ -154,12 +156,12 @@ const AdminArticles = () => {
                   <tr key={article.id} className="hover:bg-blue-50/50 transition-colors">
                     <td className="p-4">
                       <div className="font-bold text-gray-800 line-clamp-1">{article.title}</div>
-                      <div className="text-xs text-gray-500 mt-1">{new Date(article.createdAt).toLocaleDateString('vi-VN')}</div>
+                      <div className="text-xs text-gray-500 mt-1">{new Date(article.created_at).toLocaleDateString('vi-VN')}</div>
                     </td>
                     <td className="p-4 text-sm text-gray-600">{article.category}</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${article.isPublished ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                        {article.isPublished ? 'Đã xuất bản' : 'Bản nháp'}
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${article.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {article.is_published ? 'Đã xuất bản' : 'Bản nháp'}
                       </span>
                     </td>
                     <td className="p-4 flex gap-2 justify-end">

@@ -8,6 +8,14 @@ const DoctorSection = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+
+  // Lọc bác sĩ đang hoạt động và sắp xếp theo rating từ cao đến thấp
+  const processedDoctors = doctors
+    .filter(doc => doc.user?.is_active !== 0 && doc.user?.is_active !== false)
+    .sort((a, b) => (Number(b.average_rating) || 0) - (Number(a.average_rating) || 0));
+
+  const displayedDoctors = showAll ? processedDoctors : processedDoctors.slice(0, 6);
 
   useEffect(() => {
     getDoctors()
@@ -63,13 +71,16 @@ const DoctorSection = () => {
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Bác Sĩ Nổi Bật</h2>
             <p className="text-gray-500 text-base md:text-lg max-w-xl">Đội ngũ y bác sĩ, chuyên gia y tế giỏi chuyên môn và tận tâm chăm sóc sức khỏe cho bạn.</p>
           </div>
-          <button className="text-blue-600 font-semibold hover:text-blue-700 transition-colors">
-            Xem Tất Cả Bác Sĩ &rarr;
+          <button 
+            onClick={() => setShowAll(!showAll)}
+            className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer"
+          >
+            {showAll ? 'Thu gọn danh sách &uarr;' : 'Xem Tất Cả Bác Sĩ &rarr;'}
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {doctors.map((doc) => {
+          {displayedDoctors.map((doc) => {
             const imageUrl = doc.avatarUrl ? `${BASE_URL}${doc.avatarUrl}` : null;
             
             // Extract Title and Name
@@ -118,16 +129,23 @@ const DoctorSection = () => {
                   </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex gap-3 mt-6">
+                {/* Ratings & Buttons */}
+                <div className="flex items-center justify-between gap-4 mt-6 pt-5 border-t border-gray-100">
+                  {/* Cụm Rating */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 text-amber-500 font-black text-lg">
+                      <Icons.Star className="w-5 h-5 fill-current" />
+                      <span>{Number(doc.average_rating || 5.0).toFixed(1)}</span>
+                    </div>
+                    <span className="text-xs text-gray-500 font-semibold">{doc.total_reviews || 0} đánh giá</span>
+                  </div>
+
+                  {/* Nút Xem hồ sơ */}
                   <button 
                     onClick={() => setSelectedDoctor(doc)}
-                    className="flex-1 py-2.5 px-2 border-2 border-blue-600 text-blue-600 rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-50 transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 px-4 bg-blue-600 text-white rounded-xl font-bold text-sm flex justify-center items-center gap-2 hover:bg-blue-700 transition-all shadow-md shadow-blue-200 cursor-pointer"
                   >
                     Xem hồ sơ <Icons.ChevronRightCircle className="w-4 h-4" />
-                  </button>
-                  <button className="flex-1 py-2.5 px-2 bg-blue-600 text-white rounded-xl font-bold text-sm flex justify-center items-center gap-1.5 hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200 cursor-pointer">
-                    Đặt lịch khám <Icons.CalendarDays className="w-4 h-4" />
                   </button>
                 </div>
               </div>

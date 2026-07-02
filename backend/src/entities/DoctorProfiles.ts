@@ -12,6 +12,7 @@ import { Appointments } from './Appointments';
 import { Users } from './Users';
 import { Specialties } from './Specialties';
 import { DoctorSchedules } from './DoctorSchedules';
+import { Ratings } from './Ratings';
 
 @Index('user_id', ['userId'], { unique: true })
 @Index('specialty_id', ['specialtyId'], {})
@@ -35,7 +36,7 @@ export class DoctorProfiles {
   @Column('int', {
     name: 'experience_years',
     nullable: true,
-    default: () => "'0'",
+    default: '0',
   })
   experienceYears: number | null;
 
@@ -44,6 +45,12 @@ export class DoctorProfiles {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
+
+  @Column('int', { name: 'total_reviews', default: 0 })
+  total_reviews: number;
+
+  @Column('decimal', { name: 'average_rating', precision: 3, scale: 1, default: 0.0 })
+  average_rating: number;
 
   @OneToMany(() => Appointments, (appointments) => appointments.doctorProfile)
   appointments: Appointments[];
@@ -67,4 +74,7 @@ export class DoctorProfiles {
     (doctorSchedules) => doctorSchedules.doctorProfile,
   )
   doctorSchedules: DoctorSchedules[];
+
+  @OneToMany(() => Ratings, (ratings) => ratings.doctor_profile)
+  ratings: Ratings[];
 }

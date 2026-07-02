@@ -223,6 +223,7 @@ export class AppointmentsService {
         },
         invoices: true,
         medicalRecords: true,
+        rating: true,
       },
       order: {
         appointmentDate: 'DESC',
@@ -244,6 +245,7 @@ export class AppointmentsService {
         },
         invoices: true,
         medicalRecords: true,
+        rating: true,
       },
     });
     if (!appointment) {

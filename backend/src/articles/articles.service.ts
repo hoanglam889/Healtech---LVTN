@@ -16,15 +16,19 @@ export class ArticlesService {
   }
 
   findAll(isPublishedOnly?: boolean) {
-    const whereCondition = isPublishedOnly ? { isPublished: true } : {};
+    const whereCondition = isPublishedOnly ? { is_published: true } : {};
     return this.articlesRepo.find({
       where: whereCondition,
-      order: { createdAt: 'DESC' },
+      relations: { user: true },
+      order: { created_at: 'DESC' },
     });
   }
 
   async findOne(id: number) {
-    const article = await this.articlesRepo.findOne({ where: { id } });
+    const article = await this.articlesRepo.findOne({ 
+      where: { id },
+      relations: { user: true },
+    });
     if (!article) {
       throw new NotFoundException(`Article #${id} not found`);
     }

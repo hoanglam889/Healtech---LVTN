@@ -83,11 +83,11 @@ const DoctorDetailModal = ({ doctor, onClose, onBooking }) => {
                 <span className="text-xs text-gray-500 font-semibold mt-1 uppercase">Năm kinh nghiệm</span>
               </div>
               <div className="flex-1 min-w-[120px] bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center border border-gray-100">
-                <span className="text-xl font-black text-amber-500">5.0</span>
+                <span className="text-xl font-black text-amber-500">{Number(doctor.average_rating || 5.0).toFixed(1)}</span>
                 <div className="flex text-amber-400 mt-1">
-                  {[1, 2, 3, 4, 5].map(i => <Icons.Star key={i} className="w-3 h-3 fill-current" />)}
+                  {[1, 2, 3, 4, 5].map(i => <Icons.Star key={i} className={`w-3 h-3 ${i <= (doctor.average_rating || 5) ? 'fill-current' : 'fill-amber-100 text-amber-100'}`} />)}
                 </div>
-                <span className="text-[10px] text-gray-500 font-semibold mt-1 uppercase">Đánh giá</span>
+                <span className="text-[10px] text-gray-500 font-semibold mt-1 uppercase">{doctor.total_reviews || 0} Đánh giá</span>
               </div>
               <div className="flex-1 min-w-[120px] bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center border border-gray-100">
                 <Icons.BadgeCheck className="w-7 h-7 text-emerald-500 mb-1" />

@@ -18,6 +18,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { EventsModule } from './events/events.module';
 import { AiModule } from './ai/ai.module';
 import { ArticlesModule } from './articles/articles.module';
+import { RatingsModule } from './ratings/ratings.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ArticlesModule } from './articles/articles.module';
     EventsModule,
     AiModule,
     ArticlesModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

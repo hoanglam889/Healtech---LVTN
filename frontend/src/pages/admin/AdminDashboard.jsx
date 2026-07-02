@@ -7,6 +7,7 @@ import AdminSpecialties from '../../components/dashboard/admin/AdminSpecialties'
 import AdminSchedules from '../../components/dashboard/admin/AdminSchedules';
 import AdminTransactions from '../../components/dashboard/admin/AdminTransactions';
 import AdminArticles from '../../components/dashboard/admin/AdminArticles';
+import AdminRatings from '../../components/dashboard/admin/AdminRatings';
 
 export default function AdminDashboard() {
   // Trạng thái admin đang đăng nhập (lấy từ localStorage độc lập)
@@ -201,19 +202,23 @@ export default function AdminDashboard() {
               <Icons.FileText className="w-5 h-5" />
               <span>Quản lý Bài viết</span>
             </button>
+
+            <button
+              onClick={() => { setActiveTab('ratings'); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                activeTab === 'ratings'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <Icons.Star className="w-5 h-5" />
+              <span>Quản lý Đánh giá</span>
+            </button>
           </nav>
         </div>
 
         {/* FOOTER ACTIONS */}
         <div className="space-y-2">
-          <button
-            onClick={handleGoHome}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
-          >
-            <Icons.Globe className="w-5 h-5" />
-            <span>Trang bệnh nhân</span>
-          </button>
-          
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-all cursor-pointer border-t border-gray-100/60 pt-4"
@@ -246,6 +251,7 @@ export default function AdminDashboard() {
                 {activeTab === 'schedules' && 'Cấu hình Lịch trực Bác sĩ'}
                 {activeTab === 'transactions' && 'Quản lý Giao dịch & Ca hẹn'}
                 {activeTab === 'articles' && 'Quản lý Bài viết & Tin tức'}
+                {activeTab === 'ratings' && 'Quản lý Đánh giá Bác sĩ'}
               </h2>
               <p className="text-[10px] lg:text-xs text-gray-400 font-semibold mt-0.5">Trang dành riêng cho Quản trị viên phòng khám</p>
             </div>
@@ -267,6 +273,7 @@ export default function AdminDashboard() {
           {activeTab === 'schedules' && <AdminSchedules />}
           {activeTab === 'transactions' && <AdminTransactions />}
           {activeTab === 'articles' && <AdminArticles />}
+          {activeTab === 'ratings' && <AdminRatings />}
         </div>
       </main>
 

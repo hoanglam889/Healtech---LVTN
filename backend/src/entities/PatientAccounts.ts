@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Notifications } from './Notifications';
 import { Patients } from './Patients';
+import { Ratings } from './Ratings';
 
 @Index('phone', ['phone'], { unique: true })
 @Entity('patient_accounts', { schema: 'clinic_flow_erp' })
@@ -39,7 +40,7 @@ export class PatientAccounts {
       name: 'is_active',
       nullable: true,
       width: 1,
-      default: () => "'0'", // Đổi mặc định thành 0 (chưa kích hoạt)
+      default: '0', // Đổi mặc định thành 0 (chưa kích hoạt)
     } as any,
   )
   isActive: boolean | null;
@@ -61,4 +62,7 @@ export class PatientAccounts {
 
   @OneToMany(() => Patients, (patients) => patients.patientAccount)
   patients: Patients[];
+
+  @OneToMany(() => Ratings, (ratings) => ratings.patient_account)
+  ratings: Ratings[];
 }

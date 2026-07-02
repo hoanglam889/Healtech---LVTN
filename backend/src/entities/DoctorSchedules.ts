@@ -25,7 +25,7 @@ export class DoctorSchedules {
   @Column('date', { name: 'date' })
   date: string;
 
-  @Column('int', { name: 'max_patients', nullable: true, default: () => "'5'" })
+  @Column('int', { name: 'max_patients', nullable: true, default: '5' })
   maxPatients: number | null;
 
   @Column('timestamp', {

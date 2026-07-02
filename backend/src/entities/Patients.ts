@@ -24,7 +24,7 @@ export class Patients {
     name: 'relationship',
     nullable: true,
     length: 50,
-    default: () => "'Bản thân'",
+    default: 'Bản thân',
   })
   relationship: string | null;
 

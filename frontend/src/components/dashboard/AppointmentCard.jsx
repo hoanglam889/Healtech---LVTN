@@ -2,7 +2,8 @@ import React from 'react';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
 
-const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
+const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate }) => {
+  const isDone = apt.status === 'DONE';
   const isUpcoming = apt.status === 'BOOKED';
   const isCancelled = apt.status === 'CANCELLED';
   const isCheckedIn = apt.status === 'WAITING' || apt.status === 'EXAMINING';
@@ -99,6 +100,31 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel }) => {
               <span>Mã QR</span>
             </button>
           )}
+          {/* Khu vực Đánh giá */}
+          {isDone && (
+            apt.rating ? (
+              // Nếu đã đánh giá rồi -> Hiện số sao đã đánh giá (nút bị làm mờ và vô hiệu hóa)
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg cursor-not-allowed opacity-80">
+                <span className="text-xs font-bold text-gray-500">Đã đánh giá:</span>
+                <div className="flex items-center text-amber-500 font-bold text-xs gap-0.5">
+                  <span>{apt.rating.rating}</span>
+                  <Icons.Star className="w-3.5 h-3.5 fill-current" />
+                </div>
+              </div>
+            ) : (
+              // Nếu chưa đánh giá và có onRate -> Hiện nút Đánh giá bình thường
+              onRate && (
+                <button 
+                  onClick={() => onRate(apt)}
+                  className="text-xs font-bold text-amber-500 hover:text-amber-600 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-100 transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <Icons.Star className="w-3.5 h-3.5" />
+                  <span>Đánh giá</span>
+                </button>
+              )
+            )
+          )}
+
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ import { AppointmentStatusLogs } from './AppointmentStatusLogs';
 import { Invoices } from './Invoices';
 import { MedicalRecords } from './MedicalRecords';
 import { AppointmentServices } from './AppointmentServices';
+import { Ratings } from './Ratings';
 
 @Index('qr_code', ['qrCode'], { unique: true })
 @Index('patient_id', ['patientId'], {})
@@ -42,14 +43,14 @@ export class Appointments {
     name: 'status',
     nullable: true,
     enum: ['PENDING', 'BOOKED', 'WAITING', 'EXAMINING', 'DONE', 'CANCELLED'],
-    default: () => "'BOOKED'",
+    default: 'BOOKED',
   })
   status: 'PENDING' | 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DONE' | 'CANCELLED' | null;
 
   @Column('int', {
     name: 'priority_score',
     nullable: true,
-    default: () => "'1'",
+    default: '1',
   })
   priorityScore: number | null;
 
@@ -94,4 +95,7 @@ export class Appointments {
     (appointmentServices) => appointmentServices.appointment,
   )
   appointmentServices: AppointmentServices[];
+
+  @OneToOne(() => Ratings, (ratings) => ratings.appointment)
+  rating: Ratings;
 }

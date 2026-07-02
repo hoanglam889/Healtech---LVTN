@@ -29,7 +29,7 @@ export class Notifications {
       name: 'is_read',
       nullable: true,
       width: 1,
-      default: () => "'0'",
+      default: '0',
     } as any,
   )
   isRead: boolean | null;

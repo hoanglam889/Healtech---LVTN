@@ -63,8 +63,8 @@ const ArticleSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {articles.length > 0 ? articles.slice(0, 3).map((article) => {
-            const imageUrl = getImageUrl(article.imageUrl);
-            const publishDate = new Date(article.createdAt).toLocaleDateString('vi-VN', {
+            const imageUrl = getImageUrl(article.image_url);
+            const publishDate = new Date(article.created_at).toLocaleDateString('vi-VN', {
               day: '2-digit', month: '2-digit', year: 'numeric'
             });
 

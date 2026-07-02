@@ -18,7 +18,7 @@ export class Services {
   @Column('boolean', {
     name: 'is_active',
     nullable: true,
-    default: () => "'1'",
+    default: '1',
   })
   isActive: boolean | null;
 

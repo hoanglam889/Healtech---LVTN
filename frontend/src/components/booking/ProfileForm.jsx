@@ -117,10 +117,9 @@ const ProfileForm = ({ onAddProfile }) => {
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Quan hệ với chủ tài khoản</label>
               <select 
                 name="relationship"
-                defaultValue="Bản thân"
+                defaultValue="Bố/Mẹ"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm font-medium"
               >
-                <option value="Bản thân">Bản thân</option>
                 <option value="Bố/Mẹ">Bố/Mẹ</option>
                 <option value="Vợ/Chồng">Vợ/Chồng</option>
                 <option value="Con cái">Con cái</option>
