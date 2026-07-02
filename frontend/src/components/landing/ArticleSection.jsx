@@ -39,7 +39,7 @@ const ArticleSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((item) => (
               <div key={item} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
-                <div className="aspect-[16/9] bg-gray-200 w-full"></div>
+                <div className="aspect-video bg-gray-200 w-full"></div>
                 <div className="p-5 md:p-6 space-y-4">
                   <div className="h-4 bg-gray-200 rounded w-1/4"></div>
                   <div className="h-6 bg-gray-200 rounded w-full"></div>
@@ -74,7 +74,7 @@ const ArticleSection = () => {
                 onClick={() => setSelectedArticle(article)}
                 className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group flex flex-col"
               >
-                <div className="aspect-[16/9] bg-gray-100 w-full relative">
+                <div className="aspect-video bg-gray-100 w-full relative">
                   {imageUrl ? (
                     <img src={imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (

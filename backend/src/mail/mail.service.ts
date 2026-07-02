@@ -86,4 +86,46 @@ export class MailService {
       html: `<p>Vui lòng di chuyển đến cửa phòng khám để không bị mất lượt khám.</p>`,
     });
   }
+  // 3. Hàm gửi mail liên hệ từ khách hàng
+  async sendContactMail(name: string, phone: string, email: string, message: string) {
+    // Địa chỉ nhận mặc định là email admin.
+    // Vì không biết email admin chính xác nên tạm thời lấy email cấu hình SMTP hoặc hardcode.
+    // Thực tế sẽ dùng: const adminEmail = process.env.SMTP_USER;
+    const adminEmail = process.env.SMTP_USER || 'admin@healtech.com';
+
+    await this.mailerService.sendMail({
+      to: adminEmail,
+      replyTo: email, // Giúp admin bấm Reply thì trả lời về mail của khách
+      subject: `[Liên Hệ Mới] Từ khách hàng: ${name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+          <div style="background-color: #2563eb; padding: 16px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h2 style="color: white; margin: 0;">THÔNG BÁO LIÊN HỆ MỚI</h2>
+          </div>
+          <div style="padding: 24px;">
+            <p style="color: #4b5563;">Hệ thống vừa nhận được một yêu cầu liên hệ mới từ khách hàng qua Website:</p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; width: 120px;"><strong>Họ và tên:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;"><strong>Số điện thoại:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${phone}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;"><strong>Email:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;"><a href="mailto:${email}">${email}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;"><strong>Lời nhắn:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${message.replace(/\n/g, '<br>')}</td>
+              </tr>
+            </table>
+            <p style="color: #6b7280; font-size: 13px; margin-top: 24px;">Lưu ý: Bấm <strong>Trả lời (Reply)</strong> để phản hồi trực tiếp cho khách hàng qua địa chỉ email của họ.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
 }

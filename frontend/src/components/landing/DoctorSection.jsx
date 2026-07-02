@@ -10,9 +10,9 @@ const DoctorSection = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showAll, setShowAll] = useState(false);
 
-  // Lọc bác sĩ đang hoạt động và sắp xếp theo rating từ cao đến thấp
+  // Lọc bác sĩ đang hoạt động (isActive == 1 hoặc true) và sắp xếp theo rating từ cao đến thấp
   const processedDoctors = doctors
-    .filter(doc => doc.user?.is_active !== 0 && doc.user?.is_active !== false)
+    .filter(doc => Number(doc.user?.isActive) === 1 || doc.user?.isActive === true)
     .sort((a, b) => (Number(b.average_rating) || 0) - (Number(a.average_rating) || 0));
 
   const displayedDoctors = showAll ? processedDoctors : processedDoctors.slice(0, 6);

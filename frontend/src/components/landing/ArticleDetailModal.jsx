@@ -53,7 +53,7 @@ const ArticleDetailModal = ({ article, onClose }) => {
         {/* Content Area */}
         <div className="overflow-y-auto custom-scrollbar flex-1">
           {/* Cover Image */}
-          <div className="w-full h-64 md:h-80 bg-gray-100 relative">
+          <div className="w-full aspect-video bg-gray-100 relative">
             {imageUrl ? (
               <img 
                 src={imageUrl} 

@@ -1,6 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
+import apiClient from '../../services/apiClient';
 
 const ContactSection = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState('');
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', text: '' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!firstName || !lastName || !email || !phone || !message) {
+      setFeedback({ type: 'error', text: 'Vui lòng điền đầy đủ thông tin!' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedback({ type: '', text: '' });
+
+    try {
+      const response = await apiClient.post('/mail/contact', {
+        name: `${lastName} ${firstName}`,
+        phone,
+        email,
+        message
+      });
+      setFeedback({ type: 'success', text: response.data?.message || 'Gửi liên hệ thành công!' });
+      // Reset form
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setPhone('');
+      setMessage('');
+    } catch (error) {
+      setFeedback({ 
+        type: 'error', 
+        text: error.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-16 lg:gap-24">
@@ -27,27 +71,45 @@ const ContactSection = () => {
         </div>
 
         <div className="flex-1">
-          <form className="bg-white p-8 md:p-10 rounded-3xl shadow-lg shadow-gray-100/50 border border-gray-100 space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="bg-white p-8 md:p-10 rounded-3xl shadow-lg shadow-gray-100/50 border border-gray-100 space-y-6" onSubmit={handleSubmit}>
+            {feedback.text && (
+              <div className={`p-4 rounded-xl text-sm font-semibold ${feedback.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                {feedback.text}
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Tên</label>
-                <input type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="Lâm" />
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Họ</label>
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="Nguyễn" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Họ</label>
-                <input type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="Nguyễn" />
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tên</label>
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="Lâm" />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Địa Chỉ Email</label>
-              <input type="email" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="lam@example.com" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="0912345678" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Địa Chỉ Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" placeholder="lam@example.com" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Lời nhắn</label>
-              <textarea rows="4" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all resize-none" placeholder="Hãy mô tả thắc mắc hoặc yêu cầu hỗ trợ của bạn..."></textarea>
+              <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows="4" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all resize-none" placeholder="Hãy mô tả thắc mắc hoặc yêu cầu hỗ trợ của bạn..."></textarea>
             </div>
-            <button className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-sm">
-              Gửi Tin Nhắn
+            <button disabled={isSubmitting} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Đang gửi...</span>
+                </>
+              ) : (
+                'Gửi Tin Nhắn'
+              )}
             </button>
           </form>
         </div>

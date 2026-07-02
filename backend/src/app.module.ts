@@ -19,6 +19,7 @@ import { EventsModule } from './events/events.module';
 import { AiModule } from './ai/ai.module';
 import { ArticlesModule } from './articles/articles.module';
 import { RatingsModule } from './ratings/ratings.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -48,7 +49,7 @@ import { RatingsModule } from './ratings/ratings.module';
         secure: true, // true cho port 465, false cho port 587
         auth: {
           user: 'lamphan3107@gmail.com', // Điền email của bác vào đây
-          pass: 'vxrfwoveyaxapncd', // Đã cập nhật mã mới
+          pass: 'vqla yjkd hdlf wytk', // Đã cập nhật mã mới
         },
       },
       defaults: {
@@ -71,6 +72,7 @@ import { RatingsModule } from './ratings/ratings.module';
     AiModule,
     ArticlesModule,
     RatingsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
