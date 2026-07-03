@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, LessThan } from 'typeorm';
@@ -526,8 +527,16 @@ export class AppointmentsService {
     return this.findOne(id);
   }
 
-  async remove(id: number) {
+  async remove(id: number, user: any = null) {
     const appointment = await this.findOne(id); // Kiểm tra xem bản ghi có tồn tại không
+
+    // Bảo mật: Nếu là bệnh nhân, chỉ được xóa lịch của chính mình
+    if (user && user.role === 'PATIENT') {
+      if (appointment.patient?.patientAccountId !== user.id) {
+        throw new ForbiddenException('Bạn không có quyền xóa lịch khám của người khác!');
+      }
+    }
+
     await this.appointmentsRepo.remove(appointment);
     return { success: true, message: `Đã xóa lịch hẹn #${id} thành công` };
   }
