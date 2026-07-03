@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { ArticlesService } from './articles.service';
 
 @Controller('articles')
@@ -10,12 +11,14 @@ export class ArticlesController {
     return this.articlesService.create(createArticleDto);
   }
 
+  @Public()
   @Get()
   findAll(@Query('publishedOnly') publishedOnly: string) {
     const isPublishedOnly = publishedOnly === 'true';
     return this.articlesService.findAll(isPublishedOnly);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.articlesService.findOne(+id);

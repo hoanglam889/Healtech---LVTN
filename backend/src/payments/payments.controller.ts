@@ -7,12 +7,14 @@ import {
   Res,
   BadRequestException,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { PaymentsService } from './payments.service';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  @Public()
   @Post('create-payment-url')
   async createPaymentUrl(
     @Body('invoiceId') invoiceId: string,
@@ -26,6 +28,7 @@ export class PaymentsController {
     return { url };
   }
 
+  @Public()
   @Get('vnpay-return')
   async vnpayReturn(@Query() query: any, @Res() res: any) {
     const source = query.source || 'reception';

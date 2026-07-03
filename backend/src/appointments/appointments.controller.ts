@@ -7,10 +7,8 @@ import {
   Param,
   Delete,
   Query,
-  UseGuards,
   Request,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -42,7 +40,6 @@ export class AppointmentsController {
     return this.appointmentsService.update(+id, updateAppointmentDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
     return this.appointmentsService.remove(+id, req.user);

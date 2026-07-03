@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { DoctorProfilesService } from './doctor-profiles.service';
 import { CreateDoctorProfileDto } from './dto/create-doctor-profile.dto';
 import { UpdateDoctorProfileDto } from './dto/update-doctor-profile.dto';
@@ -20,11 +21,13 @@ export class DoctorProfilesController {
     return this.doctorProfilesService.create(createDoctorProfileDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.doctorProfilesService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.doctorProfilesService.findOne(+id);

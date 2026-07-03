@@ -11,10 +11,13 @@ import {
 import { AuthService } from './auth.service';
 import type { Response, Request } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { Public } from './public.decorator';
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('staff-login')
   async staffLogin(
     @Body() body: any,
@@ -36,6 +39,7 @@ export class AuthController {
     return userData;
   }
 
+  @Public()
   @Post('patient-login')
   async patientLogin(
     @Body() body: any,
@@ -55,6 +59,7 @@ export class AuthController {
     return userData;
   }
 
+  @Public()
   @Post('patient-register')
   async patientRegister(
     @Body() body: any,
@@ -75,6 +80,7 @@ export class AuthController {
     return regData;
   }
 
+  @Public()
   @Post('patient-verify-otp')
   async patientVerifyOtp(
     @Body() body: any,

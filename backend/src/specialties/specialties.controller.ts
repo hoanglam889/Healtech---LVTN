@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { SpecialtiesService } from './specialties.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
@@ -20,11 +21,13 @@ export class SpecialtiesController {
     return this.specialtiesService.create(createSpecialtyDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.specialtiesService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.specialtiesService.findOne(+id);
