@@ -20,9 +20,11 @@ import { AiModule } from './ai/ai.module';
 import { ArticlesModule } from './articles/articles.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { MailModule } from './mail/mail.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     // 1. Load file cấu hình .env
     ConfigModule.forRoot({
       isGlobal: true,

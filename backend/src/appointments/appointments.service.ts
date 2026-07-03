@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, LessThan } from 'typeorm';
 import { Appointments } from '../entities/Appointments';
 import { Invoices } from '../entities/Invoices';
 import { MedicalRecords } from '../entities/MedicalRecords';
@@ -15,6 +15,7 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { MailService } from '../mail/mail.service';
 import { Patients } from '../entities/Patients';
 import { EventsGateway } from '../events/events.gateway';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class AppointmentsService {
@@ -59,6 +60,7 @@ export class AppointmentsService {
       // Tìm lịch làm việc của bác sĩ trong ngày và khung giờ đó
       const schedule = await queryRunner.manager
         .createQueryBuilder('doctor_schedules', 'ds')
+        //dòng này ép lock db(database), khi có 1 appoiment đi vào thì appoiment khác phải chờ 
         .innerJoinAndSelect('ds.shift', 's')
         .where('ds.doctorProfileId = :doctorId', { doctorId: doctorProfileId })
         .andWhere('ds.date = :date', { date: appointmentDate })
@@ -546,5 +548,37 @@ export class AppointmentsService {
       changedBy,
       notes,
     });
+  }
+
+  // 11. Thư viện CronJob dọn dẹp lịch PENDING chưa thanh toán VNPAY
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async cleanupPendingAppointments() {
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    
+    const pendingAppointments = await this.appointmentsRepo.find({
+      where: {
+        status: 'PENDING',
+        createdAt: LessThan(fifteenMinutesAgo),
+      },
+    });
+
+    if (pendingAppointments.length > 0) {
+      for (const apt of pendingAppointments) {
+        await this.appointmentsRepo.update(apt.id, { status: 'CANCELLED' });
+        
+        await this.logStatusChange(
+          apt.id,
+          'PENDING',
+          'CANCELLED',
+          null,
+          'Hệ thống tự động hủy do quá hạn chờ thanh toán VNPAY'
+        );
+      }
+      
+      // Phát sóng để lễ tân tự động cập nhật lại danh sách nếu đang mở màn hình
+      if (this.eventsGateway && this.eventsGateway.server) {
+        this.eventsGateway.server.emit('appointments_updated');
+      }
+    }
   }
 }
