@@ -151,6 +151,14 @@ export class AppointmentsService {
 
       await queryRunner.manager.save(Invoices, invoice);
 
+      // Ghi log trạng thái khởi tạo
+      const initialLog = new AppointmentStatusLogs();
+      initialLog.appointmentId = savedAppointment.id;
+      initialLog.oldStatus = null;
+      initialLog.newStatus = savedAppointment.status as any;
+      initialLog.notes = paymentMethod === 'VNPAY' ? 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)' : 'Bệnh nhân tạo lịch hẹn (Tiền mặt)';
+      await queryRunner.manager.save(AppointmentStatusLogs, initialLog);
+
       await queryRunner.commitTransaction();
 
       // Chỉ phát sóng và gửi mail nếu đã BOOKED (tiền mặt)
@@ -224,6 +232,9 @@ export class AppointmentsService {
         invoices: true,
         medicalRecords: true,
         rating: true,
+        appointmentStatusLogs: {
+          changedBy2: true, // Kèm thông tin người thay đổi
+        },
       },
       order: {
         appointmentDate: 'DESC',
@@ -246,6 +257,9 @@ export class AppointmentsService {
         invoices: true,
         medicalRecords: true,
         rating: true,
+        appointmentStatusLogs: {
+          changedBy2: true,
+        },
       },
     });
     if (!appointment) {
@@ -256,6 +270,8 @@ export class AppointmentsService {
 
   async update(id: number, updateDto: any) {
     const appointment = await this.findOne(id);
+    
+    console.log("UPDATE DTO RECEIVED:", updateDto);
 
     const {
       invoiceStatus,
@@ -392,12 +408,18 @@ export class AppointmentsService {
           noteStr += `Bác sĩ ID (${appointment.doctorProfileId} -> ${appointmentFields.doctorProfileId}). `;
         }
         
-        await this.appointmentStatusLogsRepo.save({
-          appointmentId: id,
-          oldStatus: appointment.status as any,
-          newStatus: appointment.status as any,
-          notes: noteStr,
-        });
+        await this.logStatusChange(id, appointment.status, appointment.status as string, null, noteStr);
+      }
+
+      // Nếu có đổi trạng thái, ghi log
+      if (appointmentFields.status && appointmentFields.status !== appointment.status) {
+        let noteStr = 'Cập nhật trạng thái khám';
+        if (appointmentFields.status === 'WAITING') noteStr = 'Bệnh nhân đã check-in (Lễ tân xác nhận)';
+        else if (appointmentFields.status === 'EXAMINING') noteStr = 'Bác sĩ gọi vào phòng khám';
+        else if (appointmentFields.status === 'DONE') noteStr = 'Hoàn tất khám bệnh';
+        else if (appointmentFields.status === 'CANCELLED') noteStr = 'Hủy lịch khám';
+        
+        await this.logStatusChange(id, appointment.status, appointmentFields.status, null, noteStr);
       }
 
       // ===== THUẬT TOÁN HÀNG ĐỢI (SMART QUEUE) =====
@@ -506,5 +528,23 @@ export class AppointmentsService {
     const appointment = await this.findOne(id); // Kiểm tra xem bản ghi có tồn tại không
     await this.appointmentsRepo.remove(appointment);
     return { success: true, message: `Đã xóa lịch hẹn #${id} thành công` };
+  }
+
+  // 10. Hàm Helper ghi log thay đổi trạng thái
+  async logStatusChange(
+    appointmentId: number,
+    oldStatus: string | null,
+    newStatus: string,
+    changedBy: number | null = null,
+    notes: string | null = null,
+  ) {
+    if (oldStatus === newStatus && !notes) return;
+    await this.appointmentStatusLogsRepo.save({
+      appointmentId,
+      oldStatus: oldStatus as any,
+      newStatus: newStatus as any,
+      changedBy,
+      notes,
+    });
   }
 }

@@ -13,6 +13,8 @@ import { EventsGateway } from '../events/events.gateway';
 import { MailService } from '../mail/mail.service';
 import { Patients } from '../entities/Patients';
 
+import { AppointmentStatusLogs } from '../entities/AppointmentStatusLogs';
+
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
@@ -22,6 +24,8 @@ export class PaymentsService {
     @InjectRepository(Invoices) private invoicesRepo: Repository<Invoices>,
     @InjectRepository(Appointments)
     private appointmentsRepo: Repository<Appointments>,
+    @InjectRepository(AppointmentStatusLogs)
+    private appointmentStatusLogsRepo: Repository<AppointmentStatusLogs>,
     private readonly eventsGateway: EventsGateway,
     private readonly mailService: MailService,
   ) {}
@@ -110,8 +114,18 @@ export class PaymentsService {
         });
 
         if (appointment && appointment.status === 'PENDING') {
+          const oldStatus = appointment.status;
           appointment.status = 'BOOKED';
           await this.appointmentsRepo.save(appointment);
+
+          // Ghi log trạng thái thanh toán
+          await this.appointmentStatusLogsRepo.save({
+            appointmentId: appointment.id,
+            oldStatus: oldStatus as any,
+            newStatus: 'BOOKED' as any,
+            changedBy: null, // Hệ thống tự động
+            notes: 'Thanh toán thành công qua VNPAY',
+          });
 
           // Phát sóng báo lễ tân có lịch mới
           this.eventsGateway.emitUpdate('appointment_created', { 

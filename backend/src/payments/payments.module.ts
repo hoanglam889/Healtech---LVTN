@@ -4,6 +4,7 @@ import { PaymentsController } from './payments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Invoices } from '../entities/Invoices';
 import { Appointments } from '../entities/Appointments';
+import { AppointmentStatusLogs } from '../entities/AppointmentStatusLogs';
 
 import { VnpayModule } from 'nestjs-vnpay';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,7 +15,7 @@ import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoices, Appointments]),
+    TypeOrmModule.forFeature([Invoices, Appointments, AppointmentStatusLogs]),
     EventsModule,
     MailModule,
     VnpayModule.registerAsync({

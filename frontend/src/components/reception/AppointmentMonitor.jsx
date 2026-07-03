@@ -7,6 +7,7 @@ export default function AppointmentMonitor() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(new Date());
+  const [expandedHistoryId, setExpandedHistoryId] = useState(null);
 
   // Load appointments
   const loadAppointments = async (showSpinner = true) => {
@@ -208,6 +209,15 @@ export default function AppointmentMonitor() {
                       </div>
 
                       <div className="flex gap-2">
+                        {appt.appointmentStatusLogs?.length > 0 && (
+                          <button
+                            onClick={() => setExpandedHistoryId(expandedHistoryId === appt.id ? null : appt.id)}
+                            className="flex-1 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          >
+                            <Icons.History className="w-4 h-4" />
+                            Lịch sử
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             if (isPaid) {
@@ -225,9 +235,69 @@ export default function AppointmentMonitor() {
                           }`}
                         >
                           <Icons.XCircle className="w-4 h-4" />
-                          Hủy lịch (No-show)
+                          Hủy lịch
                         </button>
                       </div>
+
+                      {/* Hiển thị Timeline Lịch sử */}
+                      {expandedHistoryId === appt.id && appt.appointmentStatusLogs?.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <h5 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4">Nhật ký trạng thái</h5>
+                          <div className="space-y-4">
+                            {appt.appointmentStatusLogs.map((log, index) => {
+                              const isLast = index === appt.appointmentStatusLogs.length - 1;
+                              let statusColor = 'bg-gray-200';
+                              let statusIcon = <Icons.Info className="w-3 h-3 text-white" />;
+                              
+                              if (log.newStatus === 'PENDING') {
+                                statusColor = 'bg-gray-400';
+                                statusIcon = <Icons.CreditCard className="w-3 h-3 text-white" />;
+                              } else if (log.newStatus === 'BOOKED') {
+                                statusColor = 'bg-blue-500';
+                                statusIcon = <Icons.Check className="w-3 h-3 text-white" />;
+                              } else if (log.newStatus === 'WAITING') {
+                                statusColor = 'bg-amber-500';
+                                statusIcon = <Icons.Clock className="w-3 h-3 text-white" />;
+                              } else if (log.newStatus === 'EXAMINING') {
+                                statusColor = 'bg-purple-500';
+                                statusIcon = <Icons.Activity className="w-3 h-3 text-white" />;
+                              } else if (log.newStatus === 'DONE') {
+                                statusColor = 'bg-emerald-500';
+                                statusIcon = <Icons.CheckCircle className="w-3 h-3 text-white" />;
+                              } else if (log.newStatus === 'CANCELLED') {
+                                statusColor = 'bg-rose-500';
+                                statusIcon = <Icons.X className="w-3 h-3 text-white" />;
+                              }
+
+                              return (
+                                <div key={log.id} className="relative flex gap-4">
+                                  {!isLast && <div className="absolute left-2.5 top-6 bottom-[-16px] w-0.5 bg-gray-100"></div>}
+                                  
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 ${statusColor} ring-4 ring-white`}>
+                                    {statusIcon}
+                                  </div>
+                                  
+                                  <div className="flex-1 pb-1">
+                                    <div className="flex flex-col gap-0.5 mb-1">
+                                      <span className="text-sm font-bold text-gray-800 leading-tight">{log.notes || 'Cập nhật trạng thái'}</span>
+                                      <span className="text-[10px] font-semibold text-gray-400">
+                                        {new Date(log.changedAt).toLocaleString('vi-VN')}
+                                      </span>
+                                    </div>
+                                    {log.changedBy2 && (
+                                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                                        <Icons.User className="w-3 h-3" />
+                                        Bởi: <span className="font-semibold">{log.changedBy2.fullName}</span> 
+                                        <span className="bg-gray-100 text-[9px] px-1 rounded uppercase">{log.changedBy2.role}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
