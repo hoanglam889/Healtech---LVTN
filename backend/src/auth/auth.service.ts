@@ -7,7 +7,7 @@ import { DoctorProfiles } from '../entities/DoctorProfiles';
 import { Patients } from '../entities/Patients';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
-import { access } from 'fs';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,9 +26,17 @@ export class AuthService {
   // Đăng nhập dành cho nhân viên (STAFF) và bác sĩ (DOCTOR)
   async staffLogin(email: string, pass: string) {
     const user = await this.usersRepo.findOne({
-      where: { email, passwordHash: pass },
+      where: { email },
     });
     if (!user) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
+    }
+
+    const isMatch = user.passwordHash.startsWith('$2')
+      ? await bcrypt.compare(pass, user.passwordHash)
+      : user.passwordHash === pass;
+
+    if (!isMatch) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
     }
 
@@ -45,6 +53,7 @@ export class AuthService {
       fullName = 'Quản trị viên';
     }
     let doctorProfileId: number | null = null;
+    let avatarUrl: string | null = null;
     if (normalizedRole === 'DOCTOR') {
       const docProfile = await this.doctorProfilesRepo.findOne({
         where: { userId: user.id },
@@ -52,6 +61,7 @@ export class AuthService {
       if (docProfile) {
         fullName = docProfile.fullName;
         doctorProfileId = docProfile.id;
+        avatarUrl = docProfile.avatarUrl;
       } else {
         fullName = 'Bác sĩ trực ban';
       }
@@ -67,6 +77,7 @@ export class AuthService {
         role: normalizedRole,
         fullName,
         doctorProfileId,
+        avatarUrl,
       },
     };
   }
@@ -74,10 +85,18 @@ export class AuthService {
   // Đăng nhập dành cho bệnh nhân (khách hàng)
   async patientLogin(email: string, pass: string) {
     const account = await this.patientAccountsRepo.findOne({
-      where: { email, passwordHash: pass },
+      where: { email },
       relations: { patients: true },
     });
     if (!account) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
+    }
+
+    const isMatch = account.passwordHash.startsWith('$2')
+      ? await bcrypt.compare(pass, account.passwordHash)
+      : account.passwordHash === pass;
+
+    if (!isMatch) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
     }
 
@@ -153,7 +172,7 @@ export class AuthService {
     // 1. Tạo tài khoản bệnh nhân mới
     const newAccount = new PatientAccounts();
     newAccount.email = email;
-    newAccount.passwordHash = pass;
+    newAccount.passwordHash = await bcrypt.hash(pass, 10);
     newAccount.isActive = false; // Đợi OTP mới được kích hoạt
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     newAccount.otpCode = otp;
@@ -242,14 +261,17 @@ export class AuthService {
     }
 
     if (updateDto.oldPassword && updateDto.newPassword) {
-      if (account.passwordHash !== updateDto.oldPassword) {
+      const isMatch = account.passwordHash.startsWith('$2')
+        ? await bcrypt.compare(updateDto.oldPassword, account.passwordHash)
+        : account.passwordHash === updateDto.oldPassword;
+
+      if (!isMatch) {
         throw new UnauthorizedException('Mật khẩu hiện tại không chính xác');
       }
-      account.passwordHash = updateDto.newPassword;
+      account.passwordHash = await bcrypt.hash(updateDto.newPassword, 10);
     }
 
     await this.patientAccountsRepo.save(account);
-
     return {
       success: true,
       message: 'Cập nhật tài khoản thành công',
@@ -259,5 +281,56 @@ export class AuthService {
         phone: account.phone,
       }
     };
+  }
+
+  // Khôi phục mật khẩu - Bước 1: Gửi OTP
+  async forgotPassword(email: string) {
+    const account = await this.patientAccountsRepo.findOne({ where: { email } });
+    if (!account) {
+      throw new UnauthorizedException('Không tìm thấy tài khoản với email này!');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    account.otpCode = otp;
+    await this.patientAccountsRepo.save(account);
+
+    this.mailService.sendForgotPasswordOTP(email, otp).catch((e) => console.error(e));
+
+    return {
+      success: true,
+      message: 'Mã xác minh đã được gửi đến email của bạn.',
+    };
+  }
+
+  // Khôi phục mật khẩu - Bước 2: Xác minh OTP
+  async verifyResetOtp(email: string, otpCode: string) {
+    const account = await this.patientAccountsRepo.findOne({ where: { email } });
+    if (!account) {
+      throw new UnauthorizedException('Không tìm thấy tài khoản!');
+    }
+
+    if (account.otpCode !== otpCode) {
+      throw new UnauthorizedException('Mã xác thực không chính xác!');
+    }
+
+    return { success: true, message: 'Mã hợp lệ. Vui lòng nhập mật khẩu mới.' };
+  }
+
+  // Khôi phục mật khẩu - Bước 3: Đặt lại mật khẩu
+  async resetPassword(email: string, otpCode: string, newPassword: string) {
+    const account = await this.patientAccountsRepo.findOne({ where: { email } });
+    if (!account) {
+      throw new UnauthorizedException('Không tìm thấy tài khoản!');
+    }
+
+    if (account.otpCode !== otpCode) {
+      throw new UnauthorizedException('Mã xác thực không chính xác!');
+    }
+
+    account.passwordHash = await bcrypt.hash(newPassword, 10);
+    account.otpCode = null;
+    await this.patientAccountsRepo.save(account);
+
+    return { success: true, message: 'Đổi mật khẩu thành công!' };
   }
 }

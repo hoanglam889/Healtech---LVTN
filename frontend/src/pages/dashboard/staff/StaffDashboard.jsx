@@ -21,7 +21,9 @@ export default function StaffDashboard() {
   // Quản lý tab hiển thị
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('tab') || 'checkin';
+    if (params.get('tab')) return params.get('tab');
+    if (staffUser && staffUser.role === 'DOCTOR') return 'doctor-queue';
+    return 'checkin';
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -78,7 +80,7 @@ export default function StaffDashboard() {
           </button>
 
           {/* LOGO */}
-          <div className="flex flex-col gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
+          <div className="flex flex-col items-center gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
             <img 
               src="/images/logo2.png" 
               alt="Healtech Logo" 
@@ -89,9 +91,13 @@ export default function StaffDashboard() {
 
           {/* USER INFO PROFILE CARD */}
           <div className="mt-6 p-4 bg-gray-50/80 rounded-2xl border border-gray-100 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-extrabold border border-blue-200">
-              {staffUser.fullName.charAt(0).toUpperCase()}
-            </div>
+            {staffUser.avatarUrl ? (
+              <img src={staffUser.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-blue-200" />
+            ) : (
+              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-extrabold border border-blue-200">
+                {staffUser.fullName.charAt(0).toUpperCase()}
+              </div>
+            )}
             <div>
               <p className="font-bold text-sm text-gray-900 leading-tight">{staffUser.fullName}</p>
               <div className="flex items-center gap-1.5 mt-1">
@@ -179,13 +185,15 @@ export default function StaffDashboard() {
 
         {/* THAO TÁC HỆ THỐNG PHÍA DƯỚI */}
         <div className="space-y-2">
-          <button
-            onClick={handleGoHome}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
-          >
-            <Icons.Globe className="w-5 h-5" />
-            <span>Trang bệnh nhân</span>
-          </button>
+          {staffUser.role !== 'DOCTOR' && (
+            <button
+              onClick={handleGoHome}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
+            >
+              <Icons.Globe className="w-5 h-5" />
+              <span>Trang bệnh nhân</span>
+            </button>
+          )}
           
           <button
             onClick={handleLogout}

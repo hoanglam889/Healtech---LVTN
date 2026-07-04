@@ -113,4 +113,27 @@ export class AuthController {
     
     return this.authService.updatePatientAccount(userId, body);
   }
+
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    if (!body.email) throw new BadRequestException('Vui lòng cung cấp email');
+    return this.authService.forgotPassword(body.email);
+  }
+
+  @Public()
+  @Post('verify-reset-otp')
+  async verifyResetOtp(@Body() body: { email: string; otpCode: string }) {
+    if (!body.email || !body.otpCode) throw new BadRequestException('Thiếu thông tin xác thực');
+    return this.authService.verifyResetOtp(body.email, body.otpCode);
+  }
+
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() body: { email: string; otpCode: string; newPassword: string }) {
+    if (!body.email || !body.otpCode || !body.newPassword) {
+      throw new BadRequestException('Thiếu thông tin đặt lại mật khẩu');
+    }
+    return this.authService.resetPassword(body.email, body.otpCode, body.newPassword);
+  }
 }

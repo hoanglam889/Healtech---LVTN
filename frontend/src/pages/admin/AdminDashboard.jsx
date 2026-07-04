@@ -90,7 +90,7 @@ export default function AdminDashboard() {
           </button>
 
           {/* LOGO */}
-          <div className="flex flex-col gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
+          <div className="flex flex-col items-center gap-1 pb-6 border-b border-gray-100/60 cursor-pointer" onClick={handleGoHome}>
             <img 
               src="/images/logo2.png" 
               alt="Healtech Logo" 

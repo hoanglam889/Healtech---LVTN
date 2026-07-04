@@ -24,4 +24,17 @@ export const updatePatientAccount = async (data) => {
   const response = await apiClient.put('/auth/patient-account/update', data);
   return response.data;
 };
+export const forgotPassword = async (email) => {
+  const response = await apiClient.post('/auth/forgot-password', { email });
+  return response.data;
+};
 
+export const verifyResetOtp = async (email, otpCode) => {
+  const response = await apiClient.post('/auth/verify-reset-otp', { email, otpCode });
+  return response.data;
+};
+
+export const resetPassword = async (email, otpCode, newPassword) => {
+  const response = await apiClient.post('/auth/reset-password', { email, otpCode, newPassword });
+  return response.data;
+};

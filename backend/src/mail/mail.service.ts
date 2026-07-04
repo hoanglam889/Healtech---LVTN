@@ -28,6 +28,29 @@ export class MailService {
     });
   }
 
+  // 1.5. Hàm gửi mail OTP Khôi phục mật khẩu
+  async sendForgotPasswordOTP(email: string, otpCode: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Yêu cầu khôi phục mật khẩu Healtech',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+          <div style="background-color: #f59e0b; padding: 16px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h2 style="color: white; margin: 0;">HEALTECH CLINIC</h2>
+          </div>
+          <div style="padding: 24px;">
+            <h3 style="color: #1f2937;">Khôi phục mật khẩu</h3>
+            <p style="color: #4b5563;">Mã xác minh lấy lại mật khẩu của bạn là:</p>
+            <div style="background-color: #f3f4f6; padding: 12px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #f59e0b; border-radius: 6px; margin: 16px 0;">
+              ${otpCode}
+            </div>
+            <p style="color: #6b7280; font-size: 13px;">Vui lòng nhập mã này trên ứng dụng. Mã sẽ hết hạn sau 5 phút. Nếu bạn không yêu cầu đổi mật khẩu, vui lòng bỏ qua email này.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
   // 2. Hàm gửi mail Đặt khám thành công
   async sendBookingSuccess(
     email: string,

@@ -9,6 +9,7 @@ import { DoctorProfiles } from 'src/entities/DoctorProfiles';
 import { Users } from 'src/entities/Users';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class DoctorProfilesService {
@@ -56,7 +57,7 @@ export class DoctorProfilesService {
     const user = new Users();
     user.phone = phone;
     user.email = email;
-    user.passwordHash = password; // Sử dụng mật khẩu thô dạng seed tương tự patient
+    user.passwordHash = await bcrypt.hash(password, 10);
     user.role = 'DOCTOR';
     user.isActive = true;
     const savedUser = await this.usersRepo.save(user);
@@ -141,7 +142,7 @@ export class DoctorProfilesService {
         userUpdate.email = email;
       }
       if (password) {
-        userUpdate.passwordHash = password;
+        userUpdate.passwordHash = await bcrypt.hash(password, 10);
       }
       if (dto.isActive !== undefined) {
         userUpdate.isActive = dto.isActive;
