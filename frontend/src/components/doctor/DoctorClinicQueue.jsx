@@ -164,6 +164,7 @@ export default function DoctorClinicQueue({ staffUser }) {
       setDiagnosis('');
       setNotes('');
       setSelectedServices([]);
+      //socket bắn ra mấy thằng kia cho nó cập nhật
       loadAppointments();
     } catch (err) {
       console.error(err);

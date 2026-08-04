@@ -87,6 +87,15 @@ export default function BillingManager() {
     });
   };
 
+  const getAmountToPay = (appt) => {
+    const total = parseFloat(appt.invoices?.totalAmount || 150000);
+    // Nếu trạng thái khác PENDING thì bệnh nhân chắc chắn đã đóng 150k tiền khám.
+    if (appt.status !== 'PENDING' && total > 150000) {
+      return total - 150000;
+    }
+    return total;
+  };
+
   // Action: Confirm payment via Modal
   const handleConfirmPayment = async (apptId, paymentMethod) => {
     setLoading(true);
@@ -97,7 +106,7 @@ export default function BillingManager() {
         if (!appt || !appt.invoices) throw new Error('Không tìm thấy hóa đơn');
         
         // Gọi API tạo link VNPay
-        const { url } = await createPaymentUrl(appt.invoices.id, appt.invoices.totalAmount);
+        const { url } = await createPaymentUrl(appt.invoices.id, getAmountToPay(appt));
         
         // Chuyển hướng sang VNPay
         window.location.href = url;
@@ -168,7 +177,7 @@ export default function BillingManager() {
             {formatVND(
               appointments
                 .filter(a => a.invoices?.status === 'UNPAID' && a.status !== 'CANCELLED')
-                .reduce((sum, current) => sum + parseFloat(current.invoices?.totalAmount || 0), 0)
+                .reduce((sum, current) => sum + getAmountToPay(current), 0)
             )}
           </span>
         </div>
@@ -252,8 +261,13 @@ export default function BillingManager() {
                   </td>
 
                   {/* CỘT TỔNG CHI PHÍ */}
-                  <td className="px-6 py-4 text-right font-extrabold text-gray-900 text-base">
-                    {formatVND(parseFloat(appt.invoices?.totalAmount || 150000))}
+                  <td className="px-6 py-4 text-right">
+                    <p className="font-extrabold text-gray-900 text-base">
+                      {formatVND(getAmountToPay(appt))}
+                    </p>
+                    {appt.status !== 'PENDING' && getAmountToPay(appt) > 0 && appt.invoices?.status === 'UNPAID' && (
+                      <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1 block">Thu phát sinh</span>
+                    )}
                   </td>
 
                   {/* CỘT ACTION */}

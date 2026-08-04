@@ -16,7 +16,15 @@ export default function PaymentModal({ isOpen, onClose, appointment, onConfirm }
 
   if (!isOpen || !appointment) return null;
 
-  const totalAmount = parseFloat(appointment.invoices?.totalAmount || 150000);
+  const getAmountToPay = (appt) => {
+    const total = parseFloat(appt.invoices?.totalAmount || 150000);
+    if (appt.status !== 'PENDING' && total > 150000) {
+      return total - 150000;
+    }
+    return total;
+  };
+
+  const totalAmount = getAmountToPay(appointment);
   
   // Xử lý chuỗi nhập tiền
   const customerPaid = parseFloat(customerPaidStr.replace(/\D/g, '')) || 0;

@@ -145,6 +145,7 @@ export class AdminService {
       );
     }
 
+    //Lấy tên ca vd chữ "Sáng"
     const shiftVal = dto.shiftId;
     if (typeof shiftVal === 'string' || isNaN(+shiftVal)) {
       const sessionName = shiftVal; // "Sáng", "Chiều" hoặc "Tối"
@@ -152,7 +153,7 @@ export class AdminService {
       const targetShifts = allShifts.filter((s) =>
         s.name?.includes(sessionName),
       );
-
+      //Tạo danh sách các lịch trực
       const savedSchedules: DoctorSchedules[] = [];
       for (const shift of targetShifts) {
         // Tránh tạo trùng lặp lịch trực nếu đã tồn tại
@@ -176,15 +177,17 @@ export class AdminService {
         await this.doctorSchedulesRepo.save(savedSchedules);
       }
       return { success: true };
-    } else {
-      const schedule = new DoctorSchedules();
-      schedule.doctorProfileId = dto.doctorProfileId;
-      schedule.shiftId = +shiftVal;
-      schedule.date = dto.date;
-      schedule.maxPatients = dto.maxPatients || 5;
+    } 
+    
+    // else {
+    //   const schedule = new DoctorSchedules();
+    //   schedule.doctorProfileId = dto.doctorProfileId;
+    //   schedule.shiftId = +shiftVal;
+    //   schedule.date = dto.date;
+    //   schedule.maxPatients = dto.maxPatients || 5;
 
-      return this.doctorSchedulesRepo.save(schedule);
-    }
+    //   return this.doctorSchedulesRepo.save(schedule);
+    // }
   }
 
   // 4. Xóa ca trực bác sĩ (xóa cả buổi trực để đồng bộ)

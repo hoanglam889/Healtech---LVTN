@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ chức năng Healtech</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { curve: 'basis' } // Makes lines smooth
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sơ đồ phân rã chức năng tổng thể (WBS) - Healtech</h2>
+        <div class="mermaid">
+        graph TD
+            Sys[Hệ thống Quản lý Y tế - Healtech]
+            
+            %% Phân hệ 1
+            Sys --> M1[1. Quản lý Tài khoản & Xác thực]
+            M1 --> M1_1[Xác thực Bệnh nhân]
+            M1 --> M1_2[Xác thực Nhân viên/Admin]
+            M1 --> M1_3[Quên / Đặt lại mật khẩu]
+            
+            %% Phân hệ 2
+            Sys --> M2[2. Quản lý Lịch khám]
+            M2 --> M2_1[Đặt lịch khám mới]
+            M2 --> M2_2[Duyệt / Cập nhật / Hủy lịch]
+            M2 --> M2_3[Quản lý Dịch vụ đi kèm]
+            
+            %% Phân hệ 3
+            Sys --> M3[3. Quản lý Danh mục Y tế]
+            M3 --> M3_1[Quản lý Hồ sơ Bác sĩ]
+            M3 --> M3_2[Quản lý Chuyên khoa]
+            M3 --> M3_3[Quản lý Dịch vụ]
+            
+            %% Phân hệ 4
+            Sys --> M4[4. Quản lý Bệnh nhân]
+            M4 --> M4_1[Hồ sơ Bệnh nhân]
+            M4 --> M4_2[Đánh giá, Nhận xét]
+            
+            %% Phân hệ 5
+            Sys --> M5[5. Tài chính & Kế toán]
+            M5 --> M5_1[Xử lý Thanh toán Hóa đơn]
+            M5_1 --> M5_2[Thanh toán trực tuyến VNPay]
+            
+            %% Phân hệ 6
+            Sys --> M6[6. Tiện ích & Hỗ trợ]
+            M6 --> M6_1[Dashboard Thống kê]
+            M6 --> M6_2[Quản lý Bài viết / Tin tức]
+            M6 --> M6_3[Hỗ trợ & Liên hệ]
+            M6 --> M6_4[Tư vấn Sức khỏe AI]
+            
+            %% Style
+            classDef root fill:#4a90e2,stroke:#333,stroke-width:3px,color:#fff,font-weight:bold,font-size:24px;
+            classDef module fill:#f39c12,stroke:#333,stroke-width:2px,color:#fff,font-weight:bold,font-size:20px;
+            classDef feature fill:#ecf0f1,stroke:#bdc3c7,stroke-width:2px,color:#2c3e50,font-weight:bold,font-size:18px;
+            
+            class Sys root;
+            class M1,M2,M3,M4,M5,M6 module;
+            class M1_1,M1_2,M1_3,M2_1,M2_2,M2_3,M3_1,M3_2,M3_3,M4_1,M4_2,M5_1,M5_2,M6_1,M6_2,M6_3,M6_4 feature;
+        </div>
+    </div>
+</body>
+</html>

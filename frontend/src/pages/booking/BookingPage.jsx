@@ -229,6 +229,7 @@ const BookingPage = ({ user, onGoHome }) => {
 
   // Gửi thông tin đặt lịch hẹn lên Backend API
   const handleConfirmBooking = () => {
+    //Kiểm tra đã chọn giờ khám chưa
     if (!selectedTimeSlot) return;
     const startTime = selectedTimeSlot.split(' - ')[0] + ':00'; // Đưa về định dạng "HH:MM:SS"
 
@@ -242,6 +243,8 @@ const BookingPage = ({ user, onGoHome }) => {
 
     setErrorMsg('');
     setSubmitting(true);
+
+    //hàm tạo lịch
     createAppointment(appointmentData)
       .then(async (res) => {
         setSubmitting(false);

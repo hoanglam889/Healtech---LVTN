@@ -41,12 +41,14 @@ export class AppointmentsService {
       paymentMethod,
     } = createDto;
 
+    //khởi tạo transaction
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // 0. Lấy thông tin bệnh nhân và kiểm tra
+      
       const patientData = await queryRunner.manager
         .createQueryBuilder(Patients, 'p')
         .leftJoinAndSelect('p.patientAccount', 'pa')
@@ -271,6 +273,7 @@ export class AppointmentsService {
     return appointment;
   }
 
+  //hàm cập nhật lịch hẹn, tạo hồ sơ bệnh án nếu chưa có
   async update(id: number, updateDto: any) {
     const appointment = await this.findOne(id);
     
@@ -310,84 +313,9 @@ export class AppointmentsService {
 
     // Nếu trạng thái đổi thành WAITING (Lễ tân check-in), tính điểm priority_score cho Smart Queue
     if (appointmentFields.status === 'WAITING') {
-      let isCompleted = appointment.patient?.isCompleted;
-
-      // Fallback tính toán lại cho các hồ sơ cũ chưa được hệ thống tự động cập nhật
-      if (!isCompleted && appointment.patient) {
-        const p = appointment.patient;
-        const birthYear = new Date(p.dob).getFullYear();
-        const currentYear = new Date().getFullYear();
-        const age = currentYear - birthYear;
-
-        isCompleted = !!(
-          p.fullName &&
-          p.dob &&
-          (p.cccd || age < 16) &&
-          p.address &&
-          p.gender &&
-          p.phone
-        );
-      }
-
-      if (!isCompleted) {
-        throw new BadRequestException(
-          'Vui lòng cập nhật đầy đủ thông tin bệnh nhân (SĐT, Địa chỉ, CCCD nếu >= 16 tuổi) trước khi check-in.',
-        );
-      }
-
-      let baseScore = 5; // Mặc định người trưởng thành là 5
-
-      if (appointment.patient && appointment.patient.dob) {
-        const dobDate = new Date(appointment.patient.dob);
-        const today = new Date();
-        let age = today.getFullYear() - dobDate.getFullYear();
-        const m = today.getMonth() - dobDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
-          age--;
-        }
-
-        // Trẻ em < 6 tuổi hoặc Người già > 60 tuổi
-        if (age < 6 || age > 60) {
-          baseScore = 8;
-        }
-      }
-
-      const isBookedViaApp = true; // Khách hàng đặt lịch trước
-      const isPaidInAdvance =
-        appointment.invoices && appointment.invoices.status === 'PAID';
-
-      let lateModifier = 0;
-      if (appointment.appointmentDate && appointment.appointmentTime) {
-        try {
-          const scheduledTimeStr = `${appointment.appointmentDate}T${appointment.appointmentTime}`;
-          const scheduledDateTime = new Date(scheduledTimeStr);
-          const today = new Date();
-
-          if (!isNaN(scheduledDateTime.getTime())) {
-            const diffInMs = today.getTime() - scheduledDateTime.getTime();
-            const diffInMinutes = diffInMs / (1000 * 60);
-
-            // Đến trễ quá 20 phút
-            if (diffInMinutes > 20) {
-              lateModifier = -2;
-            }
-          }
-        } catch (timeErr) {
-          console.error('Lỗi tính toán thời gian đi trễ:', timeErr);
-        }
-      }
-
-      if (updateDto.priorityScore !== undefined) {
-        appointmentFields.priorityScore = updateDto.priorityScore;
-      } else {
-        appointmentFields.priorityScore =
-          baseScore +
-          (isBookedViaApp ? 1 : 0) +
-          (isPaidInAdvance ? 1 : 0) +
-          lateModifier;
-      }
+      appointmentFields.priorityScore = this.calculatePriorityScore(appointment, updateDto);
     }
-
+  
     // Cập nhật lịch khám
     if (appointmentFields && Object.keys(appointmentFields).length > 0) {
       // Kiểm tra xem có đổi ngày/giờ/bác sĩ không
@@ -525,6 +453,84 @@ export class AppointmentsService {
       appointmentId: id 
     });
     return this.findOne(id);
+  }
+
+
+  // Hàm tính điểm ưu tiên cho Smart Queue
+  private calculatePriorityScore(appointment: Appointments, updateDto: any): number {
+    if (updateDto.priorityScore !== undefined) {
+      return updateDto.priorityScore;
+    }
+
+    let isCompleted = appointment.patient?.isCompleted;
+
+    // Fallback tính toán lại cho các hồ sơ cũ chưa được hệ thống tự động cập nhật
+    if (!isCompleted && appointment.patient) {
+      const p = appointment.patient;
+      const birthYear = new Date(p.dob).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - birthYear;
+
+      isCompleted = !!(
+        p.fullName &&
+        p.dob &&
+        (p.cccd || age < 16) &&
+        p.address &&
+        p.gender &&
+        p.phone
+      );
+    }
+
+    if (!isCompleted) {
+      throw new BadRequestException(
+        'Vui lòng cập nhật đầy đủ thông tin bệnh nhân (SĐT, Địa chỉ, CCCD nếu >= 16 tuổi) trước khi check-in.',
+      );
+    }
+
+    let baseScore = 5; // Mặc định người trưởng thành là 5
+
+    if (appointment.patient && appointment.patient.dob) {
+      const dobDate = new Date(appointment.patient.dob);
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+
+      // Trẻ em < 6 tuổi hoặc Người già > 60 tuổi
+      if (age < 6 || age > 60) {
+        baseScore = 8;
+      }
+    }
+
+    const isBookedViaApp = true; // Khách hàng đặt lịch trước(luôn là thế)
+    const isPaidInAdvance =
+      appointment.invoices && appointment.invoices.status === 'PAID';
+
+    let lateModifier = 0;
+    if (appointment.appointmentDate && appointment.appointmentTime) {
+      try {
+        // Tính toán thời gian đi trễ
+        const scheduledTimeStr = `${appointment.appointmentDate}T${appointment.appointmentTime}`;
+        const scheduledDateTime = new Date(scheduledTimeStr);
+        const today = new Date();
+        // Nếu đến trễ quá 20 phút thì trừ điểm
+        if (!isNaN(scheduledDateTime.getTime())) {
+          const diffInMs = today.getTime() - scheduledDateTime.getTime();
+          const diffInMinutes = diffInMs / (1000 * 60);
+
+          // Đến trễ quá 20 phút
+          if (diffInMinutes > 20) {
+            lateModifier = -2;
+          }
+        }
+      } catch (timeErr) {
+        console.error('Lỗi tính toán thời gian đi trễ:', timeErr);
+      }
+    }
+    // Tính điểm 
+    return baseScore + (isBookedViaApp ? 1 : 0) + (isPaidInAdvance ? 1 : 0) + lateModifier;
   }
 
   async remove(id: number, user: any = null) {

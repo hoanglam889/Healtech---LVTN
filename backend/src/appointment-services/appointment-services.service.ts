@@ -6,6 +6,7 @@ import { AppointmentServices } from '../entities/AppointmentServices';
 import { DataSource, Repository } from 'typeorm';
 import { Services } from '../entities/Services';
 import { Invoices } from '../entities/Invoices';
+import { Appointments } from '../entities/Appointments';
 import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
@@ -42,8 +43,24 @@ export class AppointmentServicesService {
     const invoice = await manager.findOne(Invoices, {
       where: { appointmentId },
     });
-    if (invoice) {
+    const appt = await manager.findOne(Appointments, {
+      where: { id: appointmentId },
+    });
+
+    if (invoice && appt) {
       invoice.totalAmount = finalTotal.toString();
+      
+      // Nếu ca khám không phải PENDING (tức là đã thu tiền khám 150k ban đầu)
+      if (appt.status !== 'PENDING') {
+        // Nếu có dịch vụ phát sinh -> Chuyển về UNPAID để thu thêm
+        if (finalTotal > BASE_FEE) {
+          invoice.status = 'UNPAID';
+        } else {
+          // Nếu xóa hết dịch vụ phát sinh -> Chuyển lại về PAID
+          invoice.status = 'PAID';
+        }
+      }
+
       await manager.save(Invoices, invoice);
     }
   }
@@ -63,9 +80,9 @@ export class AppointmentServicesService {
         throw new BadRequestException('Hóa đơn không tồn tại!');
       }
 
-      if (invoice.status === 'PAID' || invoice.status === 'CANCELLED') {
+      if (invoice.status === 'CANCELLED') {
         throw new BadRequestException(
-          'Không thể thêm dịch vụ vào hóa đơn đã Thanh toán hoặc Đã hủy!',
+          'Không thể thêm dịch vụ vào hóa đơn Đã hủy!',
         );
       }
 
@@ -155,10 +172,10 @@ export class AppointmentServicesService {
       });
       if (
         invoice &&
-        (invoice.status === 'PAID' || invoice.status === 'CANCELLED')
+        invoice.status === 'CANCELLED'
       ) {
         throw new BadRequestException(
-          'Không thể sửa số lượng vì Hóa đơn đã Thanh toán hoặc Đã hủy!',
+          'Không thể sửa số lượng vì Hóa đơn Đã hủy!',
         );
       }
 
@@ -205,10 +222,10 @@ export class AppointmentServicesService {
       });
       if (
         invoice &&
-        (invoice.status === 'PAID' || invoice.status === 'CANCELLED')
+        invoice.status === 'CANCELLED'
       ) {
         throw new BadRequestException(
-          'Không thể xóa dịch vụ vì Hóa đơn đã Thanh toán hoặc Đã hủy!',
+          'Không thể xóa dịch vụ vì Hóa đơn Đã hủy!',
         );
       }
 

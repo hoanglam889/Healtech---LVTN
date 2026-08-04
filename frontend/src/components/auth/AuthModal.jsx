@@ -74,7 +74,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     }
   };
 
-  // Handle patient registration
+  // Gửi form đăng ký
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {

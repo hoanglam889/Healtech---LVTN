@@ -81,7 +81,7 @@ import { ScheduleModule } from '@nestjs/schedule';
   controllers: [AppController],
   providers: [
     AppService,
-    {
+    { //khai báo JWT để bảo vệ các route
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
