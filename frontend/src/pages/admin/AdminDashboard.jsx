@@ -204,7 +204,7 @@ export default function AdminDashboard() {
               <span>Quản lý Bài viết</span>
             </button>
 
-            <button
+            {/* <button
               onClick={() => { setActiveTab('services'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                 activeTab === 'services'
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
             >
               <Icons.FileText className="w-5 h-5" />
               <span>Quản lý Dịch vụ</span>
-            </button>
+            </button> */}
 
             <button
               onClick={() => { setActiveTab('ratings'); setIsSidebarOpen(false); }}
