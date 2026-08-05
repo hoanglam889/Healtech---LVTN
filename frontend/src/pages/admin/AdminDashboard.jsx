@@ -8,6 +8,7 @@ import AdminSchedules from '../../components/dashboard/admin/AdminSchedules';
 import AdminTransactions from '../../components/dashboard/admin/AdminTransactions';
 import AdminArticles from '../../components/dashboard/admin/AdminArticles';
 import AdminRatings from '../../components/dashboard/admin/AdminRatings';
+import AdminServices from '../../components/dashboard/admin/AdminServices';
 
 export default function AdminDashboard() {
   // Trạng thái admin đang đăng nhập (lấy từ localStorage độc lập)
@@ -204,6 +205,18 @@ export default function AdminDashboard() {
             </button>
 
             <button
+              onClick={() => { setActiveTab('services'); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                activeTab === 'services'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <Icons.FileText className="w-5 h-5" />
+              <span>Quản lý Dịch vụ</span>
+            </button>
+
+            <button
               onClick={() => { setActiveTab('ratings'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
                 activeTab === 'ratings'
@@ -274,6 +287,8 @@ export default function AdminDashboard() {
           {activeTab === 'transactions' && <AdminTransactions />}
           {activeTab === 'articles' && <AdminArticles />}
           {activeTab === 'ratings' && <AdminRatings />}
+          {/* giấu cô Ý, mai mở cho bất ngờ */}
+          {/* {activeTab === 'services' && <AdminServices />} */}
         </div>
       </main>
 
