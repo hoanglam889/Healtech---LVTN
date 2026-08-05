@@ -82,7 +82,6 @@ export default function BillingManager() {
       // Chỉ hiển thị hóa đơn chưa bị hủy
       if (!appt.invoices) return false;
       if (appt.status === 'CANCELLED') return false;
-      if (appt.status === 'CANCELLED') return false;
       return appt.invoices.status === filterStatus;
     });
   };
