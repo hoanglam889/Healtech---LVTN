@@ -260,7 +260,7 @@ export default function BillingManager() {
                   </td>
 
                   {/* CỘT TỔNG CHI PHÍ */}
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
                     <p className="font-extrabold text-gray-900 text-base">
                       {formatVND(getAmountToPay(appt))}
                     </p>

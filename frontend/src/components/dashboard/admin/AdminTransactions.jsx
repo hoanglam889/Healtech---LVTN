@@ -207,7 +207,7 @@ export default function AdminTransactions() {
                       <td className="py-4 px-6 text-xs font-semibold text-gray-700">
                         {item.appointmentTime?.substring(0, 5) || ''}
                       </td>
-                      <td className="py-4 px-6 font-bold text-gray-900">
+                      <td className="py-4 px-6 font-bold text-gray-900 whitespace-nowrap">
                         {item.invoices?.totalAmount 
                           ? `${parseFloat(item.invoices.totalAmount).toLocaleString('vi-VN')} đ` 
                           : '150.000 đ'}

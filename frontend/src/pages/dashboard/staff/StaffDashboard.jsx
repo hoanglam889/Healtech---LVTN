@@ -6,6 +6,7 @@ import ClinicQueue from '../../../components/reception/ClinicQueue';
 import BillingManager from '../../../components/reception/BillingManager';
 import AppointmentMonitor from '../../../components/reception/AppointmentMonitor';
 import DoctorClinicQueue from '../../../components/doctor/DoctorClinicQueue';
+import { BASE_URL } from '../../../services/apiClient';
 
 export default function StaffDashboard() {
   // Trạng thái nhân viên đang đăng nhập
@@ -92,7 +93,7 @@ export default function StaffDashboard() {
           {/* USER INFO PROFILE CARD */}
           <div className="mt-6 p-4 bg-gray-50/80 rounded-2xl border border-gray-100 flex items-center gap-3">
             {staffUser.avatarUrl ? (
-              <img src={staffUser.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-blue-200" />
+              <img src={`${BASE_URL}${staffUser.avatarUrl.replace(/^\/+/, '')}`} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-blue-200" />
             ) : (
               <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-extrabold border border-blue-200">
                 {staffUser.fullName.charAt(0).toUpperCase()}

@@ -3,6 +3,8 @@ import * as Icons from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 import PatientProfileModal from '../dashboard/patient/PatientProfileModal';
+import PaymentModal from './PaymentModal';
+import { createPaymentUrl } from '../../services/invoiceService';
 
 export default function CheckinPanel() {
   const [searchCode, setSearchCode] = useState('');
@@ -13,6 +15,8 @@ export default function CheckinPanel() {
   const [scanMessage, setScanMessage] = useState('');
   const [notification, setNotification] = useState(null);
   const [isEditingPatient, setIsEditingPatient] = useState(false);
+  //state để hiện trạng thái đóng mở modal thanh toán
+  const [selectedApptToPay, setSelectedApptToPay] = useState(null);
 
   // Load appointments from API
   const loadAppointments = async () => {
@@ -128,6 +132,38 @@ export default function CheckinPanel() {
       console.error('Lỗi check-in:', err);
       const errMsg = err.response?.data?.message || 'Đã xảy ra lỗi khi xác nhận Check-in!';
       showToast(errMsg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Xử lý xác nhận thanh toán trực tiếp tại quầy
+  const handleConfirmPayment = async (apptId, paymentMethod, changeAmount) => {
+    setLoading(true);
+    setSelectedApptToPay(null);
+    try {
+      if (paymentMethod === 'VNPAY') {
+        const { url } = await createPaymentUrl(matchedAppt.invoices.id, 150000);
+        window.location.href = url;
+        return;
+      } else {
+        // Tiền mặt - Vừa thu tiền vừa đổi trạng thái sang WAITING
+        await updateAppointment(apptId, { 
+          invoiceStatus: 'PAID', 
+          paymentMethod,
+          status: 'WAITING' 
+        });
+        showToast('Đã thu tiền và Check-in thành công!', 'success');
+        
+        // Tải lại dữ liệu
+        const data = await getAllAppointments();
+        setAppointments(data || []);
+        const found = data.find(a => a.id === apptId);
+        if (found) setMatchedAppt(found);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Đã xảy ra lỗi khi thu tiền!', 'error');
     } finally {
       setLoading(false);
     }
@@ -330,14 +366,32 @@ export default function CheckinPanel() {
           {/* NÚT XÁC NHẬN HOẶC TRẠNG THÁI HÀNG ĐỢI */}
           <div className="pt-4 border-t border-gray-100 flex justify-end">
             {matchedAppt.status === 'BOOKED' ? (
-              <button
-                onClick={handleCheckinConfirm}
-                disabled={loading}
-                className="bg-blue-600 text-white font-extrabold px-8 py-3.5 rounded-2xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100 cursor-pointer text-sm flex items-center gap-2 animate-bounce"
-              >
-                {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.Check className="w-5 h-5" />}
-                <span>Xác nhận Check-in & Tính điểm Smart Queue</span>
-              </button>
+              //status chưa thanh toán thì khóa ko cho click
+              (matchedAppt.invoices?.status || 'PENDING') === 'UNPAID' ? (
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex items-center gap-3 text-rose-600 font-bold bg-rose-50 border border-rose-100 px-5 py-3 rounded-2xl text-sm">
+                    <Icons.AlertCircle className="w-5 h-5 shrink-0" />
+                    <span>Chưa đóng tiền khám (150.000đ)</span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedApptToPay(matchedAppt)}
+                    disabled={loading}
+                    className="bg-emerald-600 text-white font-extrabold px-6 py-3 rounded-2xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-100 cursor-pointer text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.CreditCard className="w-5 h-5" />}
+                    <span>Thanh toán ngay</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleCheckinConfirm}
+                  disabled={loading}
+                  className="bg-blue-600 text-white font-extrabold px-8 py-3.5 rounded-2xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100 cursor-pointer text-sm flex items-center gap-2 animate-bounce"
+                >
+                  {loading ? <Icons.Loader className="w-5 h-5 animate-spin" /> : <Icons.Check className="w-5 h-5" />}
+                  <span>Xác nhận Check-in & Tính điểm Smart Queue</span>
+                </button>
+              )
             ) : matchedAppt.status === 'WAITING' ? (
               <div className="flex items-center gap-3 text-amber-600 font-bold bg-amber-50 border border-amber-100 px-5 py-3 rounded-2xl text-sm">
                 <Icons.Clock className="w-5 h-5" />
@@ -385,6 +439,14 @@ export default function CheckinPanel() {
           }
           showToast('Cập nhật hồ sơ bệnh nhân thành công!', 'success');
         }}
+      />
+
+      {/* MODAL THANH TOÁN */}
+      <PaymentModal 
+        isOpen={!!selectedApptToPay}
+        onClose={() => setSelectedApptToPay(null)}
+        appointment={selectedApptToPay}
+        onConfirm={handleConfirmPayment}
       />
     </div>
   );

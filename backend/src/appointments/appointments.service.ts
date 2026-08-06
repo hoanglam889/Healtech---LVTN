@@ -128,6 +128,7 @@ export class AppointmentsService {
       appointment.patientId = patientId;
       appointment.doctorProfileId = doctorProfileId;
       appointment.appointmentDate = appointmentDate;
+      appointment.appointmentTime = appointmentTime; // FIX: Bị thiếu từ thứ 7
       if (paymentMethod === 'VNPAY') {
         appointment.status = 'PENDING'; // Chờ thanh toán xong mới đổi thành BOOKED
       } else {
