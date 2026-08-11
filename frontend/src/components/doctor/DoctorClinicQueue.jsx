@@ -13,6 +13,7 @@ export default function DoctorClinicQueue({ staffUser }) {
   
   // Tabs & Cửa sổ trượt (Drawer)
   const [activeTab, setActiveTab] = useState('exam'); // 'history' | 'exam'
+  const [leftTab, setLeftTab] = useState('waiting'); // 'waiting' | 'doing_service'
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Dịch vụ
@@ -116,6 +117,16 @@ export default function DoctorClinicQueue({ staffUser }) {
       });
   };
 
+  // Lấy danh sách bệnh nhân đang đi làm dịch vụ
+  const getDoingServiceList = () => {
+    return appointments
+      .filter(appt => 
+        appt.status === 'DOING_SERVICE' && 
+        (!staffUser?.doctorProfileId || appt.doctorProfile?.id === staffUser.doctorProfileId)
+      )
+      .sort((a, b) => a.id - b.id);
+  };
+
   // Gọi khám
   const handleStartExam = async (appt) => {
     if (examiningPatient) {
@@ -174,6 +185,39 @@ export default function DoctorClinicQueue({ staffUser }) {
     }
   };
 
+  // Chỉ định làm dịch vụ cận lâm sàng
+  const handlePrescribeService = async (e) => {
+    e.preventDefault();
+    if (!examiningPatient) return;
+    
+    if (selectedServices.length === 0) {
+      showToast('Vui lòng kê ít nhất một dịch vụ cận lâm sàng trước khi chỉ định!', 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await updateAppointment(examiningPatient.id, {
+        status: 'DOING_SERVICE',
+        symptoms,
+        diagnosis,
+        notes
+      });
+      showToast(`Đã chuyển ${examiningPatient.patient?.fullName} đi làm dịch vụ!`, 'success');
+      setExaminingPatient(null);
+      setSymptoms('');
+      setDiagnosis('');
+      setNotes('');
+      setSelectedServices([]);
+      loadAppointments();
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi khi chỉ định dịch vụ', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Bỏ qua / Vắng mặt (Đẩy xuống cuối hàng đợi)
   const handleSkipPatient = async () => {
     if (!examiningPatient) return;
@@ -193,6 +237,21 @@ export default function DoctorClinicQueue({ staffUser }) {
     } catch (err) {
       console.error(err);
       showToast('Lỗi khi bỏ qua bệnh nhân', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Xác nhận nhận kết quả cận lâm sàng (Từ DOING_SERVICE -> WAITING)
+  const handleReceiveResult = async (appt) => {
+    setLoading(true);
+    try {
+      await updateAppointment(appt.id, { status: 'WAITING' });
+      showToast(`Đã nhận kết quả của ${appt.patient?.fullName}. Đưa vào ưu tiên!`, 'success');
+      loadAppointments();
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi khi nhận kết quả', 'error');
     } finally {
       setLoading(false);
     }
@@ -248,55 +307,105 @@ export default function DoctorClinicQueue({ staffUser }) {
 
       {/* PANEL TRÁI (COL-4): DANH SÁCH BỆNH NHÂN CHỜ KHÁM */}
       <div className="lg:col-span-4 bg-white rounded-3xl border border-gray-100 shadow-xl flex flex-col overflow-hidden max-h-[calc(100vh-160px)]">
-        <div className="p-6 bg-gray-50/70 border-b border-gray-100 flex justify-between items-center shrink-0">
-          <div>
-            <h3 className="font-extrabold text-gray-900 text-base">Hàng đợi Chờ khám</h3>
-            <span className="text-[10px] text-gray-400 font-bold tracking-wider uppercase mt-1 block">Bấm nút để gọi vào khám</span>
+        <div className="p-4 bg-gray-50/70 border-b border-gray-100 flex flex-col gap-3 shrink-0">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-extrabold text-gray-900 text-base">Quản lý Bệnh nhân</h3>
+              <span className="text-[10px] text-gray-400 font-bold tracking-wider uppercase mt-1 block">Bấm nút để gọi vào khám</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => loadAppointments(true)}
+                disabled={loading}
+                className="p-2 bg-white hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+              >
+                <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          
+          {/* TABS */}
+          <div className="flex bg-gray-200/50 p-1 rounded-xl">
             <button
-              type="button"
-              onClick={() => loadAppointments(true)}
-              disabled={loading}
-              className="p-2 bg-white hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+              onClick={() => setLeftTab('waiting')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${leftTab === 'waiting' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              Chờ khám ({getWaitingList().length})
             </button>
-            <span className="bg-blue-100 text-blue-600 border border-blue-200 font-extrabold px-3 py-1.5 rounded-xl text-xs">
-              {waitingList.length} Đợi
-            </span>
+            <button
+              onClick={() => setLeftTab('doing_service')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${leftTab === 'doing_service' ? 'bg-white text-amber-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Chờ kết quả ({getDoingServiceList().length})
+            </button>
           </div>
         </div>
 
         <div className="p-6 overflow-y-auto flex-1 space-y-3">
-          {waitingList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
-              <Icons.Inbox className="w-10 h-10 text-gray-300 mb-3" />
-              <p className="text-xs font-bold">Hiện không có bệnh nhân chờ!</p>
-            </div>
-          ) : (
-            waitingList.map((appt, idx) => (
-              <div key={appt.id} className="p-4 bg-gray-50/60 hover:bg-gray-50 border border-gray-100 rounded-2xl flex justify-between items-start transition-all">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded-md flex items-center justify-center">
-                      {idx + 1}
-                    </span>
-                    <p className="font-extrabold text-sm text-gray-900 leading-none">{appt.patient?.fullName}</p>
-                  </div>
-                  <span className="text-[10px] text-gray-400 font-semibold mt-2 block">
-                    Hẹn giờ: {appt.appointmentTime?.substring(0, 5)} | SĐT: {appt.patient?.phone}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleStartExam(appt)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-2 rounded-xl transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
-                >
-                  <span>Mời khám</span>
-                  <Icons.ChevronRight className="w-3 h-3" />
-                </button>
+          {leftTab === 'waiting' ? (
+            getWaitingList().length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
+                <Icons.Inbox className="w-10 h-10 text-gray-300 mb-3" />
+                <p className="text-xs font-bold">Hiện không có bệnh nhân chờ!</p>
               </div>
-            ))
+            ) : (
+              getWaitingList().map((appt, idx) => (
+                <div key={appt.id} className={`p-4 bg-gray-50/60 hover:bg-gray-50 border rounded-2xl flex justify-between items-start transition-all ${appt.priorityScore >= 1000 ? 'border-amber-200 bg-amber-50/30' : 'border-gray-100'}`}>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-5 h-5 text-[10px] font-extrabold rounded-md flex items-center justify-center ${appt.priorityScore >= 1000 ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {idx + 1}
+                      </span>
+                      <p className="font-extrabold text-sm text-gray-900 leading-none">{appt.patient?.fullName}</p>
+                      {appt.priorityScore >= 1000 && (
+                        <Icons.Zap className="w-3.5 h-3.5 text-amber-500" />
+                      )}
+                    </div>
+                    <span className="text-[10px] text-gray-400 font-semibold mt-2 block">
+                      Hẹn giờ: {appt.appointmentTime?.substring(0, 5)} | SĐT: {appt.patient?.phone}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleStartExam(appt)}
+                    className={`${appt.priorityScore >= 1000 ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'} text-white text-[10px] font-bold px-3 py-2 rounded-xl transition-colors cursor-pointer flex items-center gap-1 shadow-sm`}
+                  >
+                    <span>Mời khám</span>
+                    <Icons.ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              ))
+            )
+          ) : (
+            getDoingServiceList().length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
+                <Icons.ClipboardList className="w-10 h-10 text-gray-300 mb-3" />
+                <p className="text-xs font-bold">Không có bệnh nhân chờ kết quả!</p>
+              </div>
+            ) : (
+              getDoingServiceList().map((appt, idx) => (
+                <div key={appt.id} className="p-4 bg-gray-50/60 hover:bg-gray-50 border border-gray-100 rounded-2xl flex justify-between items-start transition-all">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 bg-amber-100 text-amber-700 text-[10px] font-extrabold rounded-md flex items-center justify-center">
+                        {idx + 1}
+                      </span>
+                      <p className="font-extrabold text-sm text-gray-900 leading-none">{appt.patient?.fullName}</p>
+                    </div>
+                    <span className="text-[10px] text-gray-400 font-semibold mt-2 block">
+                      Hẹn giờ: {appt.appointmentTime?.substring(0, 5)} | SĐT: {appt.patient?.phone}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleReceiveResult(appt)}
+                    className="bg-amber-100 hover:bg-amber-200 text-amber-700 text-[10px] font-bold px-3 py-2 rounded-xl transition-colors cursor-pointer flex items-center gap-1 shadow-sm border border-amber-200"
+                  >
+                    <Icons.FileCheck className="w-3.5 h-3.5" />
+                    <span>Nhận kết quả</span>
+                  </button>
+                </div>
+              ))
+            )
           )}
         </div>
       </div>
@@ -436,6 +545,16 @@ export default function DoctorClinicQueue({ staffUser }) {
                     >
                       <Icons.UserMinus className="w-5 h-5" />
                       <span>Vắng mặt (Bỏ qua)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={handlePrescribeService}
+                      className="bg-blue-100 text-blue-700 font-extrabold px-6 py-3.5 rounded-2xl hover:bg-blue-200 transition-all shadow-sm flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      <Icons.TestTube className="w-5 h-5" />
+                      <span>Chỉ định đi làm dịch vụ</span>
                     </button>
 
                     <button

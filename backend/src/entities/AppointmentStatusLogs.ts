@@ -22,15 +22,15 @@ export class AppointmentStatusLogs {
   @Column('enum', {
     name: 'old_status',
     nullable: true,
-    enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DONE', 'CANCELLED'],
+    enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DOING_SERVICE', 'DONE', 'CANCELLED'],
   })
-  oldStatus: 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DONE' | 'CANCELLED' | null;
+  oldStatus: 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DOING_SERVICE' | 'DONE' | 'CANCELLED' | null;
 
   @Column('enum', {
     name: 'new_status',
-    enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DONE', 'CANCELLED'],
+    enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DOING_SERVICE', 'DONE', 'CANCELLED'],
   })
-  newStatus: 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DONE' | 'CANCELLED';
+  newStatus: 'BOOKED' | 'WAITING' | 'EXAMINING' | 'DOING_SERVICE' | 'DONE' | 'CANCELLED';
 
   @Column('int', { name: 'changed_by', nullable: true })
   changedBy: number | null;

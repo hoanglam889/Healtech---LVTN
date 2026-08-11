@@ -505,8 +505,8 @@ const BookingPage = ({ user, onGoHome }) => {
                             <p className="text-xs text-gray-400 font-semibold">Kinh nghiệm: <span className="text-emerald-600 font-bold">{doc.experienceYears || 0} năm</span></p>
                             <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500">
                               <span className="text-yellow-400">★</span> 
-                              <span className="font-bold text-gray-700">4.9</span> 
-                              (98 đánh giá)
+                              <span className="font-bold text-gray-700">{doc.average_rating !== undefined ? Number(doc.average_rating).toFixed(1) : '0.0'}</span> 
+                              ({doc.total_reviews || 0} đánh giá)
                               {hasLateAllowedShift(doc, selectedDate) && (
                                 <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 ml-1">
                                   ⚠️ Nhận khám muộn

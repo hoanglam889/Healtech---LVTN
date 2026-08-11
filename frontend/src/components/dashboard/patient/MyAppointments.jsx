@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAppointmentsByUserId, updateAppointment } from '../../../services/appointmentService';
+import { createPaymentUrl } from '../../../services/invoiceService';
 import AppointmentCard from '../AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
 import { socket } from '../../../services/socket';
@@ -52,6 +53,35 @@ const MyAppointments = ({ user, onBookClick }) => {
           console.error('Lỗi khi hủy lịch khám:', err);
           alert('Không thể hủy lịch khám. Vui lòng thử lại sau.');
         });
+    }
+  };
+
+  // Hàm xử lý Thanh toán Dịch vụ
+  const handlePayService = async (appt) => {
+    if (!appt.invoices?.id) {
+      alert('Không tìm thấy thông tin hóa đơn!');
+      return;
+    }
+    try {
+      const { url } = await createPaymentUrl(appt.invoices.id, null, 'patient');
+      window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      alert('Không thể tạo link thanh toán, vui lòng thử lại!');
+    }
+  };
+
+  // Hàm xác nhận đã làm xong dịch vụ
+  const handleCompleteService = async (appt) => {
+    if (window.confirm('Bạn xác nhận đã có kết quả và muốn quay lại phòng khám?')) {
+      try {
+        await updateAppointment(appt.id, { status: 'WAITING' });
+        alert('Đã thông báo cho bác sĩ! Vui lòng quay lại phòng khám và chờ gọi tên.');
+        loadAppointments();
+      } catch (err) {
+        console.error(err);
+        alert('Có lỗi xảy ra, vui lòng thử lại!');
+      }
     }
   };
 
@@ -173,6 +203,8 @@ const MyAppointments = ({ user, onBookClick }) => {
                 formatDate={formatDate}
                 onCancel={apt.status === 'BOOKED' ? handleCancel : null}
                 onRate={setSelectedRatingApt}
+                onPayService={handlePayService}
+                onCompleteService={handleCompleteService}
               />
             ))}
           </div>

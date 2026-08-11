@@ -45,7 +45,7 @@ export class PaymentsService {
     const txnRef = `${invoice.id}_${Date.now()}`;
 
     const urlString = this.vnpayService.buildPaymentUrl({
-      vnp_Amount: totalAmount * 100, // Cần nhân 100 theo yêu cầu của VNPay
+      vnp_Amount: totalAmount, // Thư viện vnpay đã tự động nhân 100 bên trong, không cần nhân tay nữa
       vnp_IpAddr: '127.0.0.1',
       vnp_TxnRef: txnRef,
       vnp_OrderInfo: `Thanh toan hoa don ${invoice.id}`,

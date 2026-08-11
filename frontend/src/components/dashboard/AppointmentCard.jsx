@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
 
-const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate }) => {
+const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate, onPayService, onCompleteService }) => {
   const [showTimeline, setShowTimeline] = useState(false);
   const isDone = apt.status === 'DONE';
   const isUpcoming = apt.status === 'BOOKED';
   const isCancelled = apt.status === 'CANCELLED';
   const isCheckedIn = apt.status === 'WAITING' || apt.status === 'EXAMINING';
   const isPaid = apt.invoices?.status === 'PAID';
+  const isDoingService = apt.status === 'DOING_SERVICE';
   const imageUrl = apt.doctorProfile?.avatarUrl ? `${BASE_URL}${apt.doctorProfile.avatarUrl}` : null;
   const logs = apt.appointmentStatusLogs || [];
 
@@ -61,13 +62,15 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate }) => {
             <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
               isUpcoming 
                 ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-                : isCheckedIn
+                : isDoingService
                   ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                  : isCancelled
-                    ? 'bg-red-50 text-red-600 border border-red-100'
-                    : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                  : isCheckedIn
+                    ? 'bg-purple-50 text-purple-600 border border-purple-100'
+                    : isCancelled
+                      ? 'bg-red-50 text-red-600 border border-red-100'
+                      : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
             }`}>
-              {isUpcoming ? 'Đã đặt' : isCheckedIn ? 'Đã check-in' : isCancelled ? 'Đã hủy' : 'Hoàn thành'}
+              {isUpcoming ? 'Đã đặt' : isDoingService ? 'Đang làm dịch vụ' : isCheckedIn ? 'Đã check-in' : isCancelled ? 'Đã hủy' : 'Hoàn thành'}
             </span>
             {/* Trạng thái hóa đơn */}
             <span className={`text-[10px] font-bold ${isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>
@@ -107,13 +110,34 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate }) => {
               </button>
             )}
             
-            {isUpcoming && (
+            {/* Nút xem QR */}
+            {(isUpcoming || isCheckedIn || isDoingService) && onShowQr && (
               <button 
                 onClick={() => onShowQr(apt.qrCode)}
-                className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/50 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-all cursor-pointer flex items-center gap-1"
+                className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm shadow-blue-200 flex items-center gap-1"
               >
                 <Icons.QrCode className="w-3.5 h-3.5" />
                 <span>Mã QR</span>
+              </button>
+            )}
+
+            {/* Chức năng của DOING_SERVICE */}
+            {isDoingService && onPayService && !isPaid && (
+              <button 
+                onClick={() => onPayService(apt)}
+                className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm shadow-emerald-200 flex items-center gap-1 animate-pulse"
+              >
+                <Icons.CreditCard className="w-3.5 h-3.5" />
+                <span>Thanh toán Dịch vụ</span>
+              </button>
+            )}
+            {isDoingService && onCompleteService && isPaid && (
+              <button 
+                onClick={() => onCompleteService(apt)}
+                className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 px-4 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm shadow-amber-200 flex items-center gap-1 animate-[bounce_2s_infinite]"
+              >
+                <Icons.CheckCircle className="w-3.5 h-3.5" />
+                <span>Đã có kết quả</span>
               </button>
             )}
             

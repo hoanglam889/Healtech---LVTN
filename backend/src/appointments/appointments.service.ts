@@ -69,6 +69,7 @@ export class AppointmentsService {
         .andWhere('ds.date = :date', { date: appointmentDate })
         .andWhere('s.startTime <= :time', { time: appointmentTime })
         .andWhere('s.endTime >= :time', { time: appointmentTime })
+        .setLock('pessimistic_write') // THÊM KHÓA DÒNG Ở ĐÂY CHỐNG RACE CONDITION
         .getOne();
 
       if (!schedule) {
@@ -295,9 +296,11 @@ export class AppointmentsService {
       const newStatus = appointmentFields.status as string;
 
       const validTransitions: Record<string, string[]> = {
+        PENDING: ['BOOKED', 'CANCELLED'],
         BOOKED: ['WAITING', 'CANCELLED'],
         WAITING: ['EXAMINING', 'CANCELLED'],
-        EXAMINING: ['DONE', 'CANCELLED', 'WAITING'],
+        EXAMINING: ['DONE', 'CANCELLED', 'WAITING', 'DOING_SERVICE'],
+        DOING_SERVICE: ['WAITING', 'CANCELLED'],
         DONE: [], // Không được phép thay đổi
         CANCELLED: [], // Không được phép thay đổi
       };
@@ -312,9 +315,13 @@ export class AppointmentsService {
       }
     }
 
-    // Nếu trạng thái đổi thành WAITING (Lễ tân check-in), tính điểm priority_score cho Smart Queue
+    // Nếu trạng thái đổi thành WAITING (Lễ tân check-in hoặc Nộp kết quả), tính điểm priority_score cho Smart Queue
     if (appointmentFields.status === 'WAITING') {
       appointmentFields.priorityScore = this.calculatePriorityScore(appointment, updateDto);
+      // Ưu tiên khám lại: Nếu bệnh nhân từ phòng dịch vụ quay lại
+      if (appointment.status === 'DOING_SERVICE') {
+        appointmentFields.priorityScore += 1000;
+      }
     }
   
     // Cập nhật lịch khám
@@ -346,8 +353,11 @@ export class AppointmentsService {
       // Nếu có đổi trạng thái, ghi log
       if (appointmentFields.status && appointmentFields.status !== appointment.status) {
         let noteStr = 'Cập nhật trạng thái khám';
-        if (appointmentFields.status === 'WAITING') noteStr = 'Bệnh nhân đã check-in (Lễ tân xác nhận)';
+        if (appointmentFields.status === 'WAITING') {
+          noteStr = appointment.status === 'DOING_SERVICE' ? 'Đã nộp kết quả cận lâm sàng (Ưu tiên khám)' : 'Bệnh nhân đã check-in (Lễ tân xác nhận)';
+        }
         else if (appointmentFields.status === 'EXAMINING') noteStr = 'Bác sĩ gọi vào phòng khám';
+        else if (appointmentFields.status === 'DOING_SERVICE') noteStr = 'Bác sĩ chỉ định làm cận lâm sàng';
         else if (appointmentFields.status === 'DONE') noteStr = 'Hoàn tất khám bệnh';
         else if (appointmentFields.status === 'CANCELLED') noteStr = 'Hủy lịch khám';
         
