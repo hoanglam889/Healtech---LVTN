@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th7 04, 2026 lúc 04:53 PM
+-- Thời gian đã tạo: Th8 11, 2026 lúc 10:13 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -34,7 +34,7 @@ CREATE TABLE `appointments` (
   `doctor_profile_id` int(11) DEFAULT NULL,
   `appointment_date` date NOT NULL,
   `appointment_time` time DEFAULT NULL,
-  `status` enum('PENDING','BOOKED','WAITING','EXAMINING','DONE','CANCELLED') DEFAULT 'BOOKED',
+  `status` enum('PENDING','BOOKED','WAITING','EXAMINING','DOING_SERVICE','DONE','CANCELLED') DEFAULT 'BOOKED',
   `priority_score` int(11) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -82,7 +82,31 @@ INSERT INTO `appointments` (`id`, `qr_code`, `patient_id`, `doctor_profile_id`, 
 (49, 'HT-APPT-20260702-44B073F0', 10, 5, '2026-07-02', NULL, 'CANCELLED', 1, '2026-07-02 13:27:32'),
 (50, 'HT-APPT-20260702-0F155901', 10, 5, '2026-07-02', NULL, 'DONE', 6, '2026-07-02 13:31:27'),
 (51, 'HT-APPT-20260702-7EF08ED9', 6, 5, '2026-07-02', NULL, 'DONE', 6, '2026-07-02 13:32:37'),
-(52, 'HT-APPT-20260702-995B6AAB', 6, 5, '2026-07-02', NULL, 'DONE', 6, '2026-07-02 13:52:19');
+(52, 'HT-APPT-20260702-995B6AAB', 6, 5, '2026-07-02', NULL, 'DONE', 6, '2026-07-02 13:52:19'),
+(53, 'HT-APPT-20260720-FB786334', 10, 5, '2026-07-20', NULL, 'DONE', 0, '2026-07-20 10:40:08'),
+(54, 'HT-APPT-20260723-6CCEF4CD', 10, 5, '2026-07-23', NULL, 'DONE', 7, '2026-07-23 01:48:10'),
+(55, 'HT-APPT-20260729-B17D1B8D', 14, 5, '2026-07-29', NULL, 'DONE', 7, '2026-07-29 04:11:14'),
+(56, 'HT-APPT-20260805-32C0A21D', 4, 2, '2026-08-05', NULL, 'DONE', 0, '2026-08-05 07:05:59'),
+(57, 'HT-APPT-20260805-5552E6E9', 14, 2, '2026-08-05', NULL, 'DONE', 0, '2026-08-05 07:07:08'),
+(58, 'HT-APPT-20260805-DF9F9CA0', 10, 5, '2026-08-05', NULL, 'DONE', 6, '2026-08-05 07:09:51'),
+(59, 'HT-APPT-20260805-0BC26F1D', 6, 5, '2026-08-05', NULL, 'DONE', 6, '2026-08-05 07:25:11'),
+(60, 'HT-APPT-20260806-53D31213', 4, 5, '2026-08-06', NULL, 'DONE', 6, '2026-08-06 02:14:24'),
+(61, 'HT-APPT-20260806-58799641', 6, 5, '2026-08-06', '09:00:00', 'DONE', 4, '2026-08-06 02:58:00'),
+(62, 'HT-APPT-20260806-B96758A5', 14, 5, '2026-08-06', '10:00:00', 'CANCELLED', 7, '2026-08-06 03:04:57'),
+(63, 'HT-APPT-20260806-D0D90CC8', 4, 5, '2026-08-06', '10:00:00', 'DONE', 6, '2026-08-06 03:18:50'),
+(64, 'HT-APPT-20260806-177318C6', 14, 5, '2026-08-06', '10:00:00', 'DONE', 5, '2026-08-06 03:19:50'),
+(65, 'HT-APPT-20260806-75C6D0C2', 10, 5, '2026-08-06', '10:00:00', 'DONE', 5, '2026-08-06 03:22:51'),
+(66, 'HT-APPT-20260806-DF77CAD5', 10, 5, '2026-08-06', '10:00:00', 'DONE', 4, '2026-08-06 03:33:09'),
+(67, 'HT-APPT-20260806-0A511AA6', 4, 5, '2026-08-06', '11:00:00', 'CANCELLED', 7, '2026-08-06 03:51:53'),
+(68, 'HT-APPT-20260806-0CB07040', 4, 5, '2026-08-06', '11:00:00', 'DONE', 6, '2026-08-06 04:18:44'),
+(69, 'HT-APPT-20260806-C4F60A58', 4, 5, '2026-08-06', '13:00:00', 'DONE', 0, '2026-08-06 04:20:18'),
+(70, 'HT-APPT-20260806-253054E6', 4, 2, '2026-08-06', '13:00:00', 'CANCELLED', 1, '2026-08-06 04:45:05'),
+(71, 'HT-APPT-20260807-32CD9397', 6, 2, '2026-08-07', '10:00:00', 'DONE', 6, '2026-08-07 03:16:14'),
+(72, 'HT-APPT-20260808-FB14685B', 4, 2, '2026-08-08', '13:00:00', 'DONE', 1007, '2026-08-08 05:17:03'),
+(73, 'HT-APPT-20260808-8C2EB464', 14, 2, '2026-08-08', '13:00:00', 'DONE', 7, '2026-08-08 05:21:34'),
+(74, 'HT-APPT-20260810-8961B4EE', 4, 2, '2026-08-10', '15:00:00', 'DOING_SERVICE', 6, '2026-08-10 08:00:20'),
+(75, 'HT-APPT-20260810-617BA74D', 14, 2, '2026-08-10', '15:00:00', 'CANCELLED', 1, '2026-08-10 08:02:06'),
+(76, 'HT-APPT-20260810-5F5AB0E1', 14, 2, '2026-08-10', '15:00:00', 'EXAMINING', 7, '2026-08-10 08:02:06');
 
 -- --------------------------------------------------------
 
@@ -108,7 +132,16 @@ INSERT INTO `appointment_services` (`id`, `appointment_id`, `service_id`, `quant
 (3, 33, 2, 1, 150000.00, '2026-06-24 08:36:35'),
 (4, 39, 3, 1, 100000.00, '2026-06-26 08:13:36'),
 (5, 36, 4, 1, 50000.00, '2026-06-26 08:42:55'),
-(6, 38, 4, 1, 50000.00, '2026-06-26 08:43:10');
+(6, 38, 4, 1, 50000.00, '2026-06-26 08:43:10'),
+(7, 55, 3, 1, 100000.00, '2026-07-29 04:14:32'),
+(8, 57, 3, 1, 100000.00, '2026-08-05 07:11:32'),
+(9, 66, 2, 1, 150000.00, '2026-08-06 03:33:41'),
+(10, 68, 2, 1, 150000.00, '2026-08-06 04:24:44'),
+(11, 69, 3, 1, 100000.00, '2026-08-06 04:27:20'),
+(12, 69, 4, 1, 50000.00, '2026-08-06 04:27:20'),
+(13, 71, 3, 1, 100000.00, '2026-08-07 03:19:36'),
+(14, 72, 3, 1, 100000.00, '2026-08-08 05:18:00'),
+(15, 74, 2, 1, 150000.00, '2026-08-10 08:30:24');
 
 -- --------------------------------------------------------
 
@@ -119,8 +152,8 @@ INSERT INTO `appointment_services` (`id`, `appointment_id`, `service_id`, `quant
 CREATE TABLE `appointment_status_logs` (
   `id` int(11) NOT NULL,
   `appointment_id` int(11) NOT NULL,
-  `old_status` enum('BOOKED','WAITING','EXAMINING','DONE','CANCELLED') DEFAULT NULL,
-  `new_status` enum('BOOKED','WAITING','EXAMINING','DONE','CANCELLED') NOT NULL,
+  `old_status` enum('BOOKED','WAITING','EXAMINING','DOING_SERVICE','DONE','CANCELLED') DEFAULT NULL,
+  `new_status` enum('BOOKED','WAITING','EXAMINING','DOING_SERVICE','DONE','CANCELLED') NOT NULL,
   `changed_by` int(11) DEFAULT NULL,
   `changed_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `notes` varchar(255) DEFAULT NULL
@@ -132,7 +165,123 @@ CREATE TABLE `appointment_status_logs` (
 
 INSERT INTO `appointment_status_logs` (`id`, `appointment_id`, `old_status`, `new_status`, `changed_by`, `changed_at`, `notes`) VALUES
 (1, 40, 'WAITING', 'WAITING', NULL, '2026-06-26 10:47:14', 'Lễ tân dời lịch khám: Giờ (17:00:00 -> 17:00). Bác sĩ ID (5 -> 1). '),
-(2, 52, NULL, 'BOOKED', NULL, '2026-07-02 13:52:19', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)');
+(2, 52, NULL, 'BOOKED', NULL, '2026-07-02 13:52:19', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(3, 53, NULL, 'BOOKED', NULL, '2026-07-20 10:40:08', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(4, 53, 'BOOKED', 'WAITING', NULL, '2026-07-20 10:40:33', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(5, 53, 'WAITING', 'EXAMINING', NULL, '2026-07-20 10:40:41', 'Bác sĩ gọi vào phòng khám'),
+(6, 53, 'EXAMINING', 'WAITING', NULL, '2026-07-23 01:14:46', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(7, 53, 'WAITING', 'EXAMINING', NULL, '2026-07-23 01:14:49', 'Bác sĩ gọi vào phòng khám'),
+(8, 53, 'EXAMINING', 'DONE', NULL, '2026-07-23 01:14:53', 'Hoàn tất khám bệnh'),
+(9, 54, NULL, '', NULL, '2026-07-23 01:48:10', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(10, 54, '', 'BOOKED', NULL, '2026-07-23 01:49:01', 'Thanh toán thành công qua VNPAY'),
+(11, 54, 'BOOKED', 'WAITING', NULL, '2026-07-23 01:49:56', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(12, 54, 'WAITING', 'EXAMINING', NULL, '2026-07-23 01:50:06', 'Bác sĩ gọi vào phòng khám'),
+(13, 54, 'EXAMINING', 'DONE', NULL, '2026-07-23 01:50:32', 'Hoàn tất khám bệnh'),
+(14, 55, NULL, '', NULL, '2026-07-29 04:11:14', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(15, 55, '', 'BOOKED', NULL, '2026-07-29 04:12:15', 'Thanh toán thành công qua VNPAY'),
+(16, 55, 'BOOKED', 'WAITING', NULL, '2026-07-29 04:13:51', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(17, 55, 'WAITING', 'EXAMINING', NULL, '2026-07-29 04:14:23', 'Bác sĩ gọi vào phòng khám'),
+(18, 55, 'EXAMINING', 'DONE', NULL, '2026-07-29 04:14:43', 'Hoàn tất khám bệnh'),
+(19, 56, NULL, 'BOOKED', NULL, '2026-08-05 07:05:59', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(20, 56, 'BOOKED', 'WAITING', NULL, '2026-08-05 07:06:36', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(21, 57, NULL, '', NULL, '2026-08-05 07:07:08', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(22, 57, '', 'BOOKED', NULL, '2026-08-05 07:08:11', 'Thanh toán thành công qua VNPAY'),
+(23, 57, 'BOOKED', 'WAITING', NULL, '2026-08-05 07:08:34', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(24, 58, NULL, 'BOOKED', NULL, '2026-08-05 07:09:51', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(25, 58, 'BOOKED', 'WAITING', NULL, '2026-08-05 07:10:08', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(26, 57, 'WAITING', 'EXAMINING', NULL, '2026-08-05 07:10:38', 'Bác sĩ gọi vào phòng khám'),
+(27, 57, 'EXAMINING', 'WAITING', NULL, '2026-08-05 07:10:45', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(28, 56, 'WAITING', 'EXAMINING', NULL, '2026-08-05 07:10:48', 'Bác sĩ gọi vào phòng khám'),
+(29, 56, 'EXAMINING', 'WAITING', NULL, '2026-08-05 07:10:56', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(30, 57, 'WAITING', 'EXAMINING', NULL, '2026-08-05 07:11:03', 'Bác sĩ gọi vào phòng khám'),
+(31, 57, 'EXAMINING', 'DONE', NULL, '2026-08-05 07:11:36', 'Hoàn tất khám bệnh'),
+(32, 56, 'WAITING', 'EXAMINING', NULL, '2026-08-05 07:12:09', 'Bác sĩ gọi vào phòng khám'),
+(33, 56, 'EXAMINING', 'DONE', NULL, '2026-08-05 07:12:14', 'Hoàn tất khám bệnh'),
+(34, 58, 'WAITING', 'EXAMINING', NULL, '2026-08-05 07:13:06', 'Bác sĩ gọi vào phòng khám'),
+(35, 58, 'EXAMINING', 'DONE', NULL, '2026-08-05 07:13:17', 'Hoàn tất khám bệnh'),
+(36, 59, NULL, 'BOOKED', NULL, '2026-08-05 07:25:11', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(37, 59, 'BOOKED', 'WAITING', NULL, '2026-08-05 07:26:49', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(38, 59, 'WAITING', 'EXAMINING', NULL, '2026-08-05 08:32:17', 'Bác sĩ gọi vào phòng khám'),
+(39, 59, 'EXAMINING', 'DONE', NULL, '2026-08-05 08:32:22', 'Hoàn tất khám bệnh'),
+(40, 60, NULL, 'BOOKED', NULL, '2026-08-06 02:14:24', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(41, 60, 'BOOKED', 'WAITING', NULL, '2026-08-06 02:15:58', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(42, 60, 'WAITING', 'EXAMINING', NULL, '2026-08-06 02:16:51', 'Bác sĩ gọi vào phòng khám'),
+(43, 60, 'EXAMINING', 'DONE', NULL, '2026-08-06 02:17:08', 'Hoàn tất khám bệnh'),
+(44, 61, NULL, 'BOOKED', NULL, '2026-08-06 02:58:00', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(45, 61, 'BOOKED', 'WAITING', NULL, '2026-08-06 02:58:11', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(46, 61, 'WAITING', 'EXAMINING', NULL, '2026-08-06 02:58:27', 'Bác sĩ gọi vào phòng khám'),
+(47, 61, 'EXAMINING', 'DONE', NULL, '2026-08-06 02:58:36', 'Hoàn tất khám bệnh'),
+(48, 62, NULL, 'BOOKED', NULL, '2026-08-06 03:04:57', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(49, 62, 'BOOKED', 'WAITING', NULL, '2026-08-06 03:05:44', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(50, 63, NULL, 'BOOKED', NULL, '2026-08-06 03:18:50', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(51, 63, 'BOOKED', 'WAITING', NULL, '2026-08-06 03:19:05', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(52, 62, 'WAITING', 'CANCELLED', NULL, '2026-08-06 03:19:39', 'Hủy lịch khám'),
+(53, 64, NULL, 'BOOKED', NULL, '2026-08-06 03:19:50', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(54, 65, NULL, 'BOOKED', NULL, '2026-08-06 03:22:51', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(55, 63, 'WAITING', 'EXAMINING', NULL, '2026-08-06 03:30:42', 'Bác sĩ gọi vào phòng khám'),
+(56, 63, 'EXAMINING', 'DONE', NULL, '2026-08-06 03:31:13', 'Hoàn tất khám bệnh'),
+(57, 65, 'BOOKED', 'WAITING', NULL, '2026-08-06 03:32:24', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(58, 64, 'BOOKED', 'WAITING', NULL, '2026-08-06 03:32:34', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(59, 64, 'WAITING', 'EXAMINING', NULL, '2026-08-06 03:32:46', 'Bác sĩ gọi vào phòng khám'),
+(60, 64, 'EXAMINING', 'DONE', NULL, '2026-08-06 03:32:49', 'Hoàn tất khám bệnh'),
+(61, 65, 'WAITING', 'EXAMINING', NULL, '2026-08-06 03:32:50', 'Bác sĩ gọi vào phòng khám'),
+(62, 65, 'EXAMINING', 'DONE', NULL, '2026-08-06 03:32:53', 'Hoàn tất khám bệnh'),
+(63, 66, NULL, 'BOOKED', NULL, '2026-08-06 03:33:09', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(64, 66, 'BOOKED', 'WAITING', NULL, '2026-08-06 03:33:20', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(65, 66, 'WAITING', 'EXAMINING', NULL, '2026-08-06 03:33:31', 'Bác sĩ gọi vào phòng khám'),
+(66, 66, 'EXAMINING', 'DONE', NULL, '2026-08-06 03:33:42', 'Hoàn tất khám bệnh'),
+(67, 67, NULL, '', NULL, '2026-08-06 03:51:53', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(68, 67, '', 'BOOKED', NULL, '2026-08-06 03:52:34', 'Thanh toán thành công qua VNPAY'),
+(69, 67, 'BOOKED', 'WAITING', NULL, '2026-08-06 03:52:51', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(70, 67, 'WAITING', 'CANCELLED', NULL, '2026-08-06 03:53:14', 'Hủy lịch khám'),
+(71, 68, NULL, 'BOOKED', NULL, '2026-08-06 04:18:44', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(72, 68, 'BOOKED', 'WAITING', NULL, '2026-08-06 04:19:00', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(73, 69, NULL, 'BOOKED', NULL, '2026-08-06 04:20:18', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(74, 69, 'BOOKED', 'WAITING', NULL, '2026-08-06 04:21:06', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(75, 68, 'WAITING', 'EXAMINING', NULL, '2026-08-06 04:21:45', 'Bác sĩ gọi vào phòng khám'),
+(76, 68, 'EXAMINING', 'DONE', NULL, '2026-08-06 04:25:56', 'Hoàn tất khám bệnh'),
+(77, 69, 'WAITING', 'EXAMINING', NULL, '2026-08-06 04:27:14', 'Bác sĩ gọi vào phòng khám'),
+(78, 70, NULL, 'BOOKED', NULL, '2026-08-06 04:45:05', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(79, 69, 'EXAMINING', 'WAITING', NULL, '2026-08-06 04:51:58', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(80, 69, 'WAITING', 'EXAMINING', NULL, '2026-08-07 03:11:45', 'Bác sĩ gọi vào phòng khám'),
+(81, 69, 'EXAMINING', 'DONE', NULL, '2026-08-07 03:11:49', 'Hoàn tất khám bệnh'),
+(82, 71, NULL, 'BOOKED', NULL, '2026-08-07 03:16:14', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(83, 71, 'BOOKED', 'WAITING', NULL, '2026-08-07 03:19:04', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(84, 71, 'WAITING', 'EXAMINING', NULL, '2026-08-07 03:19:19', 'Bác sĩ gọi vào phòng khám'),
+(85, 71, 'EXAMINING', 'DONE', NULL, '2026-08-07 03:23:14', 'Hoàn tất khám bệnh'),
+(86, 70, 'BOOKED', 'CANCELLED', NULL, '2026-08-08 05:16:22', 'Hủy lịch khám'),
+(87, 72, NULL, 'BOOKED', NULL, '2026-08-08 05:17:03', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(88, 72, 'BOOKED', 'WAITING', NULL, '2026-08-08 05:17:45', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(89, 72, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:17:51', 'Bác sĩ gọi vào phòng khám'),
+(90, 72, 'EXAMINING', 'DOING_SERVICE', NULL, '2026-08-08 05:18:11', 'Bác sĩ chỉ định làm cận lâm sàng'),
+(91, 72, 'DOING_SERVICE', 'WAITING', NULL, '2026-08-08 05:18:15', 'Đã nộp kết quả cận lâm sàng (Ưu tiên khám)'),
+(92, 72, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:18:26', 'Bác sĩ gọi vào phòng khám'),
+(93, 72, 'EXAMINING', 'WAITING', NULL, '2026-08-08 05:18:27', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(94, 72, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:18:31', 'Bác sĩ gọi vào phòng khám'),
+(95, 72, 'EXAMINING', 'DOING_SERVICE', NULL, '2026-08-08 05:18:33', 'Bác sĩ chỉ định làm cận lâm sàng'),
+(96, 72, 'DOING_SERVICE', 'WAITING', NULL, '2026-08-08 05:19:36', 'Đã nộp kết quả cận lâm sàng (Ưu tiên khám)'),
+(97, 72, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:19:38', 'Bác sĩ gọi vào phòng khám'),
+(98, 72, 'EXAMINING', 'WAITING', NULL, '2026-08-08 05:19:38', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(99, 72, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:19:46', 'Bác sĩ gọi vào phòng khám'),
+(100, 72, 'EXAMINING', 'DOING_SERVICE', NULL, '2026-08-08 05:19:47', 'Bác sĩ chỉ định làm cận lâm sàng'),
+(101, 72, 'DOING_SERVICE', 'WAITING', NULL, '2026-08-08 05:21:12', 'Đã nộp kết quả cận lâm sàng (Ưu tiên khám)'),
+(102, 73, NULL, '', NULL, '2026-08-08 05:21:34', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(103, 73, '', 'BOOKED', NULL, '2026-08-08 05:22:22', 'Thanh toán thành công qua VNPAY'),
+(104, 73, 'BOOKED', 'WAITING', NULL, '2026-08-08 05:22:34', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(105, 72, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:22:50', 'Bác sĩ gọi vào phòng khám'),
+(106, 72, 'EXAMINING', 'DONE', NULL, '2026-08-08 05:23:13', 'Hoàn tất khám bệnh'),
+(107, 73, 'WAITING', 'EXAMINING', NULL, '2026-08-08 05:24:04', 'Bác sĩ gọi vào phòng khám'),
+(108, 73, 'EXAMINING', 'DONE', NULL, '2026-08-08 05:24:10', 'Hoàn tất khám bệnh'),
+(109, 74, NULL, 'BOOKED', NULL, '2026-08-10 08:00:20', 'Bệnh nhân tạo lịch hẹn (Tiền mặt)'),
+(110, 74, 'BOOKED', 'WAITING', NULL, '2026-08-10 08:00:45', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(111, 74, 'WAITING', 'EXAMINING', NULL, '2026-08-10 08:01:50', 'Bác sĩ gọi vào phòng khám'),
+(112, 75, NULL, '', NULL, '2026-08-10 08:02:06', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(113, 76, NULL, '', NULL, '2026-08-10 08:02:06', 'Bệnh nhân tạo lịch hẹn (Đợi thanh toán)'),
+(114, 76, '', 'BOOKED', NULL, '2026-08-10 08:03:07', 'Thanh toán thành công qua VNPAY'),
+(115, 76, 'BOOKED', 'WAITING', NULL, '2026-08-10 08:03:42', 'Bệnh nhân đã check-in (Lễ tân xác nhận)'),
+(116, 75, '', 'CANCELLED', NULL, '2026-08-10 08:20:00', 'Hệ thống tự động hủy do quá hạn chờ thanh toán VNPAY'),
+(117, 74, 'EXAMINING', 'DOING_SERVICE', NULL, '2026-08-10 08:30:25', 'Bác sĩ chỉ định làm cận lâm sàng'),
+(118, 76, 'WAITING', 'EXAMINING', NULL, '2026-08-10 08:30:32', 'Bác sĩ gọi vào phòng khám');
 
 -- --------------------------------------------------------
 
@@ -148,19 +297,19 @@ CREATE TABLE `articles` (
   `image_url` text DEFAULT NULL,
   `author_name` varchar(100) DEFAULT NULL,
   `is_published` tinyint(4) NOT NULL DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `user_id` int(11) DEFAULT NULL
+  `user_id` int(11) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `updated_at` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `articles`
 --
 
-INSERT INTO `articles` (`id`, `title`, `category`, `content`, `image_url`, `author_name`, `is_published`, `created_at`, `updated_at`, `user_id`) VALUES
-(3, 'Bệnh Sốt rét và cách phòng tránh', 'Phòng bệnh hơn chữa bệnh', 'Thưa quý vị và bà con!\n\nBệnh sốt rét là bệnh truyền nhiễm do ký sinh trùng sốt rét ký sinh trong máu người bệnh gây nên. Bệnh lây chủ yếu do muỗi A-nô-phen truyền từ người bệnh sang người lành thông qua vết muỗi đốt. Mọi người đều có thể mắc bệnh nếu sống hoặc có qua lại nơi có sốt rét lưu hành và bị muỗi A-nô-phen đốt.\n\n\n\nTrung tâm Kiểm soát bệnh tật Hà Tĩnh tổ chức bắt và định loại muỗi sốt rét tại tổ 4, xã Vũ Quang\n\nBệnh sốt rét gây thiếu máu cho người bệnh. Trẻ em bị mắc bệnh sốt rét cơ thể còi cọc chậm lớn, kém thông minh. Phụ nữ có thai mắc bệnh sốt rét dễ gây sảy thai, thai chết lưu, đẻ non hoặc khi sinh dễ mắc phải những tai biến. Phụ nữ khi mang thai nhiễm ký sinh trùng sốt rét, có thể sinh con bị lây nhiễm bệnh sốt rét từ mẹ …\n\nCách phòng chống bệnh sốt rét:\n\nHiện nay vẫn chưa có vắc xin phòng bệnh Sốt rét, vì vậy biện pháp diệt muỗi, lăng quăng/bọ gậy và phòng chống muỗi đốt vẫn là biện pháp chủ yếu và hiệu quả nhất. Để không mắc bệnh sốt rét người dân cần thực hiện các biện pháp sau:\n\n- Thường xuyên ngủ màn, ngay cả ban ngày và màn cần được tẩm hóa chất diệt muỗi. Đây là biện pháp tốt nhất để phòng bệnh Sốt rét.\n\n- Buổi tối khi làm việc phải mặc quần áo dài tay để phòng muỗi đốt, có thể sử dụng nhang xua muỗi.\n\n- Vệ sinh môi trường xung quanh nơi ở, loại bỏ những nơi trú ẩn của muỗi như phát quang bụi rậm, khơi thông cống rãnh, sắp xếp vật dụng trong nhà ngăn nắp, sạch sẽ, quần áo phải được xếp gọn gàng không nên treo hay móc quần áo trên tường làm chỗ cho muỗi đậu, vv...\n\n- Những người đi làm ở vùng rừng núi cần mang theo màn để ngủ, trước khi đi nên đến cơ sở y tế để được tư vấn phòng chống bệnh sốt rét và khi trở về từ vùng có sốt rét lưu hành nên đến cơ sở y tế để được khám, xét nghiệm, nếu có bị sốt rét sẽ được điều trị kịp thời.\n\n- Khi thấy các triệu chứng của bệnh sốt rét như: Đau đầu, mệt mỏi, đau các cơ, rối loạn tiêu hóa, rét run, sốt nóng sau đó vã mồ hôi hoặc cảm thấy ớn lạnh, gai rét, người bệnh cần đến ngay cơ sở y tế gần nhất để được xét nghiệm, chẩn đoán và điều trị kịp thời..\n\nTrung tâm Kiểm soát bệnh tật Hà Tĩnh', 'public/images/img-1782811027022-4950361.jpg', 'Bác sĩ Phan Huỳnh Hoàng Lâm', 1, '2026-06-30 09:10:46', '2026-06-30 09:18:28', NULL),
-(4, 'Các yếu tố nguy cơ đột quỵ và cách kiểm soát không dùng thuốc', 'Bảo vệ bản thân', 'Đột quỵ là một trong những nguyên nhân hàng đầu gây tử vong và tàn tật. Nhiều yếu tố nguy cơ như tăng huyết áp, xơ vữa động mạch, hút thuốc hay lối sống ít vận động có thể được kiểm soát, giúp giảm đáng kể nguy cơ đột quỵ nếu được phòng ngừa sớm.\n\nĐột quỵ xảy ra khi nào?\n\nĐột quỵ xảy ra khi dòng máu cung cấp oxy và dưỡng chất cho não bị gián đoạn hoặc khi mạch máu não bị vỡ. Khi não không được cung cấp đủ oxy, các tế bào thần kinh có thể tổn thương hoặc chết chỉ sau vài phút. Về cơ bản, đột quỵ được chia thành hai loại chính:\n\nĐột quỵ thiếu máu cục bộ: Xảy ra khi mạch máu cung cấp cho não bị tắc nghẽn bởi cục máu đông hoặc mảng xơ vữa. Đây là dạng phổ biến nhất, chiếm khoảng 85–87% các trường hợp.\n\nĐột quỵ xuất huyết: Xảy ra khi mạch máu trong não bị vỡ, gây chảy máu trong não hoặc quanh não.\n\nMặc dù cơ chế khác nhau, hai loại đột quỵ này lại có nhiều yếu tố nguy cơ chung. Một số yếu tố không thể thay đổi như tuổi tác hoặc yếu tố di truyền, nhưng nhiều yếu tố khác hoàn toàn có thể kiểm soát được thông qua lối sống và chăm sóc sức khỏe.\n\nNguyên nhân gây đột quỵ thiếu máu cục bộ\n\nĐột quỵ thiếu máu cục bộ xảy ra khi một mạch máu cung cấp máu cho não bị tắc nghẽn đột ngột. Sự tắc nghẽn này có thể do cục máu đông hình thành ngay tại mạch máu hoặc do cục máu đông từ nơi khác trong cơ thể di chuyển lên não.\n\nMột số nguyên nhân phổ biến gồm:\n\nRung nhĩ: Rung nhĩ là một dạng rối loạn nhịp tim khiến tim đập nhanh và không đều. Khi tim không bơm máu hiệu quả, máu có thể ứ đọng trong buồng tim và hình thành cục máu đông. Nếu cục máu đông này di chuyển lên não, nó có thể gây tắc mạch và dẫn đến đột quỵ.\n\nXơ vữa động mạch: Xơ vữa động mạch xảy ra khi cholesterol, chất béo và các chất khác tích tụ trên thành động mạch, tạo thành các mảng xơ vữa. Khi các mảng này phát triển lớn hoặc bị vỡ, chúng có thể gây tắc nghẽn mạch máu hoặc tạo cục máu đông, làm giảm lưu lượng máu đến não.\n\nRối loạn đông máu: Một số bệnh lý khiến máu dễ hình thành cục đông bất thường. Ví dụ như huyết khối tĩnh mạch sâu hoặc các rối loạn đông máu do di truyền. Những cục máu đông này có thể di chuyển trong hệ tuần hoàn và gây tắc mạch não.\n\nNhiễm trùng nặng: Một số tình trạng nhiễm trùng nặng như nhiễm khuẩn huyết hoặc viêm màng não có thể làm tăng nguy cơ hình thành cục máu đông trong cơ thể, từ đó làm tăng nguy cơ đột quỵ.\n\nNguyên nhân của đột quỵ xuất huyết\n\nĐột quỵ xuất huyết xảy ra khi mạch máu trong não bị suy yếu và vỡ, khiến máu tràn vào mô não và gây tổn thương. Các nguyên nhân thường gặp bao gồm:\n\nTăng huyết áp kéo dài: Tăng huyết áp là nguyên nhân phổ biến nhất gây đột quỵ xuất huyết. Khi huyết áp cao kéo dài, thành mạch máu bị tổn thương và yếu dần, làm tăng nguy cơ vỡ mạch.\n\nPhình động mạch não: Phình động mạch là tình trạng thành mạch máu bị phồng lên do yếu. Nếu túi phình bị vỡ, máu sẽ tràn vào não và gây xuất huyết.\n\nDị dạng mạch máu: Một số người có dị dạng động tĩnh mạch bẩm sinh, khiến cấu trúc mạch máu bất thường và dễ vỡ.\n\nChấn thương sọ não: Các chấn thương vùng đầu, đặc biệt do tai nạn giao thông hoặc tai nạn sinh hoạt, có thể làm tổn thương mạch máu não và gây xuất huyết.\n\nMột số bệnh lý khác: Các bệnh như xơ gan, rối loạn đông máu hoặc khối u trong não cũng có thể làm tăng nguy cơ chảy máu trong não.\n\nCác yếu tố nguy cơ đột quỵ không thể thay đổi\n\nMột số yếu tố nguy cơ đột quỵ liên quan đến đặc điểm sinh học hoặc di truyền nên không thể thay đổi:\n\nTuổi tác: Nguy cơ đột quỵ tăng dần theo tuổi. Phần lớn các trường hợp xảy ra ở người từ 65 tuổi trở lên, mặc dù bệnh vẫn có thể xảy ra ở người trẻ.\n\nTiền sử gia đình: Nếu trong gia đình có người từng bị đột quỵ hoặc mắc các bệnh tim mạch, nguy cơ của bạn cũng có thể cao hơn.\n\nTiền sử đột quỵ hoặc cơn thiếu máu não thoáng qua: Cơn thiếu máu não thoáng qua (TIA), còn gọi là \"đột quỵ nhẹ\", là dấu hiệu cảnh báo nguy cơ đột quỵ thực sự trong tương lai nếu không được kiểm soát.\n\nNhững yếu tố nguy cơ có thể thay đổi\n\nPhần lớn các yếu tố nguy cơ đột quỵ có liên quan đến lối sống và tình trạng sức khỏe. Việc kiểm soát tốt các yếu tố này có thể giúp giảm đáng kể nguy cơ mắc bệnh.\n\nTăng huyết áp: Đây là yếu tố nguy cơ quan trọng nhất của đột quỵ. Huyết áp cao làm tổn thương thành mạch máu và thúc đẩy hình thành mảng xơ vữa.\n\nĐái tháo đường: Lượng đường trong máu cao kéo dài có thể làm tổn thương mạch máu và tăng nguy cơ xơ vữa động mạch.\n\nRối loạn mỡ máu: Cholesterol LDL cao và triglyceride tăng có thể dẫn đến tích tụ mảng bám trong động mạch.\n\nHút thuốc lá: Thuốc lá làm tăng huyết áp, giảm lượng oxy trong máu và thúc đẩy quá trình xơ vữa động mạch. Người hút thuốc có nguy cơ đột quỵ cao gấp khoảng hai lần so với người không hút.\n\nBéo phì và ít vận động: Thừa cân và lối sống ít vận động làm tăng nguy cơ tăng huyết áp, đái tháo đường và rối loạn mỡ máu – những yếu tố liên quan trực tiếp đến đột quỵ.\n\nLạm dụng rượu bia: Uống quá nhiều rượu có thể làm tăng huyết áp và gây rối loạn nhịp tim, từ đó làm tăng nguy cơ đột quỵ.\n\nCách giảm nguy cơ đột quỵ bằng thay đổi lối sống\n\nPhòng ngừa đột quỵ cần kết hợp giữa kiểm soát bệnh lý và xây dựng lối sống lành mạnh. Trong đó, nhiều biện pháp không dùng thuốc có thể giúp giảm nguy cơ đáng kể:\n\nDuy trì chế độ ăn lành mạnh: Nên ưu tiên thực phẩm giàu chất xơ như rau xanh, trái cây, ngũ cốc nguyên hạt và các loại đậu; hạn chế chất béo bão hòa, thực phẩm chế biến sẵn và giảm lượng muối trong khẩu phần để hỗ trợ kiểm soát huyết áp.\n\nTập thể dục thường xuyên: Hoạt động thể chất giúp cải thiện tuần hoàn máu, kiểm soát cân nặng và giảm nguy cơ bệnh tim mạch. Người trưởng thành nên duy trì ít nhất 150 phút hoạt động thể lực cường độ trung bình mỗi tuần, như đi bộ nhanh, đạp xe hoặc bơi lội.\n\nDuy trì cân nặng hợp lý: Giữ chỉ số khối cơ thể trong mức khỏe mạnh giúp giảm nguy cơ tăng huyết áp, đái tháo đường và rối loạn mỡ máu.\n\nBỏ thuốc lá: Ngừng hút thuốc là một trong những biện pháp quan trọng nhất để giảm nguy cơ đột quỵ và bệnh tim mạch.\n\nHạn chế rượu bia: Nên hạn chế lượng rượu tiêu thụ hằng ngày và tránh uống quá mức.\n\nKhám sức khỏe định kỳ: Kiểm tra huyết áp, đường huyết và mỡ máu thường xuyên giúp phát hiện sớm các yếu tố nguy cơ để có biện pháp kiểm soát kịp thời.', '/public/images/img-1782811566914-9369032.jpg', 'Bác sĩ Bùi Cao Mỹ Ái', 1, '2026-06-30 09:26:16', '2026-06-30 09:26:16', NULL),
-(5, '9 bệnh lây qua đường tình dục phổ biến nhất', 'Phòng bệnh hơn chữa bệnh', 'Các bệnh lây qua đường tình dục có thể lây nhiễm qua bất kỳ hình thức quan hệ tình dục nào kể cả quan hệ qua đường miệng hay qua hậu môn. Những bệnh lây qua đường tình dục thường rất khó chữa và gây hậu quả lâu dài. Thậm chí, nếu không được điều trị đúng cách bệnh có thể tái phát đi tái phát lại nhiều lần hoặc chuyển sang giai đoạn mãn tính.\n\nCác bệnh lây qua đường tình dục có thể xảy ra ở bất kỳ đối tượng nào, không phân biệt độ tuổi, giới tính. Trong đó, nam nữ trong độ tuổi sinh sản là nhóm đối tượng có nguy cơ nhiễm bệnh cao nhất. Dưới đây là tổng hợp 9 bệnh lây qua đường tình dục có tỷ lệ người mắc lớn nhất hiện nay bạn cần lưu ý:\n\n1. Bệnh lậu\nBệnh lậu gây ra bởi vi khuẩn lậu có tên khoa học là Neisseria gonorrhoeae. Ở giai đoạn đầu bệnh lậu hầu như không có biểu hiện cụ thể nào nên rất khó để nhận biết. Khi bệnh đã phát triển nặng có thể làm xuất hiện những triệu chứng như: tiểu đau buốt, dương vật chảy mủ, sưng đau tinh hoàn.\n\nỞ nữ giới, bệnh lậu thường không có triệu chứng điển hình nào nên dễ bị nhầm lẫn với viêm nhiễm âm đạo thông thường. Do đó, nếu thấy dịch tiết âm đạo tăng bất thường, xuất huyết âm đạo giữa chu kỳ, tiểu nhắt...chị em cần lưu ý vì đây có thể là triệu chứng cảnh báo bệnh lậu.\n\n2. Bệnh giang mai\nVi khuẩn giang mai có tên khoa học là Treponema pallidum. Nếu không được phát hiện và điều trị sớm bệnh giang mai có thể trải qua 3 giai đoạn và 1 giai đoạn tiềm ẩn.\n\nSau từ 10 - 90 ngày từ khi tiếp xúc với mầm bệnh, trên cơ thể người bệnh sẽ xuất hiện những vết loét không đau gọi là săng giang mai. Săng giang mai có thể tự biến mất sau 3 - 6 tuần mà không cần điều trị nên người bệnh rất dễ bỏ qua. Bệnh giang mai có thể gây rất nhiều biến chứng nguy hiểm, làm tổn thương nhiều cơ quan trong cơ thể như: khớp, da, thận, não, tai, mắt...thậm chí đe dọa đến tính mạng.\n\n3. Bệnh viêm âm đạo\nCác nguyên nhân hay gặp là Vi khuẩn, Trichomonas ( Trùng roi ), và nấm candida.\n\nBệnh viêm âm đạo do nhiễm Trichomonas và vi khuẩn là một trong số những bệnh lây qua đường tình dục phổ biến nhất hiện nay. Khuẩn Trichomonas là một loại ký sinh trùng có thể tồn tại trong nhiều môi trường khác nhau và rất dễ lây nhiễm. Nữ giới khi mắc bệnh viêm âm đạo sẽ xuất hiện những triệu chứng như: khí hư ra nhiều, mùi hôi bất thường, khí hư lẫn các bọt khí, có màu xanh, xám hoặc vàng xanh. Có thể ngứa ở âm đạo. Ngoài ra, khám trong thấy bề mặt thành âm đạo dễ bị sưng đỏ, phù nề.\n\nBệnh viêm âm đạo do nhiễm vi khuẩn là một trong số những bệnh lây qua đường tình dục phổ biến nhất hiện nay. Có thể nhiễm 1 loại vi khuẩn, hay nhiều loại vi khuẩn cùng lúc. Nữ giới khi mắc bệnh viêm âm đạo sẽ xuất hiện những triệu chứng như: khí hư ra nhiều, mùi hôi bất thường, khí hư có màu vàng đục hay xám. Ngoài ra, khám trong thấy bề mặt thành âm đạo dễ bị sưng đỏ, phù nề.\n\nBệnh viêm âm đạo do nhiễm nấm Candida là một trong số những bệnh lây qua đường tình dục phổ biến nhất hiện nay. Nữ giới khi mắc bệnh viêm âm đạo do nấm candida sẽ xuất hiện những triệu chứng như: khí hư màu trắng, vón cục, như váng sữa và kèm ngứa âm họ âm đạo. Ngoài ra, khám trong thấy bề mặt thành âm đạo dễ bị sưng đỏ và có dịch như váng sữa đóng ở thành âm đạo.\n\n4. Bệnh HIV\nHIV là căn bệnh thế kỷ và cũng là một trong những bệnh lây qua đường tình dục nguy hiểm nhất hiện nay. Virus HIV gây suy giảm miễn dịch của cơ thể và có thể lây nhiễm qua nhiều con đường khác nhau như: quan hệ tình dục, lây qua truyền máu, lây từ mẹ sang con...\n\nChỉ một số ít các trường hợp nhiễm HIV xuất hiện những triệu chứng giống với cảm cúm thông thường kéo dài từ 2 - 4 tuần. Do đó, người bệnh thường không biết mình bị nhiễm HIV nếu không chủ động đi xét nghiệm.\n\n5. Bệnh Herpes sinh dục\nGiống với nhiều bệnh lây qua đường tình dục khác, Herpes sinh dục vẫn có thể lây nhiễm ngay cả khi không gây có triệu chứng bệnh. Do đó, nếu thấy trên cơ thể xuất hiện những mụn nước, nhất là quanh cơ quan sinh dục, hậu môn, sốt nhẹ, sưng đau hạch bạn cần hết sức lưu ý.\n\n6. Bệnh viêm cổ tử cung\nViêm cổ tử cung do nhiễm C. Trachomatis là bệnh rất dễ lây qua đường tình dục. Khi nhiễm bệnh, nữ giới có thể xuất hiện những triệu chứng như: khí hư ra nhiều, chảy máu âm đạo bất thường nhất là sau khi quan hệ.\n\n7. Bệnh sùi mào gà\nĐây là một bệnh lây qua đường tình dục rất phổ biến gây ra do virus HPV. Sùi mào gà có thể lây qua quan hệ tình dục, lây từ mẹ sang con, lây qua đường máu hay lây do tiếp xúc trực tiếp với vết thương hở.\n\nKhi bị nhiễm sùi mào gà, người bệnh sẽ xuất hiện những nốt sần sùi, màu hồng nhạt ở nhiều vị trí như: cơ quan sinh dục nam nữ, cổ tử cung, lỗ tiểu, tầng sinh môn, hậu môn, mắt, mũi, miệng...Phụ nữ mang thai nếu bị nhiễm sùi mào gà có thể lây sang con và ảnh hưởng đến quá trình sinh sản.\n\n8. Bệnh viêm gan siêu vi B\nĐây cũng là một trong những bệnh có thể lây qua đường tình dục. Ngoài ra, viêm gan siêu vi B còn lây qua đường máu và lây từ mẹ sang con. Bệnh có thể không gây triệu chứng nào đáng kể nhưng lại đe dọa đến sức khỏe và tính mạng.\n\nDo đó, nếu thấy xuất hiện triệu chứng bất thường như: vàng da, vàng mắt, nước tiểu sẫm màu, sốt, mệt mỏi, buồn nôn, ăn uống không ngon miệng...bạn nên đi khám sớm để có hướng điều trị đúng cách.\n\n9. Bệnh Chlamydia\nBệnh gây ra bởi một loại vi khuẩn có tên là Chlamydia trachomatis. Bệnh diễn biến khá thầm lặng nên rất khó nhận biết. Nữ giới có thể phát hiện bệnh thông qua các triệu chứng như: khí hư ra nhiều bất thường, tiểu nhắt, đau bụng, đau lưng, buồn nôn, nôn, đau khi quan hệ, chảy máu sau quan hệ...\n\nBệnh Chlamydia nếu không chữa trị sớm có thể gây vô sinh ở nữ giới và nhiều biến chứng nguy hiểm khác.', '/public/images/img-1782997531747-780097016.jpg', 'bác sĩ Phan Huỳnh Hoàng Lâm', 1, '2026-07-02 13:05:57', '2026-07-02 13:05:57', 9);
+INSERT INTO `articles` (`id`, `title`, `category`, `content`, `image_url`, `author_name`, `is_published`, `user_id`, `created_at`, `updated_at`) VALUES
+(3, 'Bệnh Sốt rét và cách phòng tránh', 'Phòng bệnh hơn chữa bệnh', 'Thưa quý vị và bà con!\n\nBệnh sốt rét là bệnh truyền nhiễm do ký sinh trùng sốt rét ký sinh trong máu người bệnh gây nên. Bệnh lây chủ yếu do muỗi A-nô-phen truyền từ người bệnh sang người lành thông qua vết muỗi đốt. Mọi người đều có thể mắc bệnh nếu sống hoặc có qua lại nơi có sốt rét lưu hành và bị muỗi A-nô-phen đốt.\n\n\n\nTrung tâm Kiểm soát bệnh tật Hà Tĩnh tổ chức bắt và định loại muỗi sốt rét tại tổ 4, xã Vũ Quang\n\nBệnh sốt rét gây thiếu máu cho người bệnh. Trẻ em bị mắc bệnh sốt rét cơ thể còi cọc chậm lớn, kém thông minh. Phụ nữ có thai mắc bệnh sốt rét dễ gây sảy thai, thai chết lưu, đẻ non hoặc khi sinh dễ mắc phải những tai biến. Phụ nữ khi mang thai nhiễm ký sinh trùng sốt rét, có thể sinh con bị lây nhiễm bệnh sốt rét từ mẹ …\n\nCách phòng chống bệnh sốt rét:\n\nHiện nay vẫn chưa có vắc xin phòng bệnh Sốt rét, vì vậy biện pháp diệt muỗi, lăng quăng/bọ gậy và phòng chống muỗi đốt vẫn là biện pháp chủ yếu và hiệu quả nhất. Để không mắc bệnh sốt rét người dân cần thực hiện các biện pháp sau:\n\n- Thường xuyên ngủ màn, ngay cả ban ngày và màn cần được tẩm hóa chất diệt muỗi. Đây là biện pháp tốt nhất để phòng bệnh Sốt rét.\n\n- Buổi tối khi làm việc phải mặc quần áo dài tay để phòng muỗi đốt, có thể sử dụng nhang xua muỗi.\n\n- Vệ sinh môi trường xung quanh nơi ở, loại bỏ những nơi trú ẩn của muỗi như phát quang bụi rậm, khơi thông cống rãnh, sắp xếp vật dụng trong nhà ngăn nắp, sạch sẽ, quần áo phải được xếp gọn gàng không nên treo hay móc quần áo trên tường làm chỗ cho muỗi đậu, vv...\n\n- Những người đi làm ở vùng rừng núi cần mang theo màn để ngủ, trước khi đi nên đến cơ sở y tế để được tư vấn phòng chống bệnh sốt rét và khi trở về từ vùng có sốt rét lưu hành nên đến cơ sở y tế để được khám, xét nghiệm, nếu có bị sốt rét sẽ được điều trị kịp thời.\n\n- Khi thấy các triệu chứng của bệnh sốt rét như: Đau đầu, mệt mỏi, đau các cơ, rối loạn tiêu hóa, rét run, sốt nóng sau đó vã mồ hôi hoặc cảm thấy ớn lạnh, gai rét, người bệnh cần đến ngay cơ sở y tế gần nhất để được xét nghiệm, chẩn đoán và điều trị kịp thời..\n\nTrung tâm Kiểm soát bệnh tật Hà Tĩnh', 'public/images/img-1782811027022-4950361.jpg', 'Bác sĩ Phan Huỳnh Hoàng Lâm', 1, NULL, '2026-08-07 12:57:12.961136', '2026-08-07 12:57:12.968105'),
+(4, 'Các yếu tố nguy cơ đột quỵ và cách kiểm soát không dùng thuốc', 'Bảo vệ bản thân', 'Đột quỵ là một trong những nguyên nhân hàng đầu gây tử vong và tàn tật. Nhiều yếu tố nguy cơ như tăng huyết áp, xơ vữa động mạch, hút thuốc hay lối sống ít vận động có thể được kiểm soát, giúp giảm đáng kể nguy cơ đột quỵ nếu được phòng ngừa sớm.\n\nĐột quỵ xảy ra khi nào?\n\nĐột quỵ xảy ra khi dòng máu cung cấp oxy và dưỡng chất cho não bị gián đoạn hoặc khi mạch máu não bị vỡ. Khi não không được cung cấp đủ oxy, các tế bào thần kinh có thể tổn thương hoặc chết chỉ sau vài phút. Về cơ bản, đột quỵ được chia thành hai loại chính:\n\nĐột quỵ thiếu máu cục bộ: Xảy ra khi mạch máu cung cấp cho não bị tắc nghẽn bởi cục máu đông hoặc mảng xơ vữa. Đây là dạng phổ biến nhất, chiếm khoảng 85–87% các trường hợp.\n\nĐột quỵ xuất huyết: Xảy ra khi mạch máu trong não bị vỡ, gây chảy máu trong não hoặc quanh não.\n\nMặc dù cơ chế khác nhau, hai loại đột quỵ này lại có nhiều yếu tố nguy cơ chung. Một số yếu tố không thể thay đổi như tuổi tác hoặc yếu tố di truyền, nhưng nhiều yếu tố khác hoàn toàn có thể kiểm soát được thông qua lối sống và chăm sóc sức khỏe.\n\nNguyên nhân gây đột quỵ thiếu máu cục bộ\n\nĐột quỵ thiếu máu cục bộ xảy ra khi một mạch máu cung cấp máu cho não bị tắc nghẽn đột ngột. Sự tắc nghẽn này có thể do cục máu đông hình thành ngay tại mạch máu hoặc do cục máu đông từ nơi khác trong cơ thể di chuyển lên não.\n\nMột số nguyên nhân phổ biến gồm:\n\nRung nhĩ: Rung nhĩ là một dạng rối loạn nhịp tim khiến tim đập nhanh và không đều. Khi tim không bơm máu hiệu quả, máu có thể ứ đọng trong buồng tim và hình thành cục máu đông. Nếu cục máu đông này di chuyển lên não, nó có thể gây tắc mạch và dẫn đến đột quỵ.\n\nXơ vữa động mạch: Xơ vữa động mạch xảy ra khi cholesterol, chất béo và các chất khác tích tụ trên thành động mạch, tạo thành các mảng xơ vữa. Khi các mảng này phát triển lớn hoặc bị vỡ, chúng có thể gây tắc nghẽn mạch máu hoặc tạo cục máu đông, làm giảm lưu lượng máu đến não.\n\nRối loạn đông máu: Một số bệnh lý khiến máu dễ hình thành cục đông bất thường. Ví dụ như huyết khối tĩnh mạch sâu hoặc các rối loạn đông máu do di truyền. Những cục máu đông này có thể di chuyển trong hệ tuần hoàn và gây tắc mạch não.\n\nNhiễm trùng nặng: Một số tình trạng nhiễm trùng nặng như nhiễm khuẩn huyết hoặc viêm màng não có thể làm tăng nguy cơ hình thành cục máu đông trong cơ thể, từ đó làm tăng nguy cơ đột quỵ.\n\nNguyên nhân của đột quỵ xuất huyết\n\nĐột quỵ xuất huyết xảy ra khi mạch máu trong não bị suy yếu và vỡ, khiến máu tràn vào mô não và gây tổn thương. Các nguyên nhân thường gặp bao gồm:\n\nTăng huyết áp kéo dài: Tăng huyết áp là nguyên nhân phổ biến nhất gây đột quỵ xuất huyết. Khi huyết áp cao kéo dài, thành mạch máu bị tổn thương và yếu dần, làm tăng nguy cơ vỡ mạch.\n\nPhình động mạch não: Phình động mạch là tình trạng thành mạch máu bị phồng lên do yếu. Nếu túi phình bị vỡ, máu sẽ tràn vào não và gây xuất huyết.\n\nDị dạng mạch máu: Một số người có dị dạng động tĩnh mạch bẩm sinh, khiến cấu trúc mạch máu bất thường và dễ vỡ.\n\nChấn thương sọ não: Các chấn thương vùng đầu, đặc biệt do tai nạn giao thông hoặc tai nạn sinh hoạt, có thể làm tổn thương mạch máu não và gây xuất huyết.\n\nMột số bệnh lý khác: Các bệnh như xơ gan, rối loạn đông máu hoặc khối u trong não cũng có thể làm tăng nguy cơ chảy máu trong não.\n\nCác yếu tố nguy cơ đột quỵ không thể thay đổi\n\nMột số yếu tố nguy cơ đột quỵ liên quan đến đặc điểm sinh học hoặc di truyền nên không thể thay đổi:\n\nTuổi tác: Nguy cơ đột quỵ tăng dần theo tuổi. Phần lớn các trường hợp xảy ra ở người từ 65 tuổi trở lên, mặc dù bệnh vẫn có thể xảy ra ở người trẻ.\n\nTiền sử gia đình: Nếu trong gia đình có người từng bị đột quỵ hoặc mắc các bệnh tim mạch, nguy cơ của bạn cũng có thể cao hơn.\n\nTiền sử đột quỵ hoặc cơn thiếu máu não thoáng qua: Cơn thiếu máu não thoáng qua (TIA), còn gọi là \"đột quỵ nhẹ\", là dấu hiệu cảnh báo nguy cơ đột quỵ thực sự trong tương lai nếu không được kiểm soát.\n\nNhững yếu tố nguy cơ có thể thay đổi\n\nPhần lớn các yếu tố nguy cơ đột quỵ có liên quan đến lối sống và tình trạng sức khỏe. Việc kiểm soát tốt các yếu tố này có thể giúp giảm đáng kể nguy cơ mắc bệnh.\n\nTăng huyết áp: Đây là yếu tố nguy cơ quan trọng nhất của đột quỵ. Huyết áp cao làm tổn thương thành mạch máu và thúc đẩy hình thành mảng xơ vữa.\n\nĐái tháo đường: Lượng đường trong máu cao kéo dài có thể làm tổn thương mạch máu và tăng nguy cơ xơ vữa động mạch.\n\nRối loạn mỡ máu: Cholesterol LDL cao và triglyceride tăng có thể dẫn đến tích tụ mảng bám trong động mạch.\n\nHút thuốc lá: Thuốc lá làm tăng huyết áp, giảm lượng oxy trong máu và thúc đẩy quá trình xơ vữa động mạch. Người hút thuốc có nguy cơ đột quỵ cao gấp khoảng hai lần so với người không hút.\n\nBéo phì và ít vận động: Thừa cân và lối sống ít vận động làm tăng nguy cơ tăng huyết áp, đái tháo đường và rối loạn mỡ máu – những yếu tố liên quan trực tiếp đến đột quỵ.\n\nLạm dụng rượu bia: Uống quá nhiều rượu có thể làm tăng huyết áp và gây rối loạn nhịp tim, từ đó làm tăng nguy cơ đột quỵ.\n\nCách giảm nguy cơ đột quỵ bằng thay đổi lối sống\n\nPhòng ngừa đột quỵ cần kết hợp giữa kiểm soát bệnh lý và xây dựng lối sống lành mạnh. Trong đó, nhiều biện pháp không dùng thuốc có thể giúp giảm nguy cơ đáng kể:\n\nDuy trì chế độ ăn lành mạnh: Nên ưu tiên thực phẩm giàu chất xơ như rau xanh, trái cây, ngũ cốc nguyên hạt và các loại đậu; hạn chế chất béo bão hòa, thực phẩm chế biến sẵn và giảm lượng muối trong khẩu phần để hỗ trợ kiểm soát huyết áp.\n\nTập thể dục thường xuyên: Hoạt động thể chất giúp cải thiện tuần hoàn máu, kiểm soát cân nặng và giảm nguy cơ bệnh tim mạch. Người trưởng thành nên duy trì ít nhất 150 phút hoạt động thể lực cường độ trung bình mỗi tuần, như đi bộ nhanh, đạp xe hoặc bơi lội.\n\nDuy trì cân nặng hợp lý: Giữ chỉ số khối cơ thể trong mức khỏe mạnh giúp giảm nguy cơ tăng huyết áp, đái tháo đường và rối loạn mỡ máu.\n\nBỏ thuốc lá: Ngừng hút thuốc là một trong những biện pháp quan trọng nhất để giảm nguy cơ đột quỵ và bệnh tim mạch.\n\nHạn chế rượu bia: Nên hạn chế lượng rượu tiêu thụ hằng ngày và tránh uống quá mức.\n\nKhám sức khỏe định kỳ: Kiểm tra huyết áp, đường huyết và mỡ máu thường xuyên giúp phát hiện sớm các yếu tố nguy cơ để có biện pháp kiểm soát kịp thời.', '/public/images/img-1782811566914-9369032.jpg', 'Bác sĩ Bùi Cao Mỹ Ái', 1, NULL, '2026-08-07 12:57:12.961136', '2026-08-07 12:57:12.968105'),
+(5, '9 bệnh lây qua đường tình dục phổ biến nhất', 'Phòng bệnh hơn chữa bệnh', 'Các bệnh lây qua đường tình dục có thể lây nhiễm qua bất kỳ hình thức quan hệ tình dục nào kể cả quan hệ qua đường miệng hay qua hậu môn. Những bệnh lây qua đường tình dục thường rất khó chữa và gây hậu quả lâu dài. Thậm chí, nếu không được điều trị đúng cách bệnh có thể tái phát đi tái phát lại nhiều lần hoặc chuyển sang giai đoạn mãn tính.\n\nCác bệnh lây qua đường tình dục có thể xảy ra ở bất kỳ đối tượng nào, không phân biệt độ tuổi, giới tính. Trong đó, nam nữ trong độ tuổi sinh sản là nhóm đối tượng có nguy cơ nhiễm bệnh cao nhất. Dưới đây là tổng hợp 9 bệnh lây qua đường tình dục có tỷ lệ người mắc lớn nhất hiện nay bạn cần lưu ý:\n\n1. Bệnh lậu\nBệnh lậu gây ra bởi vi khuẩn lậu có tên khoa học là Neisseria gonorrhoeae. Ở giai đoạn đầu bệnh lậu hầu như không có biểu hiện cụ thể nào nên rất khó để nhận biết. Khi bệnh đã phát triển nặng có thể làm xuất hiện những triệu chứng như: tiểu đau buốt, dương vật chảy mủ, sưng đau tinh hoàn.\n\nỞ nữ giới, bệnh lậu thường không có triệu chứng điển hình nào nên dễ bị nhầm lẫn với viêm nhiễm âm đạo thông thường. Do đó, nếu thấy dịch tiết âm đạo tăng bất thường, xuất huyết âm đạo giữa chu kỳ, tiểu nhắt...chị em cần lưu ý vì đây có thể là triệu chứng cảnh báo bệnh lậu.\n\n2. Bệnh giang mai\nVi khuẩn giang mai có tên khoa học là Treponema pallidum. Nếu không được phát hiện và điều trị sớm bệnh giang mai có thể trải qua 3 giai đoạn và 1 giai đoạn tiềm ẩn.\n\nSau từ 10 - 90 ngày từ khi tiếp xúc với mầm bệnh, trên cơ thể người bệnh sẽ xuất hiện những vết loét không đau gọi là săng giang mai. Săng giang mai có thể tự biến mất sau 3 - 6 tuần mà không cần điều trị nên người bệnh rất dễ bỏ qua. Bệnh giang mai có thể gây rất nhiều biến chứng nguy hiểm, làm tổn thương nhiều cơ quan trong cơ thể như: khớp, da, thận, não, tai, mắt...thậm chí đe dọa đến tính mạng.\n\n3. Bệnh viêm âm đạo\nCác nguyên nhân hay gặp là Vi khuẩn, Trichomonas ( Trùng roi ), và nấm candida.\n\nBệnh viêm âm đạo do nhiễm Trichomonas và vi khuẩn là một trong số những bệnh lây qua đường tình dục phổ biến nhất hiện nay. Khuẩn Trichomonas là một loại ký sinh trùng có thể tồn tại trong nhiều môi trường khác nhau và rất dễ lây nhiễm. Nữ giới khi mắc bệnh viêm âm đạo sẽ xuất hiện những triệu chứng như: khí hư ra nhiều, mùi hôi bất thường, khí hư lẫn các bọt khí, có màu xanh, xám hoặc vàng xanh. Có thể ngứa ở âm đạo. Ngoài ra, khám trong thấy bề mặt thành âm đạo dễ bị sưng đỏ, phù nề.\n\nBệnh viêm âm đạo do nhiễm vi khuẩn là một trong số những bệnh lây qua đường tình dục phổ biến nhất hiện nay. Có thể nhiễm 1 loại vi khuẩn, hay nhiều loại vi khuẩn cùng lúc. Nữ giới khi mắc bệnh viêm âm đạo sẽ xuất hiện những triệu chứng như: khí hư ra nhiều, mùi hôi bất thường, khí hư có màu vàng đục hay xám. Ngoài ra, khám trong thấy bề mặt thành âm đạo dễ bị sưng đỏ, phù nề.\n\nBệnh viêm âm đạo do nhiễm nấm Candida là một trong số những bệnh lây qua đường tình dục phổ biến nhất hiện nay. Nữ giới khi mắc bệnh viêm âm đạo do nấm candida sẽ xuất hiện những triệu chứng như: khí hư màu trắng, vón cục, như váng sữa và kèm ngứa âm họ âm đạo. Ngoài ra, khám trong thấy bề mặt thành âm đạo dễ bị sưng đỏ và có dịch như váng sữa đóng ở thành âm đạo.\n\n4. Bệnh HIV\nHIV là căn bệnh thế kỷ và cũng là một trong những bệnh lây qua đường tình dục nguy hiểm nhất hiện nay. Virus HIV gây suy giảm miễn dịch của cơ thể và có thể lây nhiễm qua nhiều con đường khác nhau như: quan hệ tình dục, lây qua truyền máu, lây từ mẹ sang con...\n\nChỉ một số ít các trường hợp nhiễm HIV xuất hiện những triệu chứng giống với cảm cúm thông thường kéo dài từ 2 - 4 tuần. Do đó, người bệnh thường không biết mình bị nhiễm HIV nếu không chủ động đi xét nghiệm.\n\n5. Bệnh Herpes sinh dục\nGiống với nhiều bệnh lây qua đường tình dục khác, Herpes sinh dục vẫn có thể lây nhiễm ngay cả khi không gây có triệu chứng bệnh. Do đó, nếu thấy trên cơ thể xuất hiện những mụn nước, nhất là quanh cơ quan sinh dục, hậu môn, sốt nhẹ, sưng đau hạch bạn cần hết sức lưu ý.\n\n6. Bệnh viêm cổ tử cung\nViêm cổ tử cung do nhiễm C. Trachomatis là bệnh rất dễ lây qua đường tình dục. Khi nhiễm bệnh, nữ giới có thể xuất hiện những triệu chứng như: khí hư ra nhiều, chảy máu âm đạo bất thường nhất là sau khi quan hệ.\n\n7. Bệnh sùi mào gà\nĐây là một bệnh lây qua đường tình dục rất phổ biến gây ra do virus HPV. Sùi mào gà có thể lây qua quan hệ tình dục, lây từ mẹ sang con, lây qua đường máu hay lây do tiếp xúc trực tiếp với vết thương hở.\n\nKhi bị nhiễm sùi mào gà, người bệnh sẽ xuất hiện những nốt sần sùi, màu hồng nhạt ở nhiều vị trí như: cơ quan sinh dục nam nữ, cổ tử cung, lỗ tiểu, tầng sinh môn, hậu môn, mắt, mũi, miệng...Phụ nữ mang thai nếu bị nhiễm sùi mào gà có thể lây sang con và ảnh hưởng đến quá trình sinh sản.\n\n8. Bệnh viêm gan siêu vi B\nĐây cũng là một trong những bệnh có thể lây qua đường tình dục. Ngoài ra, viêm gan siêu vi B còn lây qua đường máu và lây từ mẹ sang con. Bệnh có thể không gây triệu chứng nào đáng kể nhưng lại đe dọa đến sức khỏe và tính mạng.\n\nDo đó, nếu thấy xuất hiện triệu chứng bất thường như: vàng da, vàng mắt, nước tiểu sẫm màu, sốt, mệt mỏi, buồn nôn, ăn uống không ngon miệng...bạn nên đi khám sớm để có hướng điều trị đúng cách.\n\n9. Bệnh Chlamydia\nBệnh gây ra bởi một loại vi khuẩn có tên là Chlamydia trachomatis. Bệnh diễn biến khá thầm lặng nên rất khó nhận biết. Nữ giới có thể phát hiện bệnh thông qua các triệu chứng như: khí hư ra nhiều bất thường, tiểu nhắt, đau bụng, đau lưng, buồn nôn, nôn, đau khi quan hệ, chảy máu sau quan hệ...\n\nBệnh Chlamydia nếu không chữa trị sớm có thể gây vô sinh ở nữ giới và nhiều biến chứng nguy hiểm khác.', '/public/images/img-1782997531747-780097016.jpg', 'bác sĩ Phan Huỳnh Hoàng Lâm', 1, 9, '2026-08-07 12:57:12.961136', '2026-08-07 12:57:12.968105');
 
 -- --------------------------------------------------------
 
@@ -186,10 +335,10 @@ CREATE TABLE `doctor_profiles` (
 
 INSERT INTO `doctor_profiles` (`id`, `user_id`, `specialty_id`, `full_name`, `avatar_url`, `experience_years`, `created_at`, `total_reviews`, `average_rating`) VALUES
 (1, 4, 1, 'Bùi Cao Mỹ Ái', 'public/images/bs_caomyai.webp', 8, '2026-06-03 17:20:51', 1, 5.0),
-(2, 5, 2, 'La Thiện Đức', 'public/images/lathienduc_thankinh.webp', 12, '2026-06-03 17:20:51', 0, 0.0),
+(2, 5, 2, 'La Thiện Đức', 'public/images/lathienduc_thankinh.webp', 12, '2026-06-03 17:20:51', 2, 4.5),
 (3, 6, 2, 'Phạm Nguyễn Thu Hằng', 'public/images/thuhang_thankinh.webp', 5, '2026-06-03 17:20:51', 0, 0.0),
 (4, 7, 3, 'Trần Thị Lệ Uyên', 'public/images/tranthileuyen_sosinh.webp', 10, '2026-06-03 17:20:51', 0, 0.0),
-(5, 10, 4, 'Phan Huỳnh Hoàng Lâm', 'public/images/img-1781844740627-818067183.jpg', 1, '2026-06-19 04:35:01', 5, 5.0),
+(5, 10, 4, 'Phan Huỳnh Hoàng Lâm', 'public/images/img-1781844740627-818067183.jpg', 1, '2026-06-19 04:35:01', 7, 5.0),
 (7, 12, 1, 'Trần Quốc Việt', '/uploads/default-doctor.png', 1, '2026-06-30 08:28:25', 0, 0.0);
 
 -- --------------------------------------------------------
@@ -303,7 +452,97 @@ INSERT INTO `doctor_schedules` (`id`, `doctor_profile_id`, `shift_id`, `date`, `
 (95, 5, 9, '2026-07-02', 5, '2026-07-02 13:27:18'),
 (96, 5, 10, '2026-07-02', 5, '2026-07-02 13:27:18'),
 (97, 5, 11, '2026-07-02', 5, '2026-07-02 13:27:18'),
-(98, 5, 12, '2026-07-02', 5, '2026-07-02 13:27:18');
+(98, 5, 12, '2026-07-02', 5, '2026-07-02 13:27:18'),
+(99, 1, 1, '2026-07-10', 20, '2026-07-10 10:21:01'),
+(100, 1, 1, '2026-07-11', 20, '2026-07-10 10:21:01'),
+(101, 5, 9, '2026-07-20', 5, '2026-07-20 10:39:48'),
+(102, 5, 10, '2026-07-20', 5, '2026-07-20 10:39:48'),
+(103, 5, 11, '2026-07-20', 5, '2026-07-20 10:39:48'),
+(104, 5, 12, '2026-07-20', 5, '2026-07-20 10:39:48'),
+(105, 5, 1, '2026-07-23', 5, '2026-07-23 01:42:55'),
+(106, 5, 2, '2026-07-23', 5, '2026-07-23 01:42:55'),
+(107, 5, 3, '2026-07-23', 5, '2026-07-23 01:42:55'),
+(108, 5, 4, '2026-07-23', 5, '2026-07-23 01:42:55'),
+(109, 5, 5, '2026-07-23', 5, '2026-07-23 01:42:59'),
+(110, 5, 6, '2026-07-23', 5, '2026-07-23 01:42:59'),
+(111, 5, 7, '2026-07-23', 5, '2026-07-23 01:42:59'),
+(112, 5, 8, '2026-07-23', 5, '2026-07-23 01:42:59'),
+(113, 5, 9, '2026-07-23', 5, '2026-07-23 01:43:02'),
+(114, 5, 10, '2026-07-23', 5, '2026-07-23 01:43:02'),
+(115, 5, 11, '2026-07-23', 5, '2026-07-23 01:43:02'),
+(116, 5, 12, '2026-07-23', 5, '2026-07-23 01:43:02'),
+(117, 5, 1, '2026-07-28', 5, '2026-07-28 15:03:21'),
+(118, 5, 2, '2026-07-28', 5, '2026-07-28 15:03:21'),
+(119, 5, 3, '2026-07-28', 5, '2026-07-28 15:03:21'),
+(120, 5, 4, '2026-07-28', 5, '2026-07-28 15:03:21'),
+(121, 5, 1, '2026-07-29', 5, '2026-07-29 04:10:56'),
+(122, 5, 2, '2026-07-29', 5, '2026-07-29 04:10:56'),
+(123, 5, 3, '2026-07-29', 5, '2026-07-29 04:10:56'),
+(124, 5, 4, '2026-07-29', 5, '2026-07-29 04:10:56'),
+(125, 5, 1, '2026-08-04', 5, '2026-08-03 16:39:01'),
+(126, 5, 2, '2026-08-04', 5, '2026-08-03 16:39:01'),
+(127, 5, 3, '2026-08-04', 5, '2026-08-03 16:39:01'),
+(128, 5, 4, '2026-08-04', 5, '2026-08-03 16:39:01'),
+(129, 2, 5, '2026-08-05', 5, '2026-08-05 07:05:38'),
+(130, 2, 6, '2026-08-05', 5, '2026-08-05 07:05:38'),
+(131, 2, 7, '2026-08-05', 5, '2026-08-05 07:05:38'),
+(132, 2, 8, '2026-08-05', 5, '2026-08-05 07:05:38'),
+(133, 5, 5, '2026-08-05', 5, '2026-08-05 07:09:14'),
+(134, 5, 6, '2026-08-05', 5, '2026-08-05 07:09:14'),
+(135, 5, 7, '2026-08-05', 5, '2026-08-05 07:09:14'),
+(136, 5, 8, '2026-08-05', 5, '2026-08-05 07:09:14'),
+(137, 2, 1, '2026-08-06', 5, '2026-08-06 02:11:34'),
+(138, 2, 2, '2026-08-06', 5, '2026-08-06 02:11:34'),
+(139, 2, 3, '2026-08-06', 5, '2026-08-06 02:11:34'),
+(140, 2, 4, '2026-08-06', 5, '2026-08-06 02:11:34'),
+(141, 5, 1, '2026-08-06', 5, '2026-08-06 02:11:39'),
+(142, 5, 2, '2026-08-06', 5, '2026-08-06 02:11:39'),
+(143, 5, 3, '2026-08-06', 5, '2026-08-06 02:11:39'),
+(144, 5, 4, '2026-08-06', 5, '2026-08-06 02:11:39'),
+(145, 1, 1, '2026-08-06', 5, '2026-08-06 02:11:46'),
+(146, 1, 2, '2026-08-06', 5, '2026-08-06 02:11:46'),
+(147, 1, 3, '2026-08-06', 5, '2026-08-06 02:11:46'),
+(148, 1, 4, '2026-08-06', 5, '2026-08-06 02:11:46'),
+(149, 5, 1, '2026-08-07', 5, '2026-08-06 02:12:30'),
+(150, 5, 2, '2026-08-07', 5, '2026-08-06 02:12:30'),
+(151, 5, 3, '2026-08-07', 5, '2026-08-06 02:12:30'),
+(152, 5, 4, '2026-08-07', 5, '2026-08-06 02:12:30'),
+(153, 5, 5, '2026-08-06', 5, '2026-08-06 04:20:00'),
+(154, 5, 6, '2026-08-06', 5, '2026-08-06 04:20:00'),
+(155, 5, 7, '2026-08-06', 5, '2026-08-06 04:20:00'),
+(156, 5, 8, '2026-08-06', 5, '2026-08-06 04:20:00'),
+(157, 1, 5, '2026-08-06', 5, '2026-08-06 04:39:26'),
+(158, 1, 6, '2026-08-06', 5, '2026-08-06 04:39:26'),
+(159, 1, 7, '2026-08-06', 5, '2026-08-06 04:39:26'),
+(160, 1, 8, '2026-08-06', 5, '2026-08-06 04:39:26'),
+(161, 3, 5, '2026-08-06', 5, '2026-08-06 04:42:06'),
+(162, 3, 6, '2026-08-06', 5, '2026-08-06 04:42:06'),
+(163, 3, 7, '2026-08-06', 5, '2026-08-06 04:42:06'),
+(164, 3, 8, '2026-08-06', 5, '2026-08-06 04:42:06'),
+(165, 2, 5, '2026-08-06', 5, '2026-08-06 04:43:36'),
+(166, 2, 6, '2026-08-06', 5, '2026-08-06 04:43:36'),
+(167, 2, 7, '2026-08-06', 5, '2026-08-06 04:43:36'),
+(168, 2, 8, '2026-08-06', 5, '2026-08-06 04:43:36'),
+(169, 2, 1, '2026-08-07', 5, '2026-08-07 03:14:08'),
+(170, 2, 2, '2026-08-07', 5, '2026-08-07 03:14:08'),
+(171, 2, 3, '2026-08-07', 5, '2026-08-07 03:14:08'),
+(172, 2, 4, '2026-08-07', 5, '2026-08-07 03:14:08'),
+(173, 2, 5, '2026-08-08', 5, '2026-08-08 05:16:51'),
+(174, 2, 6, '2026-08-08', 5, '2026-08-08 05:16:51'),
+(175, 2, 7, '2026-08-08', 5, '2026-08-08 05:16:51'),
+(176, 2, 8, '2026-08-08', 5, '2026-08-08 05:16:51'),
+(177, 2, 5, '2026-08-10', 5, '2026-08-10 08:00:01'),
+(178, 2, 6, '2026-08-10', 5, '2026-08-10 08:00:01'),
+(179, 2, 7, '2026-08-10', 5, '2026-08-10 08:00:01'),
+(180, 2, 8, '2026-08-10', 5, '2026-08-10 08:00:01'),
+(181, 5, 5, '2026-08-11', 5, '2026-08-11 07:56:02'),
+(182, 5, 6, '2026-08-11', 5, '2026-08-11 07:56:02'),
+(183, 5, 7, '2026-08-11', 5, '2026-08-11 07:56:02'),
+(184, 5, 8, '2026-08-11', 5, '2026-08-11 07:56:02'),
+(185, 1, 5, '2026-08-11', 5, '2026-08-11 07:56:25'),
+(186, 1, 6, '2026-08-11', 5, '2026-08-11 07:56:25'),
+(187, 1, 7, '2026-08-11', 5, '2026-08-11 07:56:25'),
+(188, 1, 8, '2026-08-11', 5, '2026-08-11 07:56:25');
 
 -- --------------------------------------------------------
 
@@ -364,7 +603,31 @@ INSERT INTO `invoices` (`id`, `appointment_id`, `total_amount`, `status`, `payme
 (49, 49, 150000.00, 'CANCELLED', 'CASH', NULL, '2026-07-02 13:27:32'),
 (50, 50, 150000.00, 'PAID', 'VNPAY', '2026-07-02 13:37:37', '2026-07-02 13:31:27'),
 (51, 51, 150000.00, 'PAID', 'CASH', '2026-07-02 13:36:22', '2026-07-02 13:32:37'),
-(52, 52, 150000.00, 'PAID', 'CASH', '2026-07-02 13:53:30', '2026-07-02 13:52:19');
+(52, 52, 150000.00, 'PAID', 'CASH', '2026-07-02 13:53:30', '2026-07-02 13:52:19'),
+(53, 53, 150000.00, 'PAID', 'CASH', '2026-07-23 01:16:27', '2026-07-20 10:40:08'),
+(54, 54, 150000.00, 'PAID', 'VNPAY', '2026-07-23 01:49:01', '2026-07-23 01:48:10'),
+(55, 55, 250000.00, 'PAID', 'VNPAY', '2026-07-29 04:15:41', '2026-07-29 04:11:14'),
+(56, 56, 150000.00, 'PAID', 'CASH', '2026-08-05 07:12:29', '2026-08-05 07:05:59'),
+(57, 57, 250000.00, 'PAID', 'CASH', '2026-08-05 07:12:00', '2026-08-05 07:07:08'),
+(58, 58, 150000.00, 'PAID', 'VNPAY', '2026-08-05 07:17:11', '2026-08-05 07:09:51'),
+(59, 59, 150000.00, 'PAID', 'VNPAY', '2026-08-05 07:27:31', '2026-08-05 07:25:11'),
+(60, 60, 150000.00, 'PAID', 'CASH', '2026-08-06 02:17:20', '2026-08-06 02:14:24'),
+(61, 61, 150000.00, 'PAID', 'CASH', '2026-08-06 03:19:21', '2026-08-06 02:58:00'),
+(62, 62, 150000.00, 'CANCELLED', 'CASH', '2026-08-06 03:05:34', '2026-08-06 03:04:57'),
+(63, 63, 150000.00, 'PAID', 'CASH', '2026-08-06 03:19:05', '2026-08-06 03:18:50'),
+(64, 64, 150000.00, 'PAID', 'VNPAY', '2026-08-06 03:20:56', '2026-08-06 03:19:50'),
+(65, 65, 150000.00, 'PAID', 'CASH', '2026-08-06 03:31:55', '2026-08-06 03:22:51'),
+(66, 66, 300000.00, 'PAID', 'CASH', '2026-08-06 03:34:15', '2026-08-06 03:33:09'),
+(67, 67, 150000.00, 'CANCELLED', 'VNPAY', '2026-08-06 03:52:34', '2026-08-06 03:51:53'),
+(68, 68, 300000.00, 'PAID', 'CASH', '2026-08-08 05:20:20', '2026-08-06 04:18:44'),
+(69, 69, 300000.00, 'PAID', 'CASH', '2026-08-08 05:20:16', '2026-08-06 04:20:18'),
+(70, 70, 150000.00, 'CANCELLED', 'CASH', NULL, '2026-08-06 04:45:05'),
+(71, 71, 250000.00, 'PAID', 'CASH', '2026-08-08 05:20:12', '2026-08-07 03:16:14'),
+(72, 72, 250000.00, 'PAID', 'CASH', '2026-08-08 05:20:33', '2026-08-08 05:17:03'),
+(73, 73, 150000.00, 'PAID', 'VNPAY', '2026-08-08 05:22:22', '2026-08-08 05:21:34'),
+(74, 74, 300000.00, 'UNPAID', 'CASH', '2026-08-10 08:00:45', '2026-08-10 08:00:20'),
+(75, 75, 150000.00, 'UNPAID', 'VNPAY', NULL, '2026-08-10 08:02:06'),
+(76, 76, 150000.00, 'PAID', 'VNPAY', '2026-08-10 08:03:07', '2026-08-10 08:02:06');
 
 -- --------------------------------------------------------
 
@@ -412,7 +675,26 @@ INSERT INTO `medical_records` (`id`, `appointment_id`, `symptoms`, `diagnosis`, 
 (26, 43, 'sadasd', 'sadas', 'ádasd', '2026-06-28 08:49:03'),
 (27, 50, 'adasdas', 'dsadsads', 'ádsda', '2026-07-02 13:36:03'),
 (28, 51, 'ádasd', 'sadad', 'ádsada', '2026-07-02 13:36:11'),
-(29, 52, 'dầ', 'âsd', 'ádasd', '2026-07-02 13:53:13');
+(29, 52, 'dầ', 'âsd', 'ádasd', '2026-07-02 13:53:13'),
+(30, 53, 'addfas', 'sdads', 'asdasd', '2026-07-23 01:14:53'),
+(31, 54, 'Đau đầu', 'Thiểu ngủ, dẫn đến đau đầu', 'alo 123', '2026-07-23 01:50:32'),
+(32, 55, 'đau đầu', 'đau đầu', 'đau đầu, nghỉ ngơi vài ngày', '2026-07-29 04:14:43'),
+(33, 57, 'Đau đầu', 'Đau đầu', 'Đau đầu', '2026-08-05 07:11:36'),
+(34, 56, 'ádasd', 'sdasd', 'ádasd', '2026-08-05 07:12:14'),
+(35, 58, 'fasf', 'ầdafdaf', 'adfafd', '2026-08-05 07:13:17'),
+(36, 59, 'ádasd', 'sdasd', 'ádasdas', '2026-08-05 08:32:22'),
+(37, 60, 'wrqwew', 'asdsadsa', 'asdasdsa', '2026-08-06 02:17:08'),
+(38, 61, 'ádsad', 'ádsad', 'sadsad', '2026-08-06 02:58:36'),
+(39, 63, 'KHỚP VAI BỊ ĐAU', 'VIÊM GÂN VAI', 'NGHỈ NGƠI KO CHƠI THỂ THAO 2 TUẦN', '2026-08-06 03:31:13'),
+(40, 64, 'DẤ', 'SDASD', 'SADAS', '2026-08-06 03:32:49'),
+(41, 65, 'ÁDASD', 'ÁDASD', 'SADASD', '2026-08-06 03:32:53'),
+(42, 66, 'TEST', 'TEST', 'TEST', '2026-08-06 03:33:42'),
+(43, 68, 'ĐAU ĐẦU', 'ĐAU ĐẦU', '', '2026-08-06 04:25:56'),
+(44, 69, 'dassad', 'asdsad', 'aadsd', '2026-08-07 03:11:49'),
+(45, 71, 'đau đầu', 'đau đầu', 'đau đầu', '2026-08-07 03:23:14'),
+(46, 72, 'THIẾU NGỦ ', 'THIẾU NGỦ ', 'THIẾU NGỦ ', '2026-08-08 05:18:11'),
+(47, 73, 'ĐÂF', 'ẦDAS', 'ÁDAD', '2026-08-08 05:24:10'),
+(48, 74, '', '', '', '2026-08-10 08:30:25');
 
 -- --------------------------------------------------------
 
@@ -492,7 +774,7 @@ INSERT INTO `patient_accounts` (`id`, `phone`, `password_hash`, `is_active`, `cr
 (1, '0901234567', '$2b$10$wO3.Vj.8x1...dummyhash123456789', 1, '2026-06-05 09:40:27', NULL, NULL),
 (2, '0987654321', '$2b$10$xP4.Wk.9y2...dummyhash987654321', 1, '2026-06-05 09:40:27', NULL, NULL),
 (3, '0911222333', '$2b$10$yQ5.Zl.0z3...dummyhash112233445', 0, '2026-06-05 09:40:27', NULL, NULL),
-(4, '0797551612', '$2b$10$NPy8OUX3zAbzANm6hIzfY.U2OJvNab8IeA6z7CmiYx/HTu5EH1CZq', 1, '2026-06-05 09:40:27', 'lamphan3107@gmail.com', NULL),
+(4, '0797551612', '$2b$10$H3ceY54PXcGuctnH9220SOhNDOOsx87rhk98aaQXft.rPjz9kDAjG', 1, '2026-06-05 09:40:27', 'lamphan3107@gmail.com', NULL),
 (5, '0333897665', '1', 1, '2026-06-20 02:48:44', NULL, NULL),
 (7, '', '12345678', 1, '2026-06-21 17:13:39', 'lamtric23@gmail.com', '268542'),
 (18, NULL, 'Hoanglam23', 1, '2026-06-23 06:31:31', 'xuantung10042008hn@gmail.com', NULL);
@@ -510,7 +792,7 @@ CREATE TABLE `ratings` (
   `patient_account_id` int(11) NOT NULL,
   `rating` int(11) NOT NULL,
   `comment` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` datetime(6) NOT NULL DEFAULT current_timestamp(6)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -518,12 +800,16 @@ CREATE TABLE `ratings` (
 --
 
 INSERT INTO `ratings` (`id`, `appointment_id`, `doctor_profile_id`, `patient_account_id`, `rating`, `comment`, `created_at`) VALUES
-(1, 42, 5, 4, 5, '', '2026-07-02 12:31:09'),
-(2, 43, 5, 4, 5, '', '2026-07-02 12:59:21'),
-(3, 36, 5, 4, 5, '', '2026-07-02 13:01:28'),
-(4, 34, 5, 4, 5, '', '2026-07-02 13:02:58'),
-(5, 30, 5, 4, 5, '', '2026-07-02 13:03:05'),
-(6, 20, 1, 4, 5, '', '2026-07-02 13:03:09');
+(1, 42, 5, 4, 5, '', '2026-08-07 12:57:12.922071'),
+(2, 43, 5, 4, 5, '', '2026-08-07 12:57:12.922071'),
+(3, 36, 5, 4, 5, '', '2026-08-07 12:57:12.922071'),
+(4, 34, 5, 4, 5, '', '2026-08-07 12:57:12.922071'),
+(5, 30, 5, 4, 5, '', '2026-08-07 12:57:12.922071'),
+(6, 20, 1, 4, 5, '', '2026-08-07 12:57:12.922071'),
+(7, 51, 5, 4, 5, 'OK ', '2026-08-07 12:57:12.922071'),
+(8, 60, 5, 4, 5, 'bác sĩ Lâm đẹp trai quá', '2026-08-07 12:57:12.922071'),
+(9, 71, 2, 4, 5, 'ok', '2026-08-07 12:57:12.922071'),
+(10, 72, 2, 4, 4, 'TUY HƠI LÂU NHƯNG BÁC SĨ CÓ TÂM', '2026-08-08 12:23:56.328581');
 
 -- --------------------------------------------------------
 
@@ -630,7 +916,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `phone`, `password_hash`, `role`, `is_active`, `created_at`, `email`) VALUES
 (4, '044444444444', '1', 'DOCTOR', 1, '2026-06-05 16:40:33', 'lamtric23@gmail.com'),
-(5, '005', '1', 'DOCTOR', 1, '2026-06-05 16:40:33', NULL),
+(5, '005', '$2b$10$7dpqzwsNw9U2rmK7Y/vaxueBByBYj7u95msHGK.PH1QaG8bIHAfoO', 'DOCTOR', 1, '2026-06-05 16:40:33', 'lamphan.holagroup@gmail.com'),
 (6, '006', '1', 'DOCTOR', 1, '2026-06-05 16:40:33', NULL),
 (7, '007', '1', 'DOCTOR', 1, '2026-06-05 16:40:33', NULL),
 (8, '008', '1', 'STAFF', 1, '2026-06-05 16:40:33', 'lt@gmail.com'),
@@ -657,8 +943,8 @@ ALTER TABLE `appointments`
 --
 ALTER TABLE `appointment_services`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `FK_923e323e598280a0454e1d1b7cf` (`appointment_id`),
-  ADD KEY `FK_5aafcd787c270f1fd2e01376a6b` (`service_id`);
+  ADD KEY `service_id` (`service_id`),
+  ADD KEY `appointment_id` (`appointment_id`);
 
 --
 -- Chỉ mục cho bảng `appointment_status_logs`
@@ -673,7 +959,7 @@ ALTER TABLE `appointment_status_logs`
 --
 ALTER TABLE `articles`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_articles_user_id` (`user_id`);
+  ADD KEY `FK_87bb15395540ae06337a486a77a` (`user_id`);
 
 --
 -- Chỉ mục cho bảng `doctor_profiles`
@@ -742,6 +1028,7 @@ ALTER TABLE `patient_accounts`
 ALTER TABLE `ratings`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_ratings_appointment_id` (`appointment_id`),
+  ADD UNIQUE KEY `REL_6236e5807011bf0e40a9ea0157` (`appointment_id`),
   ADD KEY `idx_ratings_doctor_id` (`doctor_profile_id`),
   ADD KEY `idx_ratings_patient_id` (`patient_account_id`);
 
@@ -780,19 +1067,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT cho bảng `appointment_services`
 --
 ALTER TABLE `appointment_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `appointment_status_logs`
 --
 ALTER TABLE `appointment_status_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT cho bảng `articles`
@@ -810,19 +1097,19 @@ ALTER TABLE `doctor_profiles`
 -- AUTO_INCREMENT cho bảng `doctor_schedules`
 --
 ALTER TABLE `doctor_schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=189;
 
 --
 -- AUTO_INCREMENT cho bảng `invoices`
 --
 ALTER TABLE `invoices`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT cho bảng `medical_records`
 --
 ALTER TABLE `medical_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT cho bảng `notifications`
@@ -846,7 +1133,7 @@ ALTER TABLE `patient_accounts`
 -- AUTO_INCREMENT cho bảng `ratings`
 --
 ALTER TABLE `ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `services`
@@ -901,7 +1188,7 @@ ALTER TABLE `appointment_status_logs`
 -- Các ràng buộc cho bảng `articles`
 --
 ALTER TABLE `articles`
-  ADD CONSTRAINT `fk_articles_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_87bb15395540ae06337a486a77a` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `doctor_profiles`
@@ -945,9 +1232,9 @@ ALTER TABLE `patients`
 -- Các ràng buộc cho bảng `ratings`
 --
 ALTER TABLE `ratings`
-  ADD CONSTRAINT `fk_ratings_appointment_id` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_ratings_doctor_id` FOREIGN KEY (`doctor_profile_id`) REFERENCES `doctor_profiles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_ratings_patient_id` FOREIGN KEY (`patient_account_id`) REFERENCES `patient_accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_6236e5807011bf0e40a9ea0157f` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_b2aa709ba7b36ea59045aa55aa4` FOREIGN KEY (`doctor_profile_id`) REFERENCES `doctor_profiles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_cae26d8d5e2cbb131c8bfc26270` FOREIGN KEY (`patient_account_id`) REFERENCES `patient_accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
