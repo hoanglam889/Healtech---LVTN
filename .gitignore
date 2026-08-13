@@ -7,9 +7,7 @@
 **/.env.*.local
 
 # Các thư mục chứa code đã được biên dịch/build
-**/dist/
 **/build/
-/backend/dist/
 /backend/tsconfig.tsbuildinfo
 
 # File logs hoặc debug
