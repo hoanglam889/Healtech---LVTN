@@ -63,7 +63,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
   ]
 }`;
             const model = this.genAI.getGenerativeModel({
-                model: "gemini-2.5-flash",
+                model: "gemini-1.5-flash",
                 generationConfig: {
                     responseMimeType: "application/json",
                     responseSchema: {
