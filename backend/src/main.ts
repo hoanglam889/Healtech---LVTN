@@ -8,7 +8,13 @@ async function bootstrap() {
 
   //lấy link FRONTEND_URL ở .env hoặc chạy link mặc định
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      if (!origin || origin.includes('localhost') || origin.includes('14.225.218.191') || origin.includes('healtech.duckdns.org')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
 
