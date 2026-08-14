@@ -12,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         (request: Request) => {
           let data = request?.cookies['access_token'];
           if (!data) {
-            data = request?.cookies['acces_token']; // Đề phòng bạn gõ sai chính tả lúc set cookie
+            data = request?.cookies['acces_token']; // Check for typo acces_token
           }
           if (!data) {
             return null;
