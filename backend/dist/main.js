@@ -10,7 +10,14 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        origin: function (origin, callback) {
+            if (!origin || origin.includes('localhost') || origin.includes('14.225.218.191') || origin.includes('healtech.duckdns.org')) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
     });
     app.useStaticAssets((0, path_1.join)(__dirname, '..', 'public'), {
