@@ -57,7 +57,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
 
       // Gemini configuration for structured JSON output
       const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-flash-latest",
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
