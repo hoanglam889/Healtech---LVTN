@@ -49,7 +49,10 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             throw new common_1.BadRequestException('Không tìm thấy hóa đơn');
         }
         const totalAmount = amount || Number(invoice.totalAmount);
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+        let backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+        if (backendUrl.includes('14.225.218.191')) {
+            backendUrl = 'https://healtech-api.duckdns.org';
+        }
         const returnUrl = `${backendUrl}/payments/vnpay-return${source ? '?source=' + source : ''}`;
         const txnRef = `${invoice.id}_${Date.now()}`;
         const urlString = this.vnpayService.buildPaymentUrl({

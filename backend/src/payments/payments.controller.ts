@@ -34,7 +34,10 @@ export class PaymentsController {
     const source = query.source || 'reception';
     const result = await this.paymentsService.vnpayReturn(query as any);
     // Redirect về Frontend hiển thị kết quả
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    let baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    if (baseUrl.includes('14.225.218.191')) {
+      baseUrl = 'https://healtech.duckdns.org';
+    }
     const frontendUrl = `${baseUrl}/payment-result?status=${result.status}&invoiceId=${result.invoiceId}&amount=${result.amount}&message=${encodeURIComponent(result.message)}&source=${source}`;
     return res.redirect(frontendUrl);
   }

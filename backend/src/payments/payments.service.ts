@@ -39,7 +39,10 @@ export class PaymentsService {
     }
 
     const totalAmount = amount || Number(invoice.totalAmount);
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    let backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    if (backendUrl.includes('14.225.218.191')) {
+      backendUrl = 'https://healtech-api.duckdns.org';
+    }
     const returnUrl = `${backendUrl}/payments/vnpay-return${source ? '?source=' + source : ''}`; // IPN webhook
 
     // Tạo TxnRef duy nhất: ID Hóa Đơn + Timestamp
