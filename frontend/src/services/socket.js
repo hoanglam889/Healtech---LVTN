@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'http://14.225.218.191:3000';
+const hostname = window.location.hostname;
+const SOCKET_URL = `http://${hostname}:3000`;
 
 export const socket = io(SOCKET_URL, {
   transports: ['websocket'],
