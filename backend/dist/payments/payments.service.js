@@ -49,7 +49,8 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             throw new common_1.BadRequestException('Không tìm thấy hóa đơn');
         }
         const totalAmount = amount || Number(invoice.totalAmount);
-        const returnUrl = `http://localhost:3000/payments/vnpay-return${source ? '?source=' + source : ''}`;
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+        const returnUrl = `${backendUrl}/payments/vnpay-return${source ? '?source=' + source : ''}`;
         const txnRef = `${invoice.id}_${Date.now()}`;
         const urlString = this.vnpayService.buildPaymentUrl({
             vnp_Amount: totalAmount,

@@ -34,7 +34,8 @@ export class PaymentsController {
     const source = query.source || 'reception';
     const result = await this.paymentsService.vnpayReturn(query as any);
     // Redirect về Frontend hiển thị kết quả
-    const frontendUrl = `http://localhost:5173/payment-result?status=${result.status}&invoiceId=${result.invoiceId}&amount=${result.amount}&message=${encodeURIComponent(result.message)}&source=${source}`;
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = `${baseUrl}/payment-result?status=${result.status}&invoiceId=${result.invoiceId}&amount=${result.amount}&message=${encodeURIComponent(result.message)}&source=${source}`;
     return res.redirect(frontendUrl);
   }
 }

@@ -39,7 +39,8 @@ export class PaymentsService {
     }
 
     const totalAmount = amount || Number(invoice.totalAmount);
-    const returnUrl = `http://localhost:3000/payments/vnpay-return${source ? '?source=' + source : ''}`; // IPN webhook
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const returnUrl = `${backendUrl}/payments/vnpay-return${source ? '?source=' + source : ''}`; // IPN webhook
 
     // Tạo TxnRef duy nhất: ID Hóa Đơn + Timestamp
     const txnRef = `${invoice.id}_${Date.now()}`;
