@@ -1,7 +1,9 @@
 import { io } from 'socket.io-client';
 
 const hostname = window.location.hostname;
-const SOCKET_URL = `http://${hostname}:3000`;
+const SOCKET_URL = hostname.includes('duckdns.org')
+  ? 'https://healtech-api.duckdns.org'
+  : `http://${hostname}:3000`;
 
 export const socket = io(SOCKET_URL, {
   transports: ['websocket'],

@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const hostname = window.location.hostname;
-export const BASE_URL = `http://${hostname}:3000/`;
+export const BASE_URL = hostname.includes('duckdns.org') 
+  ? 'https://healtech-api.duckdns.org/' 
+  : `http://${hostname}:3000/`;
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
