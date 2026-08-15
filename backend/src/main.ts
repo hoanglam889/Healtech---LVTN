@@ -3,6 +3,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: __dirname + '/../.env' });
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 

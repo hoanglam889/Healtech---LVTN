@@ -37,14 +37,14 @@ __decorate([
     (0, typeorm_1.Column)('enum', {
         name: 'old_status',
         nullable: true,
-        enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DOING_SERVICE', 'DONE', 'CANCELLED'],
+        enum: ['PENDING', 'BOOKED', 'WAITING', 'EXAMINING', 'DOING_SERVICE', 'DONE', 'CANCELLED'],
     }),
     __metadata("design:type", Object)
 ], AppointmentStatusLogs.prototype, "oldStatus", void 0);
 __decorate([
     (0, typeorm_1.Column)('enum', {
         name: 'new_status',
-        enum: ['BOOKED', 'WAITING', 'EXAMINING', 'DOING_SERVICE', 'DONE', 'CANCELLED'],
+        enum: ['PENDING', 'BOOKED', 'WAITING', 'EXAMINING', 'DOING_SERVICE', 'DONE', 'CANCELLED'],
     }),
     __metadata("design:type", String)
 ], AppointmentStatusLogs.prototype, "newStatus", void 0);
