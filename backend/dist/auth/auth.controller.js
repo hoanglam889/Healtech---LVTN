@@ -30,7 +30,8 @@ let AuthController = class AuthController {
         const loginData = await this.authService.staffLogin(email, password);
         res.cookie('acces_token', loginData.access_token, {
             httpOnly: true,
-            secure: false,
+            secure: true,
+            sameSite: 'none',
             maxAge: 5 * 60 * 60 * 1000,
         });
         const { access_token, ...userData } = loginData;
@@ -44,8 +45,9 @@ let AuthController = class AuthController {
         const loginData = await this.authService.patientLogin(email, password);
         res.cookie('acces_token', loginData.access_token, {
             httpOnly: true,
-            secure: false,
-            maxAge: 5 * 60 * 60 * 1000,
+            secure: true,
+            sameSite: 'none',
+            maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         const { access_token, ...userData } = loginData;
         return userData;
@@ -67,8 +69,9 @@ let AuthController = class AuthController {
         if (verifyData.success) {
             res.cookie('acces_token', verifyData.access_token, {
                 httpOnly: true,
-                secure: false,
-                maxAge: 5 * 60 * 60 * 1000,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 30 * 24 * 60 * 60 * 1000,
             });
             const { access_token, ...userData } = verifyData;
             return userData;
