@@ -56,7 +56,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         const returnUrl = `${backendUrl}/payments/vnpay-return${source ? '?source=' + source : ''}`;
         const txnRef = `${invoice.id}_${Date.now()}`;
         const urlString = this.vnpayService.buildPaymentUrl({
-            vnp_Amount: totalAmount * 100,
+            vnp_Amount: totalAmount,
             vnp_IpAddr: '127.0.0.1',
             vnp_TxnRef: txnRef,
             vnp_OrderInfo: `Thanh toan hoa don ${invoice.id}`,
