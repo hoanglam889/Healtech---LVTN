@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as Icons from 'lucide-react';
 import apiClient from '../../services/apiClient';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 export default function FloatingAIAssistant({ isChatOpen, setIsChatOpen }) {
+  const { confirm } = useConfirm();
   const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem('ai_chat_history');
@@ -25,7 +27,7 @@ export default function FloatingAIAssistant({ isChatOpen, setIsChatOpen }) {
     }
   }, [messages, isChatOpen]);
 
-  const toggleChat = () => {
+  const toggleChat = async () => {
     const newState = !isChatOpen;
     setIsChatOpen(newState);
   };
@@ -52,8 +54,8 @@ export default function FloatingAIAssistant({ isChatOpen, setIsChatOpen }) {
     }
   };
 
-  const handleClearHistory = () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ đoạn hội thoại này không?')) {
+  const handleClearHistory = async () => {
+    if (await confirm('Bạn có chắc chắn muốn xóa toàn bộ đoạn hội thoại này không?')) {
       const defaultMsg = [{ role: 'ai', text: 'Chào bạn! Mình là Trợ lý AI của Healtech. Bạn đang có triệu chứng gì, hãy kể cho mình nghe để mình tư vấn chuyên khoa phù hợp nhé!' }];
       setMessages(defaultMsg);
       localStorage.setItem('ai_chat_history', JSON.stringify(defaultMsg));

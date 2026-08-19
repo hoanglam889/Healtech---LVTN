@@ -6,8 +6,10 @@ import { getSpecialties } from '../../../services/specialtyService';
 import { BASE_URL } from '../../../services/apiClient';
 import { uploadImage } from '../../../services/uploadService';
 import { useToast } from '../../../contexts/ToastContext';
+import { useConfirm } from '../../../contexts/ConfirmContext';
 
 export default function AdminUsers({ roleType }) {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [specialties, setSpecialties] = useState([]);
@@ -132,7 +134,7 @@ export default function AdminUsers({ roleType }) {
     }
 
     const nextStatusText = userItem.status === 'ACTIVE' ? 'KHOÁ' : 'MỞ KHOÁ';
-    if (!window.confirm(`Bạn có chắc chắn muốn ${nextStatusText} tài khoản của ${userItem.fullName}?`)) {
+    if (!await confirm(`Bạn có chắc chắn muốn ${nextStatusText} tài khoản của ${userItem.fullName}?`)) {
       return;
     }
 

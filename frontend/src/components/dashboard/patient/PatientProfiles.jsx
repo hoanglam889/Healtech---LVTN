@@ -3,8 +3,10 @@ import * as Icons from 'lucide-react';
 import { getPatientsByAccountId, deletePatient } from '../../../services/patientService';
 import PatientProfileModal from './PatientProfileModal';
 import { useToast } from '../../../contexts/ToastContext';
+import { useConfirm } from '../../../contexts/ConfirmContext';
 
 const PatientProfiles = ({ user }) => {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,8 +46,8 @@ const PatientProfiles = ({ user }) => {
   };
 
   // Xóa hồ sơ
-  const handleDelete = (id, name) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa hồ sơ của bệnh nhân "${name}" không?`)) {
+  const handleDelete = async (id, name) => {
+    if (await confirm(`Bạn có chắc chắn muốn xóa hồ sơ của bệnh nhân "${name}" không?`)) {
       deletePatient(id)
         .then(() => {
           loadData();

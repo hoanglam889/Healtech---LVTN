@@ -7,7 +7,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { socket } from '../../../services/socket';
 import  RatingModal  from './RatingModal';
 import { useToast } from '../../../contexts/ToastContext';
+import { useConfirm } from '../../../contexts/ConfirmContext';
 const MyAppointments = ({ user, onBookClick }) => {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,8 +46,8 @@ const MyAppointments = ({ user, onBookClick }) => {
   }, [user?.id]);
 
   // Hàm xử lý Hủy lịch khám
-  const handleCancel = (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn hủy lịch khám này không? Thao tác này không thể hoàn tác.')) {
+  const handleCancel = async (id) => {
+    if (await confirm('Bạn có chắc chắn muốn hủy lịch khám này không? Thao tác này không thể hoàn tác.')) {
       updateAppointment(id, { status: 'CANCELLED' })
         .then(() => {
           showToast('Hủy lịch khám thành công.', 'success');
@@ -75,7 +77,7 @@ const MyAppointments = ({ user, onBookClick }) => {
 
   // Hàm xác nhận đã làm xong dịch vụ
   const handleCompleteService = async (appt) => {
-    if (window.confirm('Bạn xác nhận đã có kết quả và muốn quay lại phòng khám?')) {
+    if (await confirm('Bạn xác nhận đã có kết quả và muốn quay lại phòng khám?')) {
       try {
         await updateAppointment(appt.id, { status: 'WAITING' });
         showToast('Đã thông báo cho bác sĩ! Vui lòng quay lại phòng khám và chờ gọi tên.', 'warning');

@@ -3,8 +3,10 @@ import axios from 'axios';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../../services/apiClient';
 import { useToast } from '../../../contexts/ToastContext';
+import { useConfirm } from '../../../contexts/ConfirmContext';
 
 const AdminServices = () => {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +48,8 @@ const AdminServices = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    if(window.confirm('Bạn có chắc chắn muốn xóa dịch vụ này?')) {
+  const handleDelete = async (id) => {
+    if(await confirm('Bạn có chắc chắn muốn xóa dịch vụ này?')) {
       axios.delete(`${BASE_URL}services/${id}`)
         .then(() => fetchServices())
         .catch(err => console.error(err));

@@ -7,6 +7,7 @@ import WeeklyMatrixGrid from './WeeklyMatrixGrid';
 import ScheduleListView from './ScheduleListView';
 import ScheduleModal from './ScheduleModal';
 import { useToast } from '../../../contexts/ToastContext';
+import { useConfirm } from '../../../contexts/ConfirmContext';
 
 const sessions = [
   { id: 'Sáng', name: 'Buổi Sáng', time: '08:00 - 12:00', prefix: 'Sáng' },
@@ -15,6 +16,7 @@ const sessions = [
 ];
 
 export default function AdminSchedules() {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [schedules, setSchedules] = useState([]);
   const [shifts, setShifts] = useState([]);
@@ -109,7 +111,7 @@ export default function AdminSchedules() {
 
   // 3. Xóa ca trực
   const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa ca trực của bác sĩ này trong cả buổi trực không?')) return;
+    if (!await confirm('Bạn có chắc chắn muốn xóa ca trực của bác sĩ này trong cả buổi trực không?')) return;
     try {
       await deleteAdminSchedule(id);
       loadData();

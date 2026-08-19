@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getSpecialties, createSpecialty, updateSpecialty, deleteSpecialty } from '../../../services/specialtyService';
 import { useToast } from '../../../contexts/ToastContext';
+import { useConfirm } from '../../../contexts/ConfirmContext';
 
 // Danh sách các icon chuyên khoa được hỗ trợ đẹp mắt
 const AVAILABLE_ICONS = [
@@ -19,6 +20,7 @@ const AVAILABLE_ICONS = [
 ];
 
 export default function AdminSpecialties() {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,7 @@ export default function AdminSpecialties() {
 
   // Xóa chuyên khoa
   const handleDelete = async (spec) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa chuyên khoa "${spec.name}"? Hành động này có thể ảnh hưởng đến thông tin bác sĩ trực thuộc!`)) {
+    if (!await confirm(`Bạn có chắc chắn muốn xóa chuyên khoa "${spec.name}"? Hành động này có thể ảnh hưởng đến thông tin bác sĩ trực thuộc!`)) {
       return;
     }
     try {

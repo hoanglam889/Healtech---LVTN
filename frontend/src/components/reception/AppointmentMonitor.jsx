@@ -3,8 +3,10 @@ import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 import { socket } from '../../services/socket';
 import { useToast } from '../../contexts/ToastContext';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 export default function AppointmentMonitor() {
+  const { confirm } = useConfirm();
   const { showToast } = useToast();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ export default function AppointmentMonitor() {
 
   // Handle Cancel Appointment
   const handleCancel = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn HỦY lịch hẹn này? Thao tác không thể hoàn tác.')) return;
+    if (!await confirm('Bạn có chắc chắn muốn HỦY lịch hẹn này? Thao tác không thể hoàn tác.')) return;
     try {
       await updateAppointment(id, { status: 'CANCELLED' });
       loadAppointments(true);
