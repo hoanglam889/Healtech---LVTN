@@ -3,8 +3,10 @@ import axios from 'axios';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../../services/apiClient';
 import { uploadImage } from '../../../services/uploadService';
+import { useToast } from '../../../contexts/ToastContext';
 
 const AdminArticles = () => {
+  const { showToast } = useToast();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -82,7 +84,7 @@ const AdminArticles = () => {
       }
     } catch (err) {
       console.error('Lỗi khi tải ảnh:', err);
-      alert('Có lỗi xảy ra khi tải ảnh lên.');
+      showToast('Có lỗi xảy ra khi tải ảnh lên.', 'error');
     } finally {
       setIsUploading(false);
     }
@@ -107,14 +109,14 @@ const AdminArticles = () => {
           fetchArticles();
           resetForm();
         })
-        .catch(err => alert('Lỗi khi cập nhật bài viết'));
+        .catch(err => showToast('Lỗi khi cập nhật bài viết', 'error'));
     } else {
       axios.post(`${BASE_URL}articles`, payload)
         .then(() => {
           fetchArticles();
           resetForm();
         })
-        .catch(err => alert('Lỗi khi tạo bài viết'));
+        .catch(err => showToast('Lỗi khi tạo bài viết', 'error'));
     }
   };
 

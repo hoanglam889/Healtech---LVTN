@@ -9,8 +9,10 @@ import AdminTransactions from '../../components/dashboard/admin/AdminTransaction
 import AdminArticles from '../../components/dashboard/admin/AdminArticles';
 import AdminRatings from '../../components/dashboard/admin/AdminRatings';
 import AdminServices from '../../components/dashboard/admin/AdminServices';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AdminDashboard() {
+  const { showToast } = useToast();
   // Trạng thái admin đang đăng nhập (lấy từ localStorage độc lập)
   const [adminUser, setAdminUser] = useState(() => {
     try {
@@ -33,7 +35,7 @@ export default function AdminDashboard() {
   // Xử lý đăng nhập thành công
   const handleLoginSuccess = (user) => {
     if (user.role !== 'ADMIN') {
-      alert('Tài khoản của bạn không có quyền truy cập trang quản trị!');
+      showToast('Tài khoản của bạn không có quyền truy cập trang quản trị!', 'error');
       return;
     }
     setAdminUser(user);

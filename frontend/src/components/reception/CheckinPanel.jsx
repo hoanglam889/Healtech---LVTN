@@ -5,6 +5,7 @@ import { getAllAppointments, updateAppointment } from '../../services/appointmen
 import PatientProfileModal from '../dashboard/patient/PatientProfileModal';
 import PaymentModal from './PaymentModal';
 import { createPaymentUrl } from '../../services/invoiceService';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function CheckinPanel() {
   const [searchCode, setSearchCode] = useState('');
@@ -13,7 +14,7 @@ export default function CheckinPanel() {
   const [loading, setLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
-  const [notification, setNotification] = useState(null);
+  const { showToast } = useToast();
   const [isEditingPatient, setIsEditingPatient] = useState(false);
   //state để hiện trạng thái đóng mở modal thanh toán
   const [selectedApptToPay, setSelectedApptToPay] = useState(null);

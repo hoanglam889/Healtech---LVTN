@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useToast } from '../../contexts/ToastContext';
 
 const ProfileForm = ({ onAddProfile }) => {
+  const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = (e) => {
@@ -16,7 +18,7 @@ const ProfileForm = ({ onAddProfile }) => {
 
     // Kiểm tra các trường bắt buộc
     if (!name || !phone || !dob) {
-      alert('Vui lòng điền đầy đủ các thông tin bắt buộc.');
+      showToast('Vui lòng điền đầy đủ các thông tin bắt buộc.', 'warning');
       return;
     }
 

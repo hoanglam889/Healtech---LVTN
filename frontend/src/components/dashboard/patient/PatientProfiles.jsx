@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getPatientsByAccountId, deletePatient } from '../../../services/patientService';
 import PatientProfileModal from './PatientProfileModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const PatientProfiles = ({ user }) => {
+  const { showToast } = useToast();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,7 @@ const PatientProfiles = ({ user }) => {
         })
         .catch((err) => {
           console.error('Lỗi khi xóa hồ sơ:', err);
-          alert('Không thể xóa hồ sơ này vì đã có lịch hẹn liên kết.');
+          showToast('Không thể xóa hồ sơ này vì đã có lịch hẹn liên kết.', 'error');
         });
     }
   };

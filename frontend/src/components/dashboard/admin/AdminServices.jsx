@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../../services/apiClient';
+import { useToast } from '../../../contexts/ToastContext';
 
 const AdminServices = () => {
+  const { showToast } = useToast();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -70,7 +72,7 @@ const AdminServices = () => {
           fetchServices();
           resetForm();
         })
-        .catch(err => alert('Lỗi khi cập nhật dịch vụ'));
+        .catch(err => showToast('Lỗi khi cập nhật dịch vụ', 'error'));
     } else {
       // Nhánh Thêm Mới (Create)
       axios.post(`${BASE_URL}services`, payload)
@@ -78,7 +80,7 @@ const AdminServices = () => {
           fetchServices();
           resetForm();
         })
-        .catch(err => alert('Lỗi khi tạo dịch vụ'));
+        .catch(err => showToast('Lỗi khi tạo dịch vụ', 'error'));
     }
   };
 

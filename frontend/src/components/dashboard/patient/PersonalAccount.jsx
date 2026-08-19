@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { updatePatientAccount } from '../../../services/authService';
+import { useToast } from '../../../contexts/ToastContext';
 
 export default function PersonalAccount({ user }) {
   const [email, setEmail] = useState(user?.email || '');
@@ -9,12 +10,7 @@ export default function PersonalAccount({ user }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null);
-
-  const showToast = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  const { showToast } = useToast();
 
   const handleUpdateAccount = async (e) => {
     e.preventDefault();

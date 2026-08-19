@@ -6,7 +6,9 @@ import AppointmentCard from '../AppointmentCard';
 import { QRCodeSVG } from 'qrcode.react';
 import { socket } from '../../../services/socket';
 import  RatingModal  from './RatingModal';
+import { useToast } from '../../../contexts/ToastContext';
 const MyAppointments = ({ user, onBookClick }) => {
+  const { showToast } = useToast();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedQr, setSelectedQr] = useState(null); // Lưu mã QR khám hiển thị Modal
@@ -46,12 +48,12 @@ const MyAppointments = ({ user, onBookClick }) => {
     if (window.confirm('Bạn có chắc chắn muốn hủy lịch khám này không? Thao tác này không thể hoàn tác.')) {
       updateAppointment(id, { status: 'CANCELLED' })
         .then(() => {
-          alert('Hủy lịch khám thành công.');
+          showToast('Hủy lịch khám thành công.', 'success');
           loadAppointments();
         })
         .catch((err) => {
           console.error('Lỗi khi hủy lịch khám:', err);
-          alert('Không thể hủy lịch khám. Vui lòng thử lại sau.');
+          showToast('Không thể hủy lịch khám. Vui lòng thử lại sau.', 'error');
         });
     }
   };
@@ -59,7 +61,7 @@ const MyAppointments = ({ user, onBookClick }) => {
   // Hàm xử lý Thanh toán Dịch vụ
   const handlePayService = async (appt) => {
     if (!appt.invoices?.id) {
-      alert('Không tìm thấy thông tin hóa đơn!');
+      showToast('Không tìm thấy thông tin hóa đơn!', 'error');
       return;
     }
     try {
@@ -67,7 +69,7 @@ const MyAppointments = ({ user, onBookClick }) => {
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      alert('Không thể tạo link thanh toán, vui lòng thử lại!');
+      showToast('Không thể tạo link thanh toán, vui lòng thử lại!', 'error');
     }
   };
 
@@ -76,11 +78,11 @@ const MyAppointments = ({ user, onBookClick }) => {
     if (window.confirm('Bạn xác nhận đã có kết quả và muốn quay lại phòng khám?')) {
       try {
         await updateAppointment(appt.id, { status: 'WAITING' });
-        alert('Đã thông báo cho bác sĩ! Vui lòng quay lại phòng khám và chờ gọi tên.');
+        showToast('Đã thông báo cho bác sĩ! Vui lòng quay lại phòng khám và chờ gọi tên.', 'warning');
         loadAppointments();
       } catch (err) {
         console.error(err);
-        alert('Có lỗi xảy ra, vui lòng thử lại!');
+        showToast('Có lỗi xảy ra, vui lòng thử lại!', 'error');
       }
     }
   };

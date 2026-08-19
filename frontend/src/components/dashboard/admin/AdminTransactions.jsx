@@ -3,6 +3,7 @@ import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../../services/appointmentService';
 import { getDoctors } from '../../../services/doctorService';
 import { socket } from '../../../services/socket';
+import { useToast } from '../../../contexts/ToastContext';
 
 export default function AdminTransactions() {
   const [appointments, setAppointments] = useState([]);
@@ -13,7 +14,7 @@ export default function AdminTransactions() {
   const [rescheduleItem, setRescheduleItem] = useState(null);
   const [rescheduleData, setRescheduleData] = useState({ date: '', time: '', doctorId: '' });
   const [isConfirmingReschedule, setIsConfirmingReschedule] = useState(false);
-  const [notification, setNotification] = useState(null);
+  const { showToast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('ALL'); // 'ALL' | 'PAID' | 'UNPAID' | 'CANCELLED'
@@ -45,11 +46,6 @@ export default function AdminTransactions() {
 
     return () => socket.off('invoice_paid');
   }, []);
-
-  const showToast = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   // Xử lý Hủy lịch khám (Gọi API)
   const handleCancel = async (id) => {

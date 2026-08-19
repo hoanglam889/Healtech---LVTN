@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { BASE_URL } from '../../services/apiClient';
+import { useToast } from '../../contexts/ToastContext';
 
 const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate, onPayService, onCompleteService }) => {
+  const { showToast } = useToast();
   const [showTimeline, setShowTimeline] = useState(false);
   const isDone = apt.status === 'DONE';
   const isUpcoming = apt.status === 'BOOKED';
@@ -94,7 +96,7 @@ const AppointmentCard = ({ apt, onShowQr, formatDate, onCancel, onRate, onPaySer
               <button 
                 onClick={() => {
                   if (isPaid) {
-                    alert('Bạn không thể hủy lịch này vì đơn khám đã được thanh toán.\nVui lòng liên hệ trực tiếp với Phòng khám để được hỗ trợ đổi lịch.');
+                    showToast('Bạn không thể hủy lịch này vì đơn khám đã được thanh toán.\nVui lòng liên hệ trực tiếp với Phòng khám để được hỗ trợ đổi lịch.', 'error');
                   } else {
                     onCancel(apt.id);
                   }

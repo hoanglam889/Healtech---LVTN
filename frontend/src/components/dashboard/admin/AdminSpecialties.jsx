@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getSpecialties, createSpecialty, updateSpecialty, deleteSpecialty } from '../../../services/specialtyService';
+import { useToast } from '../../../contexts/ToastContext';
 
 // Danh sách các icon chuyên khoa được hỗ trợ đẹp mắt
 const AVAILABLE_ICONS = [
@@ -18,6 +19,7 @@ const AVAILABLE_ICONS = [
 ];
 
 export default function AdminSpecialties() {
+  const { showToast } = useToast();
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,11 +78,11 @@ export default function AdminSpecialties() {
     }
     try {
       await deleteSpecialty(spec.id);
-      alert('Xóa chuyên khoa thành công!');
+      showToast('Xóa chuyên khoa thành công!', 'success');
       loadSpecialties();
     } catch (err) {
       console.error(err);
-      alert('Có lỗi xảy ra hoặc chuyên khoa đang được sử dụng bởi bác sĩ khác nên không thể xóa!');
+      showToast('Có lỗi xảy ra hoặc chuyên khoa đang được sử dụng bởi bác sĩ khác nên không thể xóa!', 'error');
     }
   };
 
@@ -88,7 +90,7 @@ export default function AdminSpecialties() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Vui lòng điền tên chuyên khoa!');
+      showToast('Vui lòng điền tên chuyên khoa!', 'warning');
       return;
     }
 
@@ -101,16 +103,16 @@ export default function AdminSpecialties() {
     try {
       if (editingSpecialty) {
         await updateSpecialty(editingSpecialty.id, payload);
-        alert('Cập nhật chuyên khoa thành công!');
+        showToast('Cập nhật chuyên khoa thành công!', 'success');
       } else {
         await createSpecialty(payload);
-        alert('Tạo chuyên khoa mới thành công!');
+        showToast('Tạo chuyên khoa mới thành công!', 'success');
       }
       setIsModalOpen(false);
       loadSpecialties();
     } catch (err) {
       console.error(err);
-      alert('Có lỗi xảy ra khi lưu thông tin chuyên khoa!');
+      showToast('Có lỗi xảy ra khi lưu thông tin chuyên khoa!', 'error');
     }
   };
 

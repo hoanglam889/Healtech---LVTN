@@ -4,10 +4,12 @@ import { getAllAppointments, updateAppointment, createAppointment } from '../../
 import { createPatient } from '../../services/patientService';
 import { getDoctors } from '../../services/doctorService';
 import { socket } from '../../services/socket';
+import { useToast } from '../../contexts/ToastContext';
+
 export default function ClinicQueue() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null);
+  const { showToast } = useToast();
   const [cancelConfirmId, setCancelConfirmId] = useState(null);
   
   const [doctors, setDoctors] = useState([]);
@@ -60,10 +62,7 @@ export default function ClinicQueue() {
     return () => socket.off('appointment_updated');
   }, []);
 
-  const showToast = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+
 
   const handleCancelAppointment = async (id) => {
     try {
@@ -200,16 +199,6 @@ export default function ClinicQueue() {
   return (
     <div className="space-y-6">
       
-      {/* POPUP NOTIFICATION */}
-      {notification && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl text-white font-bold border transition-all animate-[fadeIn_0.2s_ease-out] ${
-          notification.type === 'success' ? 'bg-emerald-500 border-emerald-600' : 
-          notification.type === 'warning' ? 'bg-amber-500 border-amber-600' : 'bg-rose-500 border-rose-600'
-        }`}>
-          <Icons.Volume2 className="w-5 h-5 animate-bounce" />
-          <span>{notification.message}</span>
-        </div>
-      )}
 
       {/* HEADER SECTION WITH REFRESH BUTTON */}
       <div className="flex items-center justify-between">

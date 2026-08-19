@@ -3,6 +3,7 @@ import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 import { getAllServices, getAppointmentServices, addAppointmentService, removeAppointmentService } from '../../services/clinicService';
 import { socket } from '../../services/socket';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function DoctorClinicQueue({ staffUser }) {
   const [appointments, setAppointments] = useState([]);
@@ -26,7 +27,7 @@ export default function DoctorClinicQueue({ staffUser }) {
   const [diagnosis, setDiagnosis] = useState('');
   const [notes, setNotes] = useState('');
   
-  const [notification, setNotification] = useState(null);
+  const { showToast } = useToast();
 
   // Lấy danh mục dịch vụ gốc
   const loadAvailableServices = async () => {
@@ -92,11 +93,6 @@ export default function DoctorClinicQueue({ staffUser }) {
     });
     return () => socket.off('appointment_updated');
   }, []);
-
-  const showToast = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   // Get waiting list
   const getWaitingList = () => {
@@ -294,17 +290,6 @@ export default function DoctorClinicQueue({ staffUser }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative overflow-hidden">
       
-      {/* POPUP NOTIFICATION */}
-      {notification && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl text-white font-bold border transition-all animate-[fadeIn_0.2s_ease-out] ${
-          notification.type === 'success' ? 'bg-emerald-500 border-emerald-600' : 
-          notification.type === 'warning' ? 'bg-amber-500 border-amber-600' : 'bg-rose-500 border-rose-600'
-        }`}>
-          <Icons.Activity className="w-5 h-5 animate-pulse" />
-          <span>{notification.message}</span>
-        </div>
-      )}
-
       {/* PANEL TRÁI (COL-4): DANH SÁCH BỆNH NHÂN CHỜ KHÁM */}
       <div className="lg:col-span-4 bg-white rounded-3xl border border-gray-100 shadow-xl flex flex-col overflow-hidden max-h-[calc(100vh-160px)]">
         <div className="p-4 bg-gray-50/70 border-b border-gray-100 flex flex-col gap-3 shrink-0">

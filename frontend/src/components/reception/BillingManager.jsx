@@ -6,12 +6,13 @@ import { socket } from '../../services/socket';
 import PaymentModal from './PaymentModal';
 import InvoiceTemplate from './InvoiceTemplate';
 import { useReactToPrint } from 'react-to-print';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function BillingManager() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('UNPAID'); // 'UNPAID' | 'PAID'
-  const [notification, setNotification] = useState(null);
+  const { showToast } = useToast();
   const [selectedApptToPay, setSelectedApptToPay] = useState(null);
   
   const [apptToPrint, setApptToPrint] = useState(null);
@@ -71,11 +72,6 @@ export default function BillingManager() {
     };
   }, []);
 
-  const showToast = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
   // Filter bills
   const getFilteredBills = () => {
     return appointments.filter((appt) => {
@@ -134,14 +130,6 @@ export default function BillingManager() {
   return (
     <div className="space-y-6">
       
-      {/* POPUP NOTIFICATION */}
-      {notification && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl text-white font-bold bg-emerald-500 border border-emerald-600 transition-all animate-[fadeIn_0.2s_ease-out]">
-          <Icons.CheckCircle className="w-5 h-5" />
-          <span>{notification.message}</span>
-        </div>
-      )}
-
       {/* FILTER BUTTONS & QUICK STATS */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
         

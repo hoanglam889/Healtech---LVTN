@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import { getAllAppointments, updateAppointment } from '../../services/appointmentService';
 import { socket } from '../../services/socket';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AppointmentMonitor() {
+  const { showToast } = useToast();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(new Date());
@@ -73,7 +75,7 @@ export default function AppointmentMonitor() {
       loadAppointments(true);
     } catch (err) {
       console.error(err);
-      alert('Lỗi khi hủy lịch hẹn!');
+      showToast('Lỗi khi hủy lịch hẹn!', 'error');
     }
   };
 
@@ -221,7 +223,7 @@ export default function AppointmentMonitor() {
                         <button
                           onClick={() => {
                             if (isPaid) {
-                              alert('Không thể hủy lịch này vì bệnh nhân đã thanh toán (VNPAY).\nVui lòng liên hệ bệnh nhân để đổi lịch thay vì hủy.');
+                              showToast('Không thể hủy lịch này vì bệnh nhân đã thanh toán (VNPAY).\nVui lòng liên hệ bệnh nhân để đổi lịch thay vì hủy.', 'error');
                             } else {
                               handleCancel(appt.id);
                             }

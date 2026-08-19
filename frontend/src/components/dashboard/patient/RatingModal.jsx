@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { createRating } from '../../../services/ratingService';
+import { useToast } from '../../../contexts/ToastContext';
 
 const RatingModal = ({ appointment, onClose, onSuccess }) => {
+  const { showToast } = useToast();
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -16,9 +18,9 @@ const RatingModal = ({ appointment, onClose, onSuccess }) => {
         comment: comment,
       });
     onSuccess(); // Báo thành công để đóng Modal
-    alert("Cảm ơn bác đã đánh giá! Cực kỳ trân trọng!"); // Hiện thông báo vui vẻ
+    showToast("Cảm ơn bác đã đánh giá! Cực kỳ trân trọng!", 'success'); // Hiện thông báo vui vẻ
     } catch (error) {
-      alert("Chết dở, có lỗi gì đó xảy ra khi gửi đánh giá rùi!");
+      showToast("Chết dở, có lỗi gì đó xảy ra khi gửi đánh giá rùi!", 'error');
       console.error(error);
     }
   };

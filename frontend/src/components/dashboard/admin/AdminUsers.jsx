@@ -5,8 +5,10 @@ import { getAllPatients } from '../../../services/patientService';
 import { getSpecialties } from '../../../services/specialtyService';
 import { BASE_URL } from '../../../services/apiClient';
 import { uploadImage } from '../../../services/uploadService';
+import { useToast } from '../../../contexts/ToastContext';
 
 export default function AdminUsers({ roleType }) {
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +127,7 @@ export default function AdminUsers({ roleType }) {
   // Khóa / Mở khóa tài khoản Bác sĩ
   const handleToggleStatus = async (userItem) => {
     if (userItem.role !== 'DOCTOR') {
-      alert('Không thể thay đổi trạng thái của tài khoản bệnh nhân!');
+      showToast('Không thể thay đổi trạng thái của tài khoản bệnh nhân!', 'error');
       return;
     }
 
@@ -140,11 +142,11 @@ export default function AdminUsers({ roleType }) {
       } else {
         await updateDoctor(userItem.id, { isActive: true });
       }
-      alert(`${nextStatusText} tài khoản bác sĩ thành công!`);
+      showToast(`${nextStatusText} tài khoản bác sĩ thành công!`, 'success');
       loadData();
     } catch (err) {
       console.error(err);
-      alert('Có lỗi xảy ra khi cập nhật trạng thái tài khoản!');
+      showToast('Có lỗi xảy ra khi cập nhật trạng thái tài khoản!', 'error');
     }
   };
 
@@ -165,7 +167,7 @@ export default function AdminUsers({ roleType }) {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Kích thước ảnh không được vượt quá 5MB!');
+      showToast('Kích thước ảnh không được vượt quá 5MB!', 'error');
       return;
     }
 

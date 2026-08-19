@@ -6,6 +6,7 @@ import { getSpecialties } from '../../../services/specialtyService';
 import WeeklyMatrixGrid from './WeeklyMatrixGrid';
 import ScheduleListView from './ScheduleListView';
 import ScheduleModal from './ScheduleModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const sessions = [
   { id: 'Sáng', name: 'Buổi Sáng', time: '08:00 - 12:00', prefix: 'Sáng' },
@@ -14,6 +15,7 @@ const sessions = [
 ];
 
 export default function AdminSchedules() {
+  const { showToast } = useToast();
   const [schedules, setSchedules] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -113,7 +115,7 @@ export default function AdminSchedules() {
       loadData();
     } catch (err) {
       console.error(err);
-      alert('Không thể xóa ca trực!');
+      showToast('Không thể xóa ca trực!', 'error');
     }
   };
 
@@ -137,7 +139,7 @@ export default function AdminSchedules() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedDoctorId || !selectedShiftId || !selectedDate) {
-      alert('Vui lòng điền đủ thông tin!');
+      showToast('Vui lòng điền đủ thông tin!', 'warning');
       return;
     }
     try {
@@ -151,7 +153,7 @@ export default function AdminSchedules() {
       loadData();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Lỗi xếp ca trực!');
+      showToast(err.response?.data?.message || 'Lỗi xếp ca trực!', 'error');
     }
   };
 
