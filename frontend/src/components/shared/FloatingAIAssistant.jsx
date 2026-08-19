@@ -38,7 +38,7 @@ export default function FloatingAIAssistant({ isChatOpen, setIsChatOpen }) {
     setIsLoading(true);
 
     try {
-      const res = await apiClient.post('/ai/triage', { symptoms: userMsg });
+      const res = await apiClient.post('/ai/triage', { symptoms: userMsg }, { timeout: 30000 });
       if (res.data && res.data.suggestions) {
         setMessages(prev => [...prev, { role: 'ai', suggestions: res.data.suggestions }]);
       } else {

@@ -101,7 +101,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
 
         return parsed;
       } catch (geminiError) {
-        console.error('Lỗi từ Google Gemini API hoặc khi Parse JSON:', geminiError);
+        console.error('Lỗi từ Google Gemini API hoặc khi Parse JSON:', geminiError.message || geminiError);
         // Fallback an toàn nếu AI lỗi (trả về JSON mặc định để không bị 500)
         return {
           suggestions: [
