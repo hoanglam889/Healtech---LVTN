@@ -295,6 +295,18 @@ export class AppointmentsService {
       const currentStatus = appointment.status as string;
       const newStatus = appointmentFields.status as string;
 
+      // Không cho phép hủy nếu đã thanh toán
+      if (newStatus === 'CANCELLED') {
+        // Kiểm tra xem invoice là object hay array
+        const isPaid = Array.isArray(appointment.invoices) 
+          ? appointment.invoices.some(inv => inv.status === 'PAID')
+          : (appointment.invoices && appointment.invoices.status === 'PAID');
+          
+        if (isPaid) {
+          throw new BadRequestException('Không thể hủy lịch khám đã thanh toán thành công!');
+        }
+      }
+
       const validTransitions: Record<string, string[]> = {
         PENDING: ['BOOKED', 'CANCELLED'],
         BOOKED: ['WAITING', 'CANCELLED'],
@@ -332,6 +344,48 @@ export class AppointmentsService {
         (appointmentFields.appointmentTime && appointmentFields.appointmentTime !== appointment.appointmentTime) ||
         (appointmentFields.doctorProfileId && appointmentFields.doctorProfileId !== appointment.doctorProfileId);
         
+      if (isShiftChanged) {
+        const targetDoctorId = appointmentFields.doctorProfileId || appointment.doctorProfileId;
+        const targetDate = appointmentFields.appointmentDate || appointment.appointmentDate;
+        const targetTime = appointmentFields.appointmentTime || appointment.appointmentTime;
+
+        // 1. Kiểm tra bác sĩ có lịch làm việc vào ca này không
+        const schedule = await this.dataSource.manager
+          .createQueryBuilder('doctor_schedules', 'ds')
+          .innerJoinAndSelect('ds.shift', 's')
+          .where('ds.doctorProfileId = :doctorId', { doctorId: targetDoctorId })
+          .andWhere('ds.date = :date', { date: targetDate })
+          .andWhere('s.startTime <= :time', { time: targetTime })
+          .andWhere('s.endTime >= :time', { time: targetTime })
+          .getOne();
+
+        if (!schedule) {
+          throw new BadRequestException('Bác sĩ không có lịch làm việc vào khung giờ mới này. Không thể dời lịch.');
+        }
+
+        // 2. Kiểm tra giới hạn số lượng bệnh nhân của ca mới
+        const currentBookedCount = await this.dataSource.manager
+          .createQueryBuilder('appointments', 'a')
+          .where('a.doctorProfileId = :doctorId', { doctorId: targetDoctorId })
+          .andWhere('a.appointmentDate = :date', { date: targetDate })
+          .andWhere('a.appointmentTime >= :startTime', { startTime: schedule.shift.startTime })
+          .andWhere('a.appointmentTime <= :endTime', { endTime: schedule.shift.endTime })
+          .andWhere('a.status != :status', { status: 'CANCELLED' })
+          // Loại trừ chính lịch khám hiện tại đang được dời đi
+          .andWhere('a.id != :appointmentId', { appointmentId: id })
+          .getCount();
+
+        if (currentBookedCount >= schedule.maxPatients) {
+          throw new BadRequestException('Ca khám mới đã đạt tối đa số lượng bệnh nhân. Không thể dời lịch vào ca này.');
+        }
+
+        // Tự động chuyển status về BOOKED nếu đang là WAITING (đã check-in)
+        if (appointment.status === 'WAITING') {
+          appointmentFields.status = 'BOOKED';
+          appointmentFields.priorityScore = 1; // Reset điểm ưu tiên về mặc định
+        }
+      }
+
       await this.appointmentsRepo.update(id, appointmentFields);
       
       // Nếu có dời lịch, ghi log
@@ -552,6 +606,15 @@ export class AppointmentsService {
       if (appointment.patient?.patientAccountId !== user.id) {
         throw new ForbiddenException('Bạn không có quyền xóa lịch khám của người khác!');
       }
+    }
+
+    // Không cho phép xóa nếu đã thanh toán
+    const isPaid = Array.isArray(appointment.invoices) 
+      ? appointment.invoices.some(inv => inv.status === 'PAID')
+      : (appointment.invoices && appointment.invoices.status === 'PAID');
+      
+    if (isPaid) {
+      throw new BadRequestException('Không thể xóa lịch khám đã thanh toán thành công!');
     }
 
     await this.appointmentsRepo.remove(appointment);

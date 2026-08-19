@@ -349,13 +349,29 @@ export default function AdminTransactions() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase">Giờ khám</label>
-                    <input 
-                      type="time" 
+                    <label className="text-xs font-bold text-gray-500 uppercase">Ca Khám (Giờ khám)</label>
+                    <select 
                       value={rescheduleData.time}
                       onChange={(e) => setRescheduleData({...rescheduleData, time: e.target.value})}
                       className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-700 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
-                    />
+                    >
+                      <option value="">-- Chọn ca khám --</option>
+                      {(() => {
+                        if (!rescheduleData.date || !rescheduleData.doctorId) return null;
+                        
+                        const selectedDoc = doctors.find(d => d.id === parseInt(rescheduleData.doctorId));
+                        if (!selectedDoc || !selectedDoc.doctorSchedules) return null;
+
+                        const availableShifts = selectedDoc.doctorSchedules.filter(sched => sched.date === rescheduleData.date);
+                        
+                        return availableShifts.map(sched => {
+                          const st = sched.shift?.startTime?.slice(0, 5);
+                          const et = sched.shift?.endTime?.slice(0, 5);
+                          if (!st || !et) return null;
+                          return <option key={sched.id} value={st}>{st} - {et} {sched.isFull ? '(Đã đầy)' : ''}</option>;
+                        });
+                      })()}
+                    </select>
                   </div>
                 </div>
 

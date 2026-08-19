@@ -230,6 +230,14 @@ let AppointmentsService = class AppointmentsService {
         if (appointmentFields.status && appointment.status) {
             const currentStatus = appointment.status;
             const newStatus = appointmentFields.status;
+            if (newStatus === 'CANCELLED') {
+                const isPaid = Array.isArray(appointment.invoices)
+                    ? appointment.invoices.some(inv => inv.status === 'PAID')
+                    : (appointment.invoices && appointment.invoices.status === 'PAID');
+                if (isPaid) {
+                    throw new common_1.BadRequestException('Không thể hủy lịch khám đã thanh toán thành công!');
+                }
+            }
             const validTransitions = {
                 PENDING: ['BOOKED', 'CANCELLED'],
                 BOOKED: ['WAITING', 'CANCELLED'],
@@ -254,6 +262,38 @@ let AppointmentsService = class AppointmentsService {
             const isShiftChanged = (appointmentFields.appointmentDate && appointmentFields.appointmentDate !== appointment.appointmentDate) ||
                 (appointmentFields.appointmentTime && appointmentFields.appointmentTime !== appointment.appointmentTime) ||
                 (appointmentFields.doctorProfileId && appointmentFields.doctorProfileId !== appointment.doctorProfileId);
+            if (isShiftChanged) {
+                const targetDoctorId = appointmentFields.doctorProfileId || appointment.doctorProfileId;
+                const targetDate = appointmentFields.appointmentDate || appointment.appointmentDate;
+                const targetTime = appointmentFields.appointmentTime || appointment.appointmentTime;
+                const schedule = await this.dataSource.manager
+                    .createQueryBuilder('doctor_schedules', 'ds')
+                    .innerJoinAndSelect('ds.shift', 's')
+                    .where('ds.doctorProfileId = :doctorId', { doctorId: targetDoctorId })
+                    .andWhere('ds.date = :date', { date: targetDate })
+                    .andWhere('s.startTime <= :time', { time: targetTime })
+                    .andWhere('s.endTime >= :time', { time: targetTime })
+                    .getOne();
+                if (!schedule) {
+                    throw new common_1.BadRequestException('Bác sĩ không có lịch làm việc vào khung giờ mới này. Không thể dời lịch.');
+                }
+                const currentBookedCount = await this.dataSource.manager
+                    .createQueryBuilder('appointments', 'a')
+                    .where('a.doctorProfileId = :doctorId', { doctorId: targetDoctorId })
+                    .andWhere('a.appointmentDate = :date', { date: targetDate })
+                    .andWhere('a.appointmentTime >= :startTime', { startTime: schedule.shift.startTime })
+                    .andWhere('a.appointmentTime <= :endTime', { endTime: schedule.shift.endTime })
+                    .andWhere('a.status != :status', { status: 'CANCELLED' })
+                    .andWhere('a.id != :appointmentId', { appointmentId: id })
+                    .getCount();
+                if (currentBookedCount >= schedule.maxPatients) {
+                    throw new common_1.BadRequestException('Ca khám mới đã đạt tối đa số lượng bệnh nhân. Không thể dời lịch vào ca này.');
+                }
+                if (appointment.status === 'WAITING') {
+                    appointmentFields.status = 'BOOKED';
+                    appointmentFields.priorityScore = 1;
+                }
+            }
             await this.appointmentsRepo.update(id, appointmentFields);
             if (isShiftChanged) {
                 let noteStr = `Lễ tân dời lịch khám: `;
@@ -429,6 +469,12 @@ let AppointmentsService = class AppointmentsService {
             if (appointment.patient?.patientAccountId !== user.id) {
                 throw new common_1.ForbiddenException('Bạn không có quyền xóa lịch khám của người khác!');
             }
+        }
+        const isPaid = Array.isArray(appointment.invoices)
+            ? appointment.invoices.some(inv => inv.status === 'PAID')
+            : (appointment.invoices && appointment.invoices.status === 'PAID');
+        if (isPaid) {
+            throw new common_1.BadRequestException('Không thể xóa lịch khám đã thanh toán thành công!');
         }
         await this.appointmentsRepo.remove(appointment);
         return { success: true, message: `Đã xóa lịch hẹn #${id} thành công` };
