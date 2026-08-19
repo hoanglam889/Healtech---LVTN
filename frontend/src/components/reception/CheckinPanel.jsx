@@ -81,11 +81,6 @@ export default function CheckinPanel() {
     }
   }, [isScanning]);
 
-  // Show status popup notification
-  const showToast = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
-  };
 
   // Tra cứu mã lịch hẹn (đồng bộ fresh data từ backend)
   const handleSearch = async (code) => {
