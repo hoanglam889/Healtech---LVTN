@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const token = jwt.sign({ id: 1, role: 'PATIENT' }, 'HEATH_TECH_SECRET_KEY', { expiresIn: '1h' });
 
-fetch('http://14.225.218.191:3000/ai/triage', {
+fetch('http://localhost:3000/ai/triage', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

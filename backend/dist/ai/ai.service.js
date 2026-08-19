@@ -63,7 +63,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
   ]
 }`;
             const model = this.genAI.getGenerativeModel({
-                model: "gemini-flash-latest",
+                model: "gemini-2.5-flash",
                 generationConfig: {
                     responseMimeType: "application/json",
                     responseSchema: {
@@ -86,8 +86,24 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
                     },
                 },
             });
+            let result;
             try {
-                const result = await model.generateContent(prompt);
+                for (let attempt = 1; attempt <= 2; attempt++) {
+                    try {
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout kết nối tới Gemini API')), 15000));
+                        result = await Promise.race([
+                            model.generateContent(prompt),
+                            timeoutPromise
+                        ]);
+                        break;
+                    }
+                    catch (err) {
+                        console.error(`Lỗi Gemini API (lần ${attempt}/2):`, err.message || err);
+                        if (attempt === 2)
+                            throw err;
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
                 const text = result.response.text();
                 let cleanText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
                 const parsed = JSON.parse(cleanText);
@@ -104,13 +120,13 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
                 return parsed;
             }
             catch (geminiError) {
-                console.error('Lỗi từ Google Gemini API hoặc khi Parse JSON:', geminiError.message || geminiError);
+                console.error('Lỗi Gemini API hoặc Parse JSON, kích hoạt Fallback:', geminiError.message || geminiError);
                 return {
                     suggestions: [
                         {
                             specialty_id: specialties.length > 0 ? specialties[0].id : 1,
                             confidence: 50,
-                            reason: "Hệ thống AI đang quá tải. Dựa trên triệu chứng, chúng tôi tạm thời đề xuất chuyên khoa này. Vui lòng liên hệ lễ tân để được tư vấn chính xác hơn.",
+                            reason: "Hệ thống AI đang quá tải hoặc mất kết nối. Dựa trên triệu chứng, chúng tôi tạm thời đề xuất chuyên khoa này. Vui lòng liên hệ lễ tân để được tư vấn chính xác hơn.",
                             specialty_name: specialties.length > 0 ? specialties[0].name : 'Nội tổng quát',
                             specialty_icon: null
                         }
@@ -119,7 +135,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
             }
         }
         catch (error) {
-            console.error('Lỗi hệ thống AI Service:', error);
+            console.error('Lỗi hệ thống Database/Khởi tạo AI Service:', error);
             throw new common_1.InternalServerErrorException('Không thể kết nối tới dịch vụ AI');
         }
     }

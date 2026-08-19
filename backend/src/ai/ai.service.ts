@@ -57,7 +57,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
 
       // Gemini configuration for structured JSON output
       const model = this.genAI.getGenerativeModel({
-        model: "gemini-flash-latest",
+        model: "gemini-2.5-flash",
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -81,8 +81,29 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
         },
       });
 
+      let result;
+      
       try {
-        const result = await model.generateContent(prompt);
+        // Retry mechanism (tối đa 2 lần, timeout 4s mỗi lần) để xử lý mạng chậm ở trường/demo
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            // Dùng Promise.race để ép timeout nếu Gemini phản hồi quá chậm (15 giây)
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout kết nối tới Gemini API')), 15000)
+            );
+            result = await Promise.race([
+              model.generateContent(prompt),
+              timeoutPromise
+            ]);
+            break; // Thành công thì thoát loop
+          } catch (err) {
+            console.error(`Lỗi Gemini API (lần ${attempt}/2):`, err.message || err);
+            if (attempt === 2) throw err; // Quá 2 lần thì throw ra catch bên ngoài để fallback
+            // Đợi 1 giây trước khi thử lại
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+
         const text = result.response.text();
         let cleanText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
         const parsed = JSON.parse(cleanText);
@@ -101,14 +122,14 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
 
         return parsed;
       } catch (geminiError) {
-        console.error('Lỗi từ Google Gemini API hoặc khi Parse JSON:', geminiError.message || geminiError);
+        console.error('Lỗi Gemini API hoặc Parse JSON, kích hoạt Fallback:', geminiError.message || geminiError);
         // Fallback an toàn nếu AI lỗi (trả về JSON mặc định để không bị 500)
         return {
           suggestions: [
             {
               specialty_id: specialties.length > 0 ? specialties[0].id : 1,
               confidence: 50,
-              reason: "Hệ thống AI đang quá tải. Dựa trên triệu chứng, chúng tôi tạm thời đề xuất chuyên khoa này. Vui lòng liên hệ lễ tân để được tư vấn chính xác hơn.",
+              reason: "Hệ thống AI đang quá tải hoặc mất kết nối. Dựa trên triệu chứng, chúng tôi tạm thời đề xuất chuyên khoa này. Vui lòng liên hệ lễ tân để được tư vấn chính xác hơn.",
               specialty_name: specialties.length > 0 ? specialties[0].name : 'Nội tổng quát',
               specialty_icon: null
             }
@@ -116,7 +137,7 @@ Bạn CHỈ ĐƯỢC PHÉP trả về kết quả dưới định dạng JSON th
         };
       }
     } catch (error) {
-      console.error('Lỗi hệ thống AI Service:', error);
+      console.error('Lỗi hệ thống Database/Khởi tạo AI Service:', error);
       throw new InternalServerErrorException('Không thể kết nối tới dịch vụ AI');
     }
   }
