@@ -110,15 +110,7 @@ export default function AdminTransactions() {
 
   return (
     <div className="space-y-6">
-      {/* Thông báo Toast */}
-      {notification && (
-        <div className={`fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl font-bold shadow-2xl flex items-center gap-3 animate-in slide-in-from-right-8 ${
-          notification.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
-        }`}>
-          {notification.type === 'success' ? <Icons.CheckCircle2 className="w-5 h-5" /> : <Icons.AlertCircle className="w-5 h-5" />}
-          {notification.message}
-        </div>
-      )}
+
       
       {/* THANH TÌM KIẾM VÀ BỘ LỌC */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">

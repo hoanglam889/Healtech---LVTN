@@ -80,15 +80,7 @@ export default function PersonalAccount({ user }) {
           </div>
         </div>
 
-        {/* Notifications */}
-        {notification && (
-          <div className={`p-4 rounded-xl flex items-center gap-3 font-bold text-sm animate-[fadeIn_0.2s_ease-out] ${
-            notification.type === 'error' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-          }`}>
-            {notification.type === 'error' ? <Icons.AlertCircle className="w-5 h-5" /> : <Icons.CheckCircle className="w-5 h-5" />}
-            <span>{notification.message}</span>
-          </div>
-        )}
+
 
         {/* Cảnh báo SĐT */}
         <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl flex items-start gap-3">

@@ -168,17 +168,7 @@ export default function CheckinPanel() {
   return (
     <div className="space-y-6 max-w-4xl">
       
-      {/* THÔNG BÁO POPUP */}
-      {notification && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl text-white font-bold border transition-all animate-[fadeIn_0.2s_ease-out] ${
-          notification.type === 'success' ? 'bg-emerald-500 border-emerald-600' : 
-          notification.type === 'warning' ? 'bg-amber-500 border-amber-600' :
-          'bg-rose-500 border-rose-600'
-        }`}>
-          {notification.type === 'success' ? <Icons.CheckCircle className="w-5 h-5" /> : <Icons.AlertCircle className="w-5 h-5" />}
-          <span>{notification.message}</span>
-        </div>
-      )}
+
 
       {/* PANEL TÌM KIẾM CHÍNH */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8">
