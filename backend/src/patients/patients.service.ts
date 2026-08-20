@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -72,8 +72,20 @@ export class PatientsService {
   }
 
   async remove(id: number) {
-    const patient = await this.findOne(id);
-    await this.patientsRepository.remove(patient);
+    const patientWithAppointments = await this.patientsRepository.findOne({
+      where: { id },
+      relations: { appointments: true },
+    });
+
+    if (!patientWithAppointments) {
+      throw new NotFoundException(`Không tìm thấy bệnh nhân với ID: ${id}`);
+    }
+
+    if (patientWithAppointments.appointments && patientWithAppointments.appointments.length > 0) {
+      throw new BadRequestException('Không thể xóa hồ sơ này vì đã có lịch hẹn liên kết.');
+    }
+
+    await this.patientsRepository.remove(patientWithAppointments);
     return { success: true };
   }
 }

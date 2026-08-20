@@ -60,6 +60,15 @@ const MyAppointments = ({ user, onBookClick }) => {
     }
   };
 
+  // Hàm lấy số tiền cần thanh toán chính xác (trừ 150k nếu đã check-in)
+  const getAmountToPay = (appt) => {
+    const total = parseFloat(appt.invoices?.totalAmount || 150000);
+    if (appt.status !== 'PENDING' && total > 150000) {
+      return total - 150000;
+    }
+    return total;
+  };
+
   // Hàm xử lý Thanh toán Dịch vụ
   const handlePayService = async (appt) => {
     if (!appt.invoices?.id) {
@@ -67,7 +76,8 @@ const MyAppointments = ({ user, onBookClick }) => {
       return;
     }
     try {
-      const { url } = await createPaymentUrl(appt.invoices.id, null, 'patient');
+      const amountToPay = getAmountToPay(appt);
+      const { url } = await createPaymentUrl(appt.invoices.id, amountToPay, 'patient');
       window.location.href = url;
     } catch (err) {
       console.error(err);

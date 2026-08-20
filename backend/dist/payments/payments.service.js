@@ -56,7 +56,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         const returnUrl = `${backendUrl}/payments/vnpay-return${source ? '?source=' + source : ''}`;
         const txnRef = `${invoice.id}_${Date.now()}`;
         const urlString = this.vnpayService.buildPaymentUrl({
-            vnp_Amount: totalAmount * 100,
+            vnp_Amount: totalAmount,
             vnp_IpAddr: '127.0.0.1',
             vnp_TxnRef: txnRef,
             vnp_OrderInfo: `Thanh toan hoa don ${invoice.id}`,
@@ -75,7 +75,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             return {
                 status: 'failed',
                 invoiceId: query.vnp_TxnRef,
-                amount: query.vnp_Amount.toString(),
+                amount: (Number(query.vnp_Amount) / 100).toString(),
                 message: 'Chữ ký không hợp lệ',
             };
         }
@@ -86,7 +86,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             return {
                 status: 'failed',
                 invoiceId: invoiceIdStr,
-                amount: (Number(vnp_Amount) / 100).toString(),
+                amount: Number(vnp_Amount).toString(),
                 message: 'Giao dịch không thành công',
             };
         }
@@ -148,14 +148,14 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             return {
                 status: 'success',
                 invoiceId: invoiceIdStr,
-                amount: (Number(vnp_Amount) / 100).toString(),
+                amount: Number(vnp_Amount).toString(),
                 message: 'Thanh toán thành công',
             };
         }
         return {
             status: 'failed',
             invoiceId: invoiceIdStr,
-            amount: (Number(vnp_Amount) / 100).toString(),
+            amount: Number(vnp_Amount).toString(),
             message: 'Hóa đơn không tồn tại',
         };
     }

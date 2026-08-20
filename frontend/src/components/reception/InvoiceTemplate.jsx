@@ -101,12 +101,11 @@ const InvoiceTemplate = forwardRef(({ appointment, invoiceDetails }, ref) => {
         </table>
       </div>
 
-      {/* TỔNG KẾT & CHỮ KÝ */}
-      <div className="flex justify-between items-start mt-6">
-        <div className="w-1/2">
-          <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[9px] mb-1.5">Phương thức thanh toán</h3>
-          <p className="font-bold text-gray-800 text-xs bg-gray-100 inline-block px-3 py-1.5 rounded-lg border border-gray-200">
-            {appointment.invoices?.paymentMethod === 'VNPAY' ? 'Chuyển khoản (VNPAY/VietQR)' : 'Tiền mặt (CASH)'}
+      {/* TỔNG KẾT VÀ CHỮ KÝ */}
+      <div className="flex justify-between items-start">
+        <div className="w-1/2 pr-8">
+          <p className="text-xs text-gray-600 italic">
+            * Bệnh nhân vui lòng bảo quản biên lai để đối chiếu khi cần thiết.
           </p>
           <div className="mt-8">
             <p className="font-semibold text-gray-800 text-xs mb-1">Khách hàng</p>
@@ -117,14 +116,16 @@ const InvoiceTemplate = forwardRef(({ appointment, invoiceDetails }, ref) => {
           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-4">
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-semibold text-gray-600">Tổng phụ:</span>
-              <span className="text-xs font-bold text-gray-900">{formatVND(totalAmount)}</span>
+              <span className="text-xs font-bold text-gray-900">{formatVND(parseFloat(appointment.invoices?.totalAmount || 150000))}</span>
             </div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-semibold text-gray-600">Giảm giá:</span>
-              <span className="text-xs font-bold text-gray-900">0 ₫</span>
-            </div>
+            {appointment.status !== 'PENDING' && parseFloat(appointment.invoices?.totalAmount || 150000) > 150000 && (
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-semibold text-gray-600">Đã thanh toán (Khám):</span>
+                <span className="text-xs font-bold text-emerald-600">- {formatVND(150000)}</span>
+              </div>
+            )}
             <div className="flex justify-between items-center pt-2 border-t border-gray-300 mt-2">
-              <span className="text-sm font-bold text-gray-800">TỔNG CỘNG:</span>
+              <span className="text-sm font-bold text-gray-800">CÒN PHẢI THU:</span>
               <span className="text-lg font-black text-rose-600">{formatVND(totalAmount)}</span>
             </div>
           </div>

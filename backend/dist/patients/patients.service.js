@@ -69,8 +69,17 @@ let PatientsService = class PatientsService {
         return this.findOne(id);
     }
     async remove(id) {
-        const patient = await this.findOne(id);
-        await this.patientsRepository.remove(patient);
+        const patientWithAppointments = await this.patientsRepository.findOne({
+            where: { id },
+            relations: { appointments: true },
+        });
+        if (!patientWithAppointments) {
+            throw new common_1.NotFoundException(`Không tìm thấy bệnh nhân với ID: ${id}`);
+        }
+        if (patientWithAppointments.appointments && patientWithAppointments.appointments.length > 0) {
+            throw new common_1.BadRequestException('Không thể xóa hồ sơ này vì đã có lịch hẹn liên kết.');
+        }
+        await this.patientsRepository.remove(patientWithAppointments);
         return { success: true };
     }
 };
