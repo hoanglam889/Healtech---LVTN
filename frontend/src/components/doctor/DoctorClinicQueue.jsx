@@ -469,20 +469,34 @@ export default function DoctorClinicQueue({ staffUser }) {
                   </div>
 
                   {/* Kê Dịch vụ */}
-                  <div className="space-y-3 bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">3. Dịch vụ Cận lâm sàng</label>
-                      <button 
-                        type="button" 
-                        onClick={() => setIsDrawerOpen(true)}
-                        className="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-purple-200 transition-colors shadow-sm"
-                      >
-                        <Icons.Plus className="w-3.5 h-3.5" />
-                        <span>Kê dịch vụ</span>
-                      </button>
+                  <div className="space-y-4 bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">3. Chỉ định Dịch vụ Cận lâm sàng</label>
+                      <div className="relative">
+                        <select
+                          className="w-full bg-gray-50 border border-gray-200 outline-none p-3.5 rounded-xl font-semibold text-gray-700 text-sm focus:border-purple-500 transition-all cursor-pointer appearance-none shadow-sm"
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddService(parseInt(e.target.value, 10));
+                            }
+                          }}
+                          disabled={loadingService}
+                        >
+                          <option value="" disabled>+ Bấm vào đây để chọn dịch vụ cận lâm sàng...</option>
+                          {availableServices.filter(srv => !selectedServices.some(s => s.serviceId === srv.id)).map(srv => (
+                            <option key={srv.id} value={srv.id}>
+                              {srv.name} ({Number(srv.price).toLocaleString()} VNĐ)
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <Icons.ChevronDown className="w-5 h-5" />
+                        </div>
+                      </div>
                     </div>
                     
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
                       {selectedServices.map(item => (
                         <div key={item.id} className="bg-purple-50 border border-purple-100 text-purple-800 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 transition-all">
                           <span>{item.service?.name}</span>
@@ -568,73 +582,7 @@ export default function DoctorClinicQueue({ staffUser }) {
         )}
       </div>
 
-      {/* DRAWER KÊ DỊCH VỤ (OFFCANVAS) */}
-      {isDrawerOpen && (
-        <div className="absolute inset-0 z-50 overflow-hidden flex justify-end">
-          {/* Overlay đen */}
-          <div 
-            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" 
-            onClick={() => setIsDrawerOpen(false)} 
-          />
-          
-          {/* Panel trượt từ phải ra */}
-          <div className="relative w-full max-w-sm bg-white shadow-2xl h-full flex flex-col animate-[slideInRight_0.3s_ease-out]">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-purple-50/50 shrink-0">
-              <h3 className="font-extrabold text-purple-900 text-base flex items-center gap-2">
-                <Icons.Syringe className="w-5 h-5 text-purple-600" />
-                Danh mục Dịch vụ
-              </h3>
-              <button type="button" onClick={() => setIsDrawerOpen(false)} className="p-2 bg-white hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors shadow-sm border border-gray-100">
-                <Icons.X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-gray-50/30">
-              {availableServices.length === 0 ? (
-                <p className="text-center text-xs text-gray-400 font-bold py-10">Không có dịch vụ nào trong hệ thống.</p>
-              ) : (
-                availableServices.map(srv => {
-                  const isAdded = selectedServices.some(s => s.serviceId === srv.id);
-                  return (
-                    <div key={srv.id} className={`p-4 rounded-2xl border flex justify-between items-center transition-all shadow-sm ${isAdded ? 'bg-purple-50 border-purple-200' : 'bg-white border-gray-200 hover:border-purple-400'}`}>
-                      <div>
-                        <p className="font-extrabold text-sm text-gray-800">{srv.name}</p>
-                        <p className="text-xs text-purple-600 font-bold mt-1">{Number(srv.price).toLocaleString()} VNĐ</p>
-                      </div>
-                      <button 
-                        type="button"
-                        disabled={isAdded || loadingService}
-                        onClick={() => handleAddService(srv.id)}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wide transition-colors ${isAdded ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-200'}`}
-                      >
-                        {isAdded ? 'Đã Kê' : '+ Thêm'}
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            
-            <div className="p-6 border-t border-gray-100 shrink-0 bg-white">
-              <button 
-                type="button" 
-                onClick={() => setIsDrawerOpen(false)}
-                className="w-full py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm transition-colors"
-              >
-                Đóng Menu
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Inline animation keyframes for the drawer (if tailwind config doesn't have it) */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-      `}} />
+      {/* Removed DRAWER KÊ DỊCH VỤ (OFFCANVAS) completely to avoid UX confusion as per user requirement */}
     </div>
   );
 }
